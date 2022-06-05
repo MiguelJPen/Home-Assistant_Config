@@ -46,14 +46,7 @@ api:
             id(next_day_irrigation).publish_state(to_string(id(time_sntp).now().timestamp));
 
 ota:
-  password: "8f136aaffae81480f139672690eca1d4"
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-#  ap:
-#    ssid: "Irrigation-Valves-Lan"
-#    password: "wlCnq3hJbTNg"
-
-#captive_portal:
+  password: !secret ota_irrigation_valves_lan
 
 ethernet:
   type: LAN8720
@@ -63,10 +56,10 @@ ethernet:
   phy_addr: 1
   power_pin: GPIO16
   
-  manual_ip:
-    static_ip: 192.168.0.63
-    gateway: 192.168.0.1
-    subnet: 255.255.255.0
+#  manual_ip:
+#    static_ip: 192.168.0.63
+#    gateway: 192.168.0.1
+#    subnet: 255.255.255.0
 
 # ============================================================================ #
 globals:
@@ -88,6 +81,20 @@ globals:
   - id: south_zone_automation_bool
     type: bool
     restore_value: yes
+
+  ## Weather metrics
+  - id: mean_temp
+    type: float
+    restore_value: True
+  - id: mean_humid
+    type: float
+    restore_value: True
+  - id: min_humid
+    type: float
+    restore_value: True
+  - id: precip_yesterday
+    type: float
+    restore_value: True
 
 # ============================================================================ #
 script:
@@ -172,22 +179,6 @@ sensor:
   # ========================================================================= #
   ## To store weather metrics
   - platform: template
-    name: Mean temperature
-    id: mean_temp
-    internal: true
-  - platform: template
-    name: Mean humidity
-    id: mean_humid
-    internal: true
-  - platform: template
-    name: Min humidity
-    id: min_humid
-    internal: true
-  - platform: template
-    name: Precipitation yesterday
-    id: precip_yesterday
-    internal: true
-  - platform: template
     name: Actual temperature
     id: act_temp
     internal: True
@@ -202,41 +193,33 @@ sensor:
     entity_id: sensor.exterior_temperature_mean_over_last_48_hours
     on_value: 
       then:
-        - sensor.template.publish:
-            id: mean_temp
-            state: !lambda return id(ui_mean_temp).state;
+        - lambda: id(mean_temp) = id(ui_mean_temp).state;
   - platform: homeassistant
     id: ui_mean_humid
     entity_id: sensor.exterior_humidity_mean_over_last_48_hours
     on_value: 
       then:
-        - sensor.template.publish:
-            id: mean_humid
-            state: !lambda return id(ui_mean_humid).state;
+        - lambda: id(mean_humid) = id(ui_mean_humid).state;
   - platform: homeassistant
     id: ui_min_humid
     entity_id: sensor.exterior_humidity_minimum_over_last_48_hours
     on_value: 
       then:
-        - sensor.template.publish:
-            id: min_humid
-            state: !lambda return id(ui_min_humid).state;
+        - lambda: id(min_humid) = id(ui_min_humid).state;
   - platform: homeassistant
     id: ui_precip_yesterday
     entity_id: sensor.precipitation
     attribute: last_period
     on_value: 
       then:
-        - sensor.template.publish:
-            id: precip_yesterday
-            state: !lambda return id(ui_precip_yesterday).state;
+        - lambda: id(precip_yesterday) = id(ui_precip_yesterday).state;
   - platform: homeassistant
     id: ui_act_temp
     entity_id: sensor.exterior_sensor_temperature
     on_value: 
       then:
         - sensor.template.publish:
-            id: precip_yesterday
+            id: act_temp
             state: !lambda return id(ui_act_temp).state;
 
   # ========================================================================= #

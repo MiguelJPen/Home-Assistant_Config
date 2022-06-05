@@ -41,15 +41,15 @@ void set_new_pumping_time() {
 
 void set_winter_timestamps(time_t today, int days_ahead, int mins) {
     time_t new_pump_day = today + (days_ahead * 3600 * 24);
-    struct tm* new_time = localtime(&new_pump_day);
+    struct tm new_time = *localtime(&new_pump_day);
     string pump_on = id(pump_timestamps_on).state;
     string pump_off = id(pump_timestamps_off).state;
     string comma = (pump_on.empty() ? "" : ", ");
 
-    new_time->tm_hour = 13;
-    new_time->tm_min = 0;
-    new_time->tm_sec = 0;
-    time_t aux = mktime(new_time);
+    new_time.tm_hour = 13;
+    new_time.tm_min = 0;
+    new_time.tm_sec = 0;
+    time_t aux = mktime(&new_time);
 
     pump_on.append(comma + to_string(aux));
     pump_off.append(comma + to_string(aux + mins * 60));
@@ -62,19 +62,19 @@ void set_winter_timestamps(time_t today, int days_ahead, int mins) {
 
 void set_pumping(time_t today, time_t sunrise, time_t sunset, int days_ahead, int mins) {
     time_t new_pump_day = today + (days_ahead * 3600 * 24);
-    struct tm* new_time = localtime(&new_pump_day);
+    struct tm new_time = *localtime(&new_pump_day);
     string pump_on = id(pump_timestamps_on).state;
     string pump_off = id(pump_timestamps_off).state;
     string comma = (pump_on.empty() ? "" : ", ");
     struct tm sunrise_st = *localtime(&sunrise), sunset_st = *localtime(&sunset);
 
-    new_time->tm_hour = sunrise_st.tm_hour;
-    new_time->tm_min = sunrise_st.tm_min;
-    new_time->tm_sec = 0;
-    time_t aux = mktime(new_time);
-    new_time->tm_hour = sunset_st.tm_hour;
-    new_time->tm_min = sunset_st.tm_min;
-    time_t sunset_local = mktime(new_time);
+    new_time.tm_hour = sunrise_st.tm_hour;
+    new_time.tm_min = sunrise_st.tm_min;
+    new_time.tm_sec = 0;
+    time_t aux = mktime(&new_time);
+    new_time.tm_hour = sunset_st.tm_hour;
+    new_time.tm_min = sunset_st.tm_min;
+    time_t sunset_local = mktime(&new_time);
 
     //ESP_LOGD("set_pumping", "SUNRISE: %ld, SUNSET: %ld", sunrise, sunset);
     //ESP_LOGD("set_pumping", "SUNRISE: %ld, SUNSET: %ld", aux, sunset_local);

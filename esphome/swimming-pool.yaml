@@ -152,10 +152,6 @@ binary_sensor:
         - lambda: |-
             id(pool_filling_bool) = id(ui_pool_filling).state;
 
-  - platform: template
-    name: pool_boolean_water
-    lambda: return id(filling_available);
-
 # ============================================================================ #
 sensor:
   ## Home Assistant get sensors

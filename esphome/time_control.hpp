@@ -43,10 +43,10 @@ string update_next_run(string time_list) {
     // Compare the list of times with the current time, and return the next in the list.
     for (string timestamp : times) {
         time_t next_run_aux = atoi(timestamp.c_str());
-        struct tm *next_run = localtime(&next_run_aux);
+        struct tm next_run = *localtime(&next_run_aux);
 
-        int next_year = next_run->tm_year + 1900, next_month = next_run->tm_mon + 1, next_day = next_run->tm_mday;
-        int next_hour = next_run->tm_hour, next_minute = next_run->tm_min;
+        int next_year = next_run.tm_year + 1900, next_month = next_run.tm_mon + 1, next_day = next_run.tm_mday;
+        int next_hour = next_run.tm_hour, next_minute = next_run.tm_min;
 
         //ESP_LOGD("update_next_run", "timestamp:%s", timestamp.c_str());
         //ESP_LOGD("update_next_run", "year:%i month:%i day:%i hour:%i minute:%i", next_year, next_month, next_day, next_hour, next_minute);
@@ -83,10 +83,10 @@ bool scheduled_run(string time){
     int minute = time_now.minute;
 
     time_t next_run_aux = atoi(time.c_str());
-    struct tm *next_run = localtime(&next_run_aux);
+    struct tm next_run = *localtime(&next_run_aux);
 
-    int next_year = next_run->tm_year + 1900, next_month = next_run->tm_mon + 1, next_day = next_run->tm_mday;
-    int next_hour = next_run->tm_hour, next_minute = next_run->tm_min;
+    int next_year = next_run.tm_year + 1900, next_month = next_run.tm_mon + 1, next_day = next_run.tm_mday;
+    int next_hour = next_run.tm_hour, next_minute = next_run.tm_min;
 
     //ESP_LOGD("scheduled_run", "TODAY: year:%i month:%i day:%i hour:%i minute:%i", year, month, day, hour, minute);
     //ESP_LOGD("scheduled_run", "year:%i month:%i day:%i hour:%i minute:%i", next_year, next_month, next_day, next_hour, next_minute);
