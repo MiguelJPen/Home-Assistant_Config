@@ -1,0 +1,53 @@
+recorder:
+  db_url: !secret mariadb_url
+  purge_keep_days: 6
+  commit_interval: 30
+  include:
+    domains:
+      - automation
+      - light
+      - switch
+      - person
+    entity_globs:
+      - alarm_control_panel.*
+      - sensor.*_temperature
+      - sensor.*_humidity
+      - sensor.daily_energy_*
+      - binary_sensor.*_status
+      - binary_sensor.*_contact
+      - binary_sensor.*_tamper
+    entities:
+      - binary_sensor.router
+      - binary_sensor.router_madrid
+      - sensor.average_pressure
+      - sensor.madrid_average_pressure
+      - binary_sensor.rpi_power_status
+      - sensor.bridge_state
+      - sensor.hourly_energy
+      - sensor.fridge_plug_energy_consumption
+      - sensor.home_energy_monitor_power
+      - binary_sensor.entrada
+      - binary_sensor.cocina
+      - binary_sensor.salon
+      - binary_sensor.despacho
+      - binary_sensor.pasillo
+      - binary_sensor.despensa
+      - binary_sensor.terraza
+      - binary_sensor.ventana_del_salon
+      - binary_sensor.caja_de_alarma
+      - sensor.db_size
+      - sensor.edata_68ta
+      - sensor.edata_cv1p
+      - binary_sensor.pantry_flood_sensor_water_leak
+      - sensor.precipitation
+
+  exclude:
+    entity_globs:
+      - binary_sensor.barrera_*_tamper
+    entities:
+      - sensor.aemet_daily_forecast_temperature
+      - sensor.aemet_hourly_forecast_temperature
+      - sensor.aemet_temperature
+      - sensor.aemet_humidity
+      - sensor.0x00158d00053e7f5f_temperature
+      - sensor.0x00158d00053ed958_temperature

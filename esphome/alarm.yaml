@@ -1,0 +1,225 @@
+esphome:
+  name: alarm
+  platform: ESP32
+  board: nodemcu-32s
+  
+  on_loop:
+    then:
+    - lambda: delay(30);
+
+wifi:
+  power_save_mode: none
+  networks:
+  - ssid: !secret wifi_ssid
+    password: !secret wifi_password
+    priority: 5
+  
+#  manual_ip:
+#   static_ip: 192.168.0.60
+#   gateway: 192.168.0.1
+#   subnet: 255.255.255.0
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Alarm Fallback Hotspot"
+    password: "fIDEP893PCzE"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+ota:
+
+switch:
+  - platform: restart
+    name: "Interior sensors restart"
+    
+  - platform: gpio
+    id: exterior_siren
+    pin:
+      number: 19
+      inverted: True
+    name: "Sirena exterior"
+    restore_mode: RESTORE_DEFAULT_OFF
+    
+  - platform: gpio
+    id: interior_siren
+    pin: 
+      number: 18
+      inverted: True
+    name: "Sirena interior"
+    restore_mode: RESTORE_DEFAULT_OFF
+    
+script:
+  - id: alarm_siren_beep
+    then: 
+      - switch.turn_on: interior_siren
+      - delay: 90ms
+      - switch.turn_off: interior_siren
+      
+# Enable Home Assistant API
+api:
+  services:
+    - service: alarm_beep
+      then:
+        - script.execute: alarm_siren_beep
+    - service: alarm_beep_beep
+      then:
+        - script.execute: alarm_siren_beep
+        - delay: 150ms
+        - script.execute: alarm_siren_beep
+
+binary_sensor:
+  - platform: status
+    name: "Interior alarm status"
+    
+  - platform: gpio
+    pin:
+      number: 36
+      inverted: True
+      mode: INPUT
+    name: "Entrada"
+    device_class: motion
+    filters:
+      delayed_on_off: 700ms
+    
+  - platform: gpio
+    pin:
+      number: 39
+      inverted: True
+      mode: INPUT
+    name: "Entrada Tamper"
+    device_class: opening
+    filters:
+      delayed_on: 700ms
+    
+  - platform: gpio
+    pin:
+      number: 34
+      inverted: True
+      mode: INPUT
+    name: "Cocina"
+    device_class: motion
+    filters:
+      delayed_on_off: 700ms
+
+  - platform: gpio
+    pin:
+      number: 35
+      inverted: True
+      mode: INPUT
+    name: "Cocina Tamper"
+    device_class: opening
+    filters:
+      delayed_on: 700ms
+    
+  - platform: gpio
+    pin:
+      number: 32
+      inverted: True
+      mode: INPUT
+    name: "Salón"
+    device_class: motion
+    filters:
+      delayed_on_off: 700ms
+      
+  - platform: gpio
+    pin:
+      number: 33
+      inverted: True
+      mode: INPUT
+    name: "Salón Tamper"
+    device_class: opening
+    filters:
+      delayed_on: 700ms
+    
+  - platform: gpio
+    pin:
+      number: 25
+      inverted: True
+      mode: INPUT
+    name: "Despacho"
+    device_class: motion
+    filters:
+      delayed_on_off: 700ms
+      
+  - platform: gpio
+    pin:
+      number: 26
+      inverted: True
+      mode: INPUT
+    name: "Despacho Tamper"
+    device_class: opening
+    filters:
+      delayed_on: 700ms
+    
+  - platform: gpio
+    pin:
+      number: 27
+      inverted: True
+      mode: INPUT
+    name: "Pasillo"
+    device_class: motion
+    filters:
+      delayed_on_off: 700ms
+      
+  - platform: gpio
+    pin:
+      number: 14
+      inverted: True
+      mode: INPUT
+    name: "Pasillo Tamper"
+    device_class: opening
+    filters:
+      delayed_on: 700ms
+      
+  - platform: gpio
+    pin:
+      number: 12
+      inverted: True
+      mode: INPUT
+    name: "Despensa"
+    device_class: motion
+    filters:
+      delayed_on_off: 700ms
+      
+  - platform: gpio
+    pin:
+      number: 13
+      inverted: True
+      mode: INPUT
+    name: "Despensa Tamper"
+    device_class: opening
+    filters:
+      delayed_on: 700ms
+      
+  - platform: gpio
+    pin:
+      number: 23
+      inverted: True
+      mode: INPUT
+    name: "Terraza"
+    device_class: motion
+    filters:
+      delayed_on_off: 700ms
+      
+  - platform: gpio
+    pin:
+      number: 22
+      inverted: True
+      mode: INPUT
+    name: "Terraza Tamper"
+    device_class: opening
+    filters:
+      delayed_on: 700ms
+      
+  - platform: gpio
+    pin:
+      number: 21
+      inverted: True
+      mode: INPUT
+    name: "Caja de alarma"
+    device_class: opening
+    filters:
+      delayed_on: 700ms

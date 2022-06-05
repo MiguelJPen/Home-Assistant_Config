@@ -1,0 +1,188 @@
+# UTILITY METER
+# For measuring consumption in separated periods
+utility_meter:
+  hourly_energy:
+    source: sensor.energy_consumption
+    cycle: hourly
+  daily_energy:
+    source: sensor.energy_consumption
+    cycle: daily
+    tariffs:
+      - valle
+      - llana
+      - punta
+  weekly_energy:
+    source: sensor.energy_consumption
+    cycle: weekly
+  monthly_energy:
+    source: sensor.energy_consumption
+    cycle: monthly
+    tariffs:
+      - valle
+      - llana
+      - punta
+  daily_energy_cost:
+    source: sensor.hourly_energy_cost
+    cycle: daily
+    tariffs:
+      - valle
+      - llana
+      - punta
+  monthly_energy_cost:
+    source: sensor.hourly_energy_cost
+    cycle: monthly
+    tariffs:
+      - valle
+      - llana
+      - punta
+
+# INPUT TEXT
+# Taxes and extras
+input_text:
+  energia_peaje_valle:
+    name: Peaje de la energía en hora valle (€/kWh)
+    pattern: "[0-9]*.[0-9]*"
+    icon: mdi:bank-plus
+
+  energia_peaje_llana:
+    name: Peaje de la energía en hora llana (€/kWh)
+    pattern: "[0-9]*.[0-9]*"
+    icon: mdi:bank-plus
+
+  energia_peaje_punta:
+    name: Peaje de la energía en hora punta (€/kWh)
+    pattern: "[0-9]*.[0-9]*"
+    icon: mdi:bank-plus
+
+  energia_cargos_valle:
+    name: Cargos de la energía en hora valle (€/kWh)
+    pattern: "[0-9]*.[0-9]*"
+    icon: mdi:bank-transfer-in
+
+  energia_cargos_llana:
+    name: Cargos de la energía en hora llana (€/kWh)
+    pattern: "[0-9]*.[0-9]*"
+    icon: mdi:bank-transfer-in
+    
+  energia_cargos_punta:
+    name: Cargos de la energía en hora punta (€/kWh)
+    pattern: "[0-9]*.[0-9]*"
+    icon: mdi:bank-transfer-in
+
+  impuesto_electricidad: # A partir del día ? será 5.11269632
+    name: Impuesto de la electricidad (%)
+    pattern: "[0-9]*.[0-9]*"
+    icon: mdi:piggy-bank
+
+  impuesto_valor_annadido_energia:
+    name: Impuesto sobre el valor añadido (%)
+    pattern: "[0-9]*.[0-9]*"
+    icon: mdi:piggy-bank
+
+#INPUT NUMBER
+input_number:
+  # For storing yesterday consumption
+  yesterday_kwh:
+    min: 0
+    max: 40
+    step: 0.001
+    mode: box
+    icon: mdi:lightning-bolt-circle
+    unit_of_measurement: kWh
+
+# SENSORS
+sensor:
+  # For checking for the maximum power in the last hour
+  - platform: statistics
+    entity_id: sensor.home_energy_monitor_power
+    name: "Estadísticas de la última hora de la potencia instantánea"
+    sampling_size: 500
+    max_age: 01:00
+    precision: 0
+    state_characteristic: value_max
+
+    # For storing and calculating energy values
+  - platform: template
+    sensors:
+      energy_consumption:
+        friendly_name: "Energy consumption"
+        device_class: energy
+        unit_of_measurement: "kWh"
+        value_template: >
+          {% set ener = states('sensor.home_energy_monitor_energy') | float(0) %}
+
+          {{ (ener / 1000) }}
+        availability_template: "{{ states('sensor.home_energy_monitor_energy') not in ['unknown', 'unavailable', 'none'] }}"
+
+      daily_energy:
+        friendly_name: "Energía consumida hoy"
+        device_class: energy
+        unit_of_measurement: "kWh"
+        value_template: >
+          {% set valle = states('sensor.daily_energy_valle') | float(0) %}
+          {% set llana = states('sensor.daily_energy_llana') | float(0) %}
+          {% set punta = states('sensor.daily_energy_punta') | float(0) %}
+
+          {{ valle + llana + punta }}
+
+      # To show the value as a sensor
+      yesterday_kwh:
+        friendly_name: "Consumo de energía ayer"
+        device_class: energy
+        unit_of_measurement: "kWh"
+        value_template: "{{ states('input_number.yesterday_kwh') }}"
+
+      monthly_energy:
+        friendly_name: "Energía consumida este mes"
+        device_class: energy
+        unit_of_measurement: "kWh"
+        value_template: >
+          {% set valle = states('sensor.monthly_energy_valle') | float(0) %}
+          {% set llana = states('sensor.monthly_energy_llana') | float(0) %}
+          {% set punta = states('sensor.monthly_energy_punta') | float(0) %}
+
+          {{ valle + llana + punta }}
+
+      hourly_energy_cost:
+        unit_of_measurement: "€"
+        value_template: >
+          {% set energy = states('sensor.hourly_energy') | float(0) %}
+          {% set price = states('sensor.pvpc') | float(0) %}
+
+          {{ (energy * price) | round(5) }}
+
+      monthly_energy_cost:
+        unit_of_measurement: "€"
+        value_template: >
+          {% set valle = states('sensor.monthly_energy_cost_valle') | float(0) %}
+          {% set llana = states('sensor.monthly_energy_cost_llana') | float(0) %}
+          {% set punta = states('sensor.monthly_energy_cost_punta') | float(0) %}
+
+          {{ valle + llana + punta }}
+
+      monthly_energy_cost_imp:
+        unit_of_measurement: "€"
+        value_template: >
+          {% set valle = states('sensor.monthly_energy_valle') | float(0) %}
+          {% set llana = states('sensor.monthly_energy_llana') | float(0) %}
+          {% set punta = states('sensor.monthly_energy_punta') | float(0) %}
+          {% set cost_valle = states('sensor.monthly_energy_cost_valle') | float(0) %}
+          {% set cost_llana = states('sensor.monthly_energy_cost_llana') | float(0) %}
+          {% set cost_punta = states('sensor.monthly_energy_cost_punta') | float(0) %}
+          {% set peaje_valle = states('input_text.energia_peaje_valle') | float(0) %}
+          {% set peaje_llana = states('input_text.energia_peaje_llana') | float(0) %}
+          {% set peaje_punta = states('input_text.energia_peaje_punta') | float(0) %}
+          {% set cargos_valle = states('input_text.energia_cargos_valle') | float(0) %}
+          {% set cargos_llana = states('input_text.energia_cargos_llana') | float(0) %}
+          {% set cargos_punta = states('input_text.energia_cargos_punta') | float(0) %}
+          {% set imp_elec = states('input_text.impuesto_electricidad') | float(0) %}
+          {% set iva = states('input_text.impuesto_valor_annadido_energia') | float(0) %}
+
+          {{ ((((cost_valle + cost_llana + cost_punta) + ((valle * peaje_valle) + (llana * peaje_llana) + (punta * peaje_punta)) + ((valle * cargos_valle) + (llana * cargos_llana) + (punta * cargos_punta))) * (1 + (imp_elec / 100))) * (1 + (iva / 100))) | round(2) }}
+
+# NOTIFY
+notify:
+  # For storing data to file
+  - platform: file
+    name: energy_study_file
+    filename: /config/collected_data/energy_study.csv

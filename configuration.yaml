@@ -1,0 +1,132 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+homeassistant:
+  customize: !include customize.yaml
+
+  # For accessing certain folders
+  allowlist_external_dirs:
+    - "/config/collected_data"
+    - "/media/securityCameras"
+
+  packages:
+    irrigation: !include irrigation.yaml
+    climate: !include climate.yaml
+    zigbee: !include zigbee.yaml
+    energy: !include energy.yaml
+    recorder: !include recorder.yaml
+    google_assistant: !include google_assistant.yaml
+    external_access: !include external_access.yaml
+    security: !include security.yaml
+    lau: !include lau.yaml
+    murcia: !include murcia.yaml
+    madrid: !include madrid.yaml
+
+logger:
+  default: warn
+  logs:
+    edata.connectors: critical
+    custom_components.esios.sensor: fatal
+    
+# Text to speech
+tts:
+  - platform: google_translate
+
+# EXTERNAL FILES
+group: !include groups.yaml
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+panel_iframe: !include panels.yaml
+frontend:
+  themes: !include_dir_merge_named themes/
+
+# SENSORS
+sensor:
+  - platform: moon
+  - platform: systemmonitor
+    resources:
+      - type: disk_use_percent
+        arg: /
+      - type: disk_free
+        arg: /
+      - type: memory_use_percent
+      - type: memory_free
+      - type: swap_use_percent
+      - type: swap_free
+      - type: processor_use
+      - type: load_5m
+      - type: last_boot
+      - type: network_in
+        arg: eno1
+      - type: network_out
+        arg: eno1
+      - type: ipv4_address
+        arg: eno1
+  - platform: time_date
+    display_options:
+      - "time"
+      - "date_time"
+#  - platform: command_line
+#    name: pvpc
+#    command: "python3 /config/pvpc/pvpc_obtain.py"
+#    unit_of_measurement: "€"
+#    value_template: '{{ value_json.Actual / 1000 }}'
+#    scan_interval: 1800
+#    command_timeout: 30
+#    json_attributes:
+#      - Maximo
+#      - Minimo
+#      - Media
+#      - BajoMedia
+
+# TELEGRAM NOTIFICATIONS
+telegram_bot:
+  - platform: broadcast
+    api_key: !secret telegram_api_key
+    allowed_chat_ids:
+      - !secret miguel_chat_id
+      - !secret group_chat_id
+      - !secret lau_chat_id
+  - platform: polling
+    api_key: !secret telegram_api_key
+    allowed_chat_ids:
+      - !secret miguel_chat_id
+      - !secret group_chat_id
+      - !secret lau_chat_id
+
+notify:
+  - name: miguel
+    platform: telegram
+    chat_id: !secret miguel_chat_id
+  - name: lau
+    platform: telegram
+    chat_id: !secret lau_chat_id
+  - name: group
+    platform: telegram
+    chat_id: !secret group_chat_id
+
+# DEVICE TRACKER
+device_tracker:
+  - platform: google_maps
+    username: miguelpdomotica@gmail.com
+    scan_interval: 150
+    max_gps_accuracy: 500 # meters
+
+# BINARY SENSORS
+binary_sensor:
+  - platform: ping
+    host: 192.168.0.1
+    name: "Router"
+    count: 2
+    scan_interval: 120
+  - platform: ping
+    host: 10.133.101.1
+    name: "Router Madrid"
+    count: 2
+    scan_interval: 120
+  - platform: ping
+    host: 10.133.102.1
+    name: "Router Murcia"
+    count: 2
+    scan_interval: 120

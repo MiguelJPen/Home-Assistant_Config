@@ -1,0 +1,90 @@
+# WEATHER TEMPLATES
+# Create a custom template for getting the weather from AEMET service and include some local values
+weather:
+  # Template for daily prediction in El Niño
+  - platform: template
+    name: "AEMET El Niño - Diario"
+    unique_id: "el_nino_diary"
+    condition_template: "{{ states('sensor.aemet_condition') }}"
+    temperature_template: "{{ (states('sensor.exterior_sensor_temperature') | float(0)) | round(1) }}"
+    humidity_template: "{{ (states('sensor.exterior_sensor_humidity') | float(0)) | round(1) }}"
+    pressure_template: "{{ states('sensor.average_pressure') | int(0) }}"
+    wind_speed_template: "{{ states('sensor.aemet_wind_speed') | int(0) }}"
+    wind_bearing_template: "{{ (states('sensor.aemet_wind_bearing') | float(0)) | round(0) }}"
+    visibility_template: "{{ 12 }}" # Visibility is constant
+    forecast_template: "{{ states.weather.aemet_daily.attributes.forecast }}"
+
+    # Template for hourly prediction in El Niño
+  - platform: template
+    name: "AEMET El Niño - Horas"
+    unique_id: "el_nino_hourly"
+    condition_template: "{{ states('sensor.aemet_condition') }}"
+    temperature_template: "{{ (states('sensor.exterior_sensor_temperature') | float(0)) | round(1) }}"
+    humidity_template: "{{ (states('sensor.exterior_sensor_humidity') | float(0)) | round(1) }}"
+    pressure_template: "{{ states('sensor.average_pressure') | int(0) }}"
+    wind_speed_template: "{{ states('sensor.aemet_wind_speed') | int(0) }}"
+    wind_bearing_template: "{{ (states('sensor.aemet_wind_bearing') | float(0)) | round(0) }}"
+    visibility_template: "{{ 12 }}" # Visibility is constant
+    forecast_template: "{{ states.weather.aemet_hourly.attributes.forecast }}"
+
+    # Template for daily prediction in El Niño
+  - platform: template
+    name: "AEMET Madrid - Diario"
+    unique_id: "madrid_diary"
+    condition_template: "{{ states('sensor.aemet_madrid_condition') }}"
+    temperature_template: "{{ (states('sensor.madrid_exterior_sensor_temperature') | float(0)) | round(1) }}"
+    humidity_template: "{{ (states('sensor.madrid_exterior_sensor_humidity') | float(0)) | round(1) }}"
+    pressure_template: "{{ states('sensor.madrid_average_pressure') | int(0) }}"
+    wind_speed_template: "{{ states('sensor.aemet_madrid_wind_speed') | int(0) }}"
+    wind_bearing_template: "{{ (states('sensor.aemet_madrid_wind_bearing') | float(0)) | round(0) }}"
+    visibility_template: "{{ 12 }}" # Visibility is constant
+    forecast_template: "{{ states.weather.aemet_madrid_daily.attributes.forecast }}"
+
+sensor:
+  - platform: template
+    sensors:
+      average_pressure:
+        friendly_name: "Average pressure"
+        device_class: pressure
+        unit_of_measurement: "hPa"
+        value_template: >
+          {% set exterior = states('sensor.exterior_sensor_pressure') | float(0) %}
+          {% set living_room = states('sensor.living_room_sensor_pressure') | float(0) %}
+          {% set principal_room = states('sensor.principal_room_sensor_pressure') | float(0) %}
+
+          {% set val = [exterior, living_room, principal_room] | reject('eq', 0) | map('float') | list %}
+          {% if (val|length) == 0 -%}
+            {% set ret = states('sensor.average_pressure') %}
+          {%- else -%}
+            {% set ret = ((val | average) | round(1)) %}
+          {%- endif %}
+
+          {{ ret }}
+        availability_template: >
+          {% set exterior = states('sensor.exterior_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+          {% set living_room = states('sensor.living_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+          {% set principal_room = states('sensor.principal_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+
+          {{ exterior or living_room or principal_room }}
+
+      madrid_average_pressure:
+        friendly_name: "Average pressure - Madrid"
+        device_class: pressure
+        unit_of_measurement: "hPa"
+        value_template: >
+          {% set exterior = states('sensor.madrid_exterior_sensor_pressure') | float(0) %}
+          {% set living_room = states('sensor.madrid_living_room_sensor_pressure') | float(0) %}
+
+          {% set val = [exterior, living_room] | reject('eq', 0) | map('float') | list %}
+          {% if (val|length) == 0 -%}
+            {% set ret = states('sensor.madrid_average_pressure') %}
+          {%- else -%}
+            {% set ret = ((val | average) | round(1)) %}
+          {%- endif %}
+
+          {{ ret }}
+        availability_template: >
+          {% set exterior = states('sensor.madrid_exterior_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+          {% set living_room = states('sensor.madrid_living_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+
+          {{ exterior or living_room }}

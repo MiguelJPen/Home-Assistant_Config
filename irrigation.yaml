@@ -1,0 +1,33 @@
+input_text:
+  # To store the irrigation period
+  periodo_riego:
+    name: Periodo con agua de riego
+    icon: mdi:water-check
+    
+sensor:
+  - platform: statistics
+    name: "Exterior temperature mean over last 48 hours"
+    entity_id: sensor.exterior_sensor_temperature
+    state_characteristic: average_linear
+    sampling_size: 500
+    max_age:
+      hours: 48
+  - platform: statistics
+    name: "Exterior humidity mean over last 48 hours"
+    entity_id: sensor.exterior_sensor_humidity
+    state_characteristic: average_linear
+    sampling_size: 500
+    max_age:
+      hours: 48
+  - platform: statistics
+    name: "Exterior humidity minimum over last 48 hours"
+    entity_id: sensor.exterior_sensor_humidity
+    state_characteristic: value_min
+    sampling_size: 500
+    max_age:
+      hours: 48
+    
+input_boolean:
+  irrigation_water_available:
+    name: Agua de riego
+    icon: mdi:water-pump

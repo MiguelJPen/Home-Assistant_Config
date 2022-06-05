@@ -1,0 +1,381 @@
+esphome:
+  name: swimming-pool
+  includes:
+    - time_control.hpp
+    - pool.hpp
+  on_boot: 
+    priority: 800.0
+    then:
+      - delay: 10s
+      - lambda: |-
+          // If this variable has been deleted for any reason, reset it
+          if (id(last_automatic_pump) == 0)
+            id(last_automatic_pump) = (id(time_sntp).now().timestamp - (3600 * 24 * 3));
+          id(last_automatic_pump_ha).publish_state(get_time_formated(to_string(id(last_automatic_pump))));
+          set_new_pumping_time();
+          id(filling_available) = water_available();
+
+esp32:
+  board: esp32-poe
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  services:
+    - service: filling_start
+      then:
+        - script.execute: pool_filling_request_loop
+    - service: pump_off
+      then:
+        - switch.turn_off: swimming_pool_pump
+
+ota:
+  password: !secret ota_swimming_pool
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO17_OUT
+  phy_addr: 0
+  power_pin: GPIO12
+  
+#  manual_ip:
+#   static_ip: 192.168.0.64
+#   gateway: 192.168.0.1
+#   subnet: 255.255.255.0
+
+# ============================================================================ #
+globals: 
+  ## Bool to save switch states
+  - id: pump_automation_bool
+    type: bool
+    restore_value: yes
+  - id: pump_manual_bool
+    type: bool
+    restore_value: yes
+  - id: pump_winter_mode_bool
+    type: bool
+    restore_value: yes
+
+  #### Bool to save filling state
+  - id: pool_filling_bool
+    type: bool
+    restore_value: yes
+  - id: pool_filling_requested
+    type: bool
+    restore_value: yes
+
+  #### Bool to check if water available
+  - id: filling_available
+    type: bool
+    restore_value: yes
+
+  #### Last automatic pumping
+  - id: last_automatic_pump
+    type: long long int
+    restore_value: yes
+
+  #### Weather metrics
+  - id: mean_temp
+    type: float
+    restore_value: yes
+
+# ============================================================================ #
+script:
+  - id: pool_filling_request_loop
+    then:
+      - lambda: |-
+          id(pool_filling_requested) = false;
+      - switch.turn_off: swimming_pool_pump
+      - while:
+          condition:
+            and:
+              - binary_sensor.is_off: pool_high_level
+              - lambda: return id(filling_available);
+          then:
+          - homeassistant.service: 
+              service: esphome.irrigation_valves_lan_request_more_pool_water
+          - delay: 60s
+  - id: pool_filling_request_today
+    then:
+      - homeassistant.service:
+          service: esphome.irrigation_valves_lan_request_pool_water
+
+# ============================================================================ #
+sun:
+  latitude: !secret latitude
+  longitude: !secret longitude
+  id: sun_sun
+
+# ============================================================================ #
+binary_sensor:
+  #### Status sensor
+  - platform: status
+    name: "Swimming pool status"
+  
+  #### Pool level sensors
+  - platform: gpio
+    pin:
+      number: 14
+      inverted: true
+      mode:
+        input: true
+    name: "Low level pool sensor"
+    id: pool_low_level
+    device_class: moisture
+    filters:
+      delayed_on_off: 700ms
+  - platform: gpio
+    pin:
+      number: 15
+      inverted: true
+      mode:
+        input: true
+    name: "High level pool sensor"
+    id: pool_high_level
+    device_class: moisture
+    filters:
+      delayed_on_off: 700ms
+
+  #### For saving filling state
+  - platform: homeassistant
+    id: ui_pool_filling
+    internal: True
+    entity_id: switch.pool_filling_automation
+    on_state:
+      then:
+        - lambda: |-
+            id(pool_filling_bool) = id(ui_pool_filling).state;
+
+  - platform: template
+    name: pool_boolean_water
+    lambda: return id(filling_available);
+
+# ============================================================================ #
+sensor:
+  ## Home Assistant get sensors
+  ### To retrieve weather metrics from home assistant
+  - platform: homeassistant
+    id: ui_mean_temp
+    entity_id: sensor.exterior_temperature_mean_over_last_48_hours
+    on_value: 
+      then:
+        - lambda: id(mean_temp) = id(ui_mean_temp).state;
+  
+  # ================================== #
+  ## Countdown sensors
+  - platform: template
+    name: Pool pump left
+    id: pump_left
+    update_interval: 10s
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(swimming_pool_pump).state && (id(pump_automation_bool) || id(pump_winter_mode_bool))) {
+        return ((atoi((id(pump_next_off).state).c_str()) - id(time_sntp).now().timestamp) / 60) + 1;
+      }
+      return 0;
+
+  # ================================== #
+  ## Next cycle duration
+  - platform: template
+    name: Pool pump next duration
+    id: pool_pump_next_duration
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(pump_next_on).state == "Sin programaciones" || id(pump_next_off).state == "Sin programaciones" ||
+      id(pump_next_on).state == "No hay más programaciones" || id(pump_next_off).state == "No hay más programaciones") 
+        return 0;
+      if (atoi((id(pump_next_off).state).c_str()) > atoi((id(pump_next_on).state).c_str())) {
+        return ((atoi((id(pump_next_off).state).c_str()) - atoi((id(pump_next_on).state).c_str())) / 60);
+      }
+      return id(pool_pump_next_duration).state;
+
+# ============================================================================ #
+switch:
+  #### Restart switch
+  - platform: restart
+    name: "Swimming pool restart"
+    
+  #### Pool pump relay switch
+  - platform: gpio
+    id: swimming_pool_pump
+    internal: True
+    pin:
+      number: 13
+    name: "Bomba de la piscina"
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - component.update: pump_left
+    on_turn_off:
+        - component.update: pump_left
+
+  #### Switch for automation
+  - platform: template
+    name: Pool pump automation
+    id: pump_automation
+    lambda: return id(pump_automation_bool);
+    turn_on_action:
+      - lambda: |-
+          id(pump_automation_bool) = true;
+          id(pump_winter_mode_bool) = false;
+          set_new_pumping_time();
+      - delay: 100ms
+      - lambda: |-
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state != "No hay más programaciones" && id(pump_next_off).state != "No hay más programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state)
+              id(swimming_pool_pump).turn_on();
+          else id(swimming_pool_pump).turn_off();
+    turn_off_action:
+      - lambda: |-
+          id(pump_automation_bool) = false;
+      - switch.turn_off: swimming_pool_pump
+
+  #### Switch for manual use of the pump
+  - platform: template
+    name: Pool pump manual
+    id: pump_manual
+    lambda: return id(swimming_pool_pump).state;
+    turn_on_action:
+      - lambda: |-
+          id(pump_automation_bool) = false;
+          id(pump_winter_mode_bool) = false;
+      - delay: 50ms
+      - switch.turn_on: swimming_pool_pump
+    turn_off_action:
+      - switch.turn_off: swimming_pool_pump
+
+  #### Winter mode switch
+  - platform: template
+    name: Winter mode
+    id: pump_winter_mode
+    icon: mdi:snowflake
+    lambda: return id(pump_winter_mode_bool);
+    turn_on_action:
+      - lambda: |-
+          id(pump_automation_bool) = false;
+          id(pump_winter_mode_bool) = true;
+          set_new_pumping_time();
+      - delay: 100ms
+      - lambda: |-
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state != "No hay más programaciones" && id(pump_next_off).state != "No hay más programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state)
+              id(swimming_pool_pump).turn_on();
+          else id(swimming_pool_pump).turn_off();
+    turn_off_action:
+      - lambda: |-
+          id(pump_winter_mode_bool) = false;
+          set_new_pumping_time();
+
+# ============================================================================ #
+text_sensor:
+  #### Time
+  - platform: template
+    id: pool_time
+    name: Pool time
+    icon: mdi:calendar-clock
+
+  # ================================== #
+  ## Local variables for timestamps
+  #### Pool pumping times
+  - platform: template
+    name: Pump timestamps on
+    id: pump_timestamps_on
+    internal: True
+    on_value:
+      then: 
+        # Update the next scheduled run time
+        - text_sensor.template.publish:
+            id: pump_next_on
+            state: !lambda |-
+              return update_next_run(id(pump_timestamps_on).state);
+        - text_sensor.template.publish:
+            id: pump_next_on_ha
+            state: !lambda |-
+              return get_time_formated(id(pump_next_on).state);
+  - platform: template
+    name: Pump timestamps off
+    id: pump_timestamps_off
+    internal: True
+    on_value:
+      then: 
+        # Update the next scheduled run time
+        - text_sensor.template.publish:
+            id: pump_next_off
+            state: !lambda |-
+              return update_next_run(id(pump_timestamps_off).state);
+        - text_sensor.template.publish:
+                id: pump_next_off_ha
+                state: !lambda |-
+                  return get_time_formated(id(pump_next_off).state);
+
+  # ================================== #
+  ## Local variables for next toogle
+  - platform: template
+    id: pump_next_on
+    internal: True
+  - platform: template
+    name: Pool pump next on
+    id: pump_next_on_ha
+  - platform: template
+    id: pump_next_off
+    internal: True
+    on_value:
+      - then:
+        - component.update: pool_pump_next_duration
+  - platform: template
+    name: Pool pump next off
+    id: pump_next_off_ha
+
+  #### Last automatic pumping
+  - platform: template
+    name: Last automatic pumping
+    id: last_automatic_pump_ha
+
+# ============================================================================ #
+# Cron jobs
+time:
+  - platform: homeassistant
+    id: time_sntp
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: 0
+        minutes: 30
+        hours: 0
+        then:
+          - lambda: set_new_pumping_time();
+      - seconds: 0
+        minutes: 0
+        hours: 0,8,16
+        then:
+          - lambda: id(filling_available) = water_available();
+      - seconds: 0
+        minutes: /1
+        then:
+          - lambda: |-
+              id(pool_time).publish_state(get_time_formated(to_string(id(time_sntp).now().timestamp)));
+
+              if ((id(pump_winter_mode_bool) || (id(pool_low_level).state && id(pump_automation_bool))) && scheduled_run(id(pump_next_on).state.c_str())) {
+                id(swimming_pool_pump).turn_on();
+                id(last_automatic_pump) = id(time_sntp).now().timestamp;
+                id(last_automatic_pump_ha).publish_state(get_time_formated(to_string(id(last_automatic_pump))));
+              }
+              if ((id(pump_winter_mode_bool) || id(pump_automation_bool)) && scheduled_run(id(pump_next_off).state.c_str())) {
+                id(swimming_pool_pump).turn_off();
+                id(last_automatic_pump) = id(time_sntp).now().timestamp;
+                id(last_automatic_pump_ha).publish_state(get_time_formated(to_string(id(last_automatic_pump))));
+              }
+              if (id(pool_filling_bool) && !id(pool_low_level).state && !id(pool_filling_requested)) {
+                id(pool_filling_requested) = true;
+                id(pool_filling_request_today).execute();
+              }

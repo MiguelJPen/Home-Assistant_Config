@@ -1,0 +1,61 @@
+esphome:
+  name: home-energy-monitor
+  platform: ESP8266
+  board: nodemcuv2
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+# Enable Home Assistant API
+api:
+
+ota:
+  password: "c40df12ae4aa2959d8b69370663e83af"
+
+wifi:
+  networks:
+  - ssid: !secret wifi_ssid
+    password: !secret wifi_password
+    priority: 5
+    
+#  manual_ip:
+#   static_ip: 192.168.0.62
+#   gateway: 192.168.0.1
+#   subnet: 255.255.255.0
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Home-Energy-Mon Fallback Hotspot"
+    password: "OdXMeCbpwyPd"
+
+captive_portal:
+
+switch:
+  - platform: restart
+    name: "Home energy monitor restart"
+    
+uart:
+  rx_pin: GPIO3
+  tx_pin: GPIO1
+  baud_rate: 9600
+
+binary_sensor:
+  - platform: status
+    name: "Home energy monitor status"
+
+sensor:
+  - platform: pzemac
+    current:
+      name: "Home Energy Monitor Current"
+    voltage:
+      name: "Home Energy Monitor Voltage"
+    energy:
+      name: "Home Energy Monitor Energy"
+    power:
+      name: "Home Energy Monitor Power"
+    frequency:
+      name: "Home Energy Monitor Frequency"
+    power_factor:
+      name: "Home Energy Monitor Power Factor"
+    update_interval: 10s

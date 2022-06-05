@@ -1,0 +1,97 @@
+esphome:
+  name: alarm_exterior
+  platform: ESP32
+  board: nodemcu-32s
+  includes:
+  - BarrierSensor.h
+
+wifi:
+  power_save_mode: none
+  networks:
+  - ssid: !secret wifi_ssid
+    password: !secret wifi_password
+    priority: 5
+  
+#  manual_ip:
+#   static_ip: 192.168.0.61
+#   gateway: 192.168.0.1
+#   subnet: 255.255.255.0
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Alarm Exterior Fallback Hotspot"
+    password: "URL9WC2ZQ5Y5"
+
+captive_portal:
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+ota:
+
+switch:
+  - platform: restart
+    name: "Barriers restart"
+
+binary_sensor:
+  - platform: status
+    name: "Exterior alarm status"
+    
+  - platform: custom
+    lambda: |-
+      auto myBarr = new BarrierSensor();
+      App.register_component(myBarr);
+      return {myBarr->Barriers[0], myBarr->Barriers[1], myBarr->Barriers[2], myBarr->Barriers[3], myBarr->Barriers[4], myBarr->Barriers[5], myBarr->Tampers[0], myBarr->Tampers[1], myBarr->Tampers[2], myBarr->Tampers[3], myBarr->Tampers[4], myBarr->Tampers[5]};
+
+    binary_sensors:
+     - name: "Barrera Norte"
+       device_class: safety
+       filters:
+        delayed_on_off: 700ms
+     - name: "Ventana del Salón"
+       device_class: safety
+       filters:
+        delayed_on_off: 700ms
+     - name: "Barrera Sur"
+       device_class: safety
+       filters:
+        delayed_on_off: 700ms
+     - name: "Barrera Este"
+       device_class: safety
+       filters:
+        delayed_on_off: 700ms
+     - name: "Barrera Noroeste"
+       device_class: safety
+       filters:
+        delayed_on_off: 700ms
+     - name: "Barrera Oeste"
+       device_class: safety
+       filters:
+        delayed_on_off: 700ms
+     - name: "Barrera Norte Tamper"
+       device_class: opening
+       filters:
+        delayed_on_off: 700ms
+     - name: "Ventana del Salón Tamper"
+       device_class: opening
+       filters:
+        delayed_on_off: 700ms
+     - name: "Barrera Sur Tamper"
+       device_class: opening
+       filters:
+        delayed_on_off: 700ms
+     - name: "Barrera Este Tamper"
+       device_class: opening
+       filters:
+        delayed_on_off: 700ms
+     - name: "Barrera Noroeste Tamper"
+       device_class: opening
+       filters:
+        delayed_on_off: 700ms
+     - name: "Barrera Oeste Tamper"
+       device_class: opening
+       filters:
+        delayed_on_off: 700ms

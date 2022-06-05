@@ -1,0 +1,40 @@
+# Generic ignores
+*.log
+*.log.1
+*.log.fault
+*.db
+*.db.old
+*.db-shm
+*.db-wal
+*.pyc
+._*
+__pycache__
+
+# Directory (contents) ignores
+.cloud
+.storage
+.ssh
+deps
+log
+cloudflare
+collected_data
+zigbee2mqtt
+tts
+themes
+custom_components
+www
+
+# Specific file ignores
+.config_entries.json
+.tradfri_psk.conf
+.uuid
+core
+html5_push_registrations.conf
+ip_bans.yaml
+known_devices.yaml
+secrets.yaml
+id_rsa
+id_rsa.pub
+google_assistant_service.json
+.google_maps_location_sharing.cookies.*
+.shopping_list.json

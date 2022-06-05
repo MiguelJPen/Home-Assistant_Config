@@ -1,0 +1,775 @@
+esphome:
+  name: irrigation-valves-lan
+  platform: ESP32
+  board: esp-wrover-kit
+  includes: 
+    - time_control.hpp
+    - irrigation.hpp
+  on_boot: 
+    priority: 800.0
+    then:
+      - delay: 10s
+      - lambda: |-
+          // If this variable has been deleted for any reason, reset it
+          if (id(north_zone_last_automatic_irrigation) == 0)
+            id(north_zone_last_automatic_irrigation) = (id(time_sntp).now().timestamp - (3600 * 24 * 3));
+          if (id(south_zone_last_automatic_irrigation) == 0)
+            id(south_zone_last_automatic_irrigation) = (id(time_sntp).now().timestamp - (3600 * 24 * 3));
+          id(pool_filling_timestamps_on).publish_state("");
+          id(pool_filling_timestamps_off).publish_state("");
+          id(north_zone_last_automatic_irrigation_ha).publish_state(get_time_formated(to_string(id(north_zone_last_automatic_irrigation))));
+          id(south_zone_last_automatic_irrigation_ha).publish_state(get_time_formated(to_string(id(south_zone_last_automatic_irrigation))));
+          set_new_irrigation_time();
+
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  services:
+    - service: set_irrigation_times
+      then:
+        - lambda: |-
+            set_new_irrigation_time();
+    - service: request_pool_water
+      then:
+        - lambda: |-
+            set_pool_filling();
+    - service: request_more_pool_water
+      then:
+        - lambda: |-
+            set_more_pool_filling();
+    - service: reset_next_irrigation_day
+      then:
+        - lambda: |-
+            id(next_day_irrigation).publish_state(to_string(id(time_sntp).now().timestamp));
+
+ota:
+  password: "8f136aaffae81480f139672690eca1d4"
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+#  ap:
+#    ssid: "Irrigation-Valves-Lan"
+#    password: "wlCnq3hJbTNg"
+
+#captive_portal:
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 1
+  power_pin: GPIO16
+  
+  manual_ip:
+    static_ip: 192.168.0.63
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+# ============================================================================ #
+globals:
+  #### Last automatic irrigation
+  - id: north_zone_last_automatic_irrigation
+    type: long int
+    restore_value: yes
+  - id: south_zone_last_automatic_irrigation
+    type: long int
+    restore_value: yes
+
+  ## Bool to save automation mode
+  - id: pool_filling_automation_bool
+    type: bool
+    restore_value: yes
+  - id: north_zone_automation_bool
+    type: bool
+    restore_value: yes
+  - id: south_zone_automation_bool
+    type: bool
+    restore_value: yes
+
+# ============================================================================ #
+script:
+  - id: swimming_pool_filling_now
+    then:
+      - homeassistant.service:
+          service: esphome.swimming_pool_pump_off
+      - delay: 10s
+      - switch.turn_on: pool_filling
+      - homeassistant.service:
+          service: esphome.swimming_pool_filling_start
+  - id: avoid_freezing_pipes
+    then:
+      - while:
+          condition:
+            sensor.in_range:
+              id: act_temp
+              below: 0
+          then:
+            - switch.turn_on: north_virtual
+            - delay: 15s
+            - switch.turn_on: south_virtual
+            - delay: 240s
+            - switch.turn_off: north_virtual
+            - delay: 15s
+            - switch.turn_off: south_virtual
+            - delay: 45 min
+
+# ============================================================================ #
+number:
+  ## To set manual times in the Home Assistant frontend
+  - platform: template
+    name: "Pool filling manual duration"
+    id: pool_filling_manual_duration
+    optimistic: true
+    restore_value: true
+    min_value: 1
+    max_value: 480
+    step: 1
+    unit_of_measurement: min
+    icon: mdi:timer-sand
+  - platform: template
+    name: "North zone manual duration"
+    id: north_zone_manual_duration
+    optimistic: true
+    restore_value: true
+    min_value: 1
+    max_value: 240
+    step: 1
+    unit_of_measurement: min
+    icon: mdi:timer-sand
+  - platform: template
+    name: "South zone manual duration"
+    id: south_zone_manual_duration
+    optimistic: true
+    restore_value: true
+    min_value: 1
+    max_value: 240
+    step: 1
+    unit_of_measurement: min
+    icon: mdi:timer-sand
+
+# ============================================================================ #
+sensor:
+  #### Precipitation sensor
+  - platform: pulse_meter
+    pin:
+      number: 12
+      mode:
+        input: true
+    name: "Rain flips"
+    internal_filter_mode: PULSE
+    internal_filter: 1ms
+    internal: true
+    total:
+      unit_of_measurement: 'mm'
+      name: 'Pluviometer'
+      accuracy_decimals: 1
+      filters:
+        - multiply: 0.30303
+
+  # ========================================================================= #
+  ## To store weather metrics
+  - platform: template
+    name: Mean temperature
+    id: mean_temp
+    internal: true
+  - platform: template
+    name: Mean humidity
+    id: mean_humid
+    internal: true
+  - platform: template
+    name: Min humidity
+    id: min_humid
+    internal: true
+  - platform: template
+    name: Precipitation yesterday
+    id: precip_yesterday
+    internal: true
+  - platform: template
+    name: Actual temperature
+    id: act_temp
+    internal: True
+    on_value_range:
+      - below: 0
+        then:
+          - script.execute: avoid_freezing_pipes
+
+  ## To retrieve weather metrics from home assistant
+  - platform: homeassistant
+    id: ui_mean_temp
+    entity_id: sensor.exterior_temperature_mean_over_last_48_hours
+    on_value: 
+      then:
+        - sensor.template.publish:
+            id: mean_temp
+            state: !lambda return id(ui_mean_temp).state;
+  - platform: homeassistant
+    id: ui_mean_humid
+    entity_id: sensor.exterior_humidity_mean_over_last_48_hours
+    on_value: 
+      then:
+        - sensor.template.publish:
+            id: mean_humid
+            state: !lambda return id(ui_mean_humid).state;
+  - platform: homeassistant
+    id: ui_min_humid
+    entity_id: sensor.exterior_humidity_minimum_over_last_48_hours
+    on_value: 
+      then:
+        - sensor.template.publish:
+            id: min_humid
+            state: !lambda return id(ui_min_humid).state;
+  - platform: homeassistant
+    id: ui_precip_yesterday
+    entity_id: sensor.precipitation
+    attribute: last_period
+    on_value: 
+      then:
+        - sensor.template.publish:
+            id: precip_yesterday
+            state: !lambda return id(ui_precip_yesterday).state;
+  - platform: homeassistant
+    id: ui_act_temp
+    entity_id: sensor.exterior_sensor_temperature
+    on_value: 
+      then:
+        - sensor.template.publish:
+            id: precip_yesterday
+            state: !lambda return id(ui_act_temp).state;
+
+  # ========================================================================= #
+  ## Countdown sensors
+  #### Pool filling
+  - platform: template
+    name: Pool filling left
+    id: pool_filling_left
+    update_interval: 10s
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(swimming_pool_valve).state) {
+        return ((atoi((id(pool_filling_next_off).state).c_str()) - id(time_sntp).now().timestamp) / 60) + 1;
+      }
+      return 0;
+  #### North zone
+  - platform: template
+    name: North zone left
+    id: north_zone_left
+    update_interval: 10s
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(north_valve).state) {
+        return ((atoi((id(north_zone_next_off).state).c_str()) - id(time_sntp).now().timestamp) / 60) + 1;
+      }
+      return 0;
+  #### South zone
+  - platform: template
+    name: South zone left
+    id: south_zone_left
+    update_interval: 10s
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(south_valve).state) {
+        return ((atoi((id(south_zone_next_off).state).c_str()) - id(time_sntp).now().timestamp) / 60) + 1;
+      }
+      return 0;
+  
+  # ========================================================================= #
+  ## Next cycle duration
+  #### Pool filling
+  - platform: template
+    name: Pool filling next duration
+    id: pool_filling_next_duration
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(pool_filling_next_on).state == "Sin programaciones" || id(pool_filling_next_off).state == "Sin programaciones" ||
+      id(pool_filling_next_on).state == "No hay más programaciones" || id(pool_filling_next_off).state == "No hay más programaciones") 
+        return 0;
+      if (atoi((id(pool_filling_next_off).state).c_str()) > atoi((id(pool_filling_next_on).state).c_str())) {
+        return ((atoi((id(pool_filling_next_off).state).c_str()) - atoi((id(pool_filling_next_on).state).c_str())) / 60);
+      }
+      return id(pool_filling_next_duration).state;
+  #### North zone
+  - platform: template
+    name: North zone next duration
+    id: north_zone_next_duration
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(north_zone_next_on).state == "Sin programaciones" || id(north_zone_next_off).state == "Sin programaciones" ||
+      id(north_zone_next_on).state == "No hay más programaciones" || id(north_zone_next_off).state == "No hay más programaciones") 
+        return 0;
+      if (atoi((id(north_zone_next_off).state).c_str()) > atoi((id(north_zone_next_on).state).c_str())) {
+        return ((atoi((id(north_zone_next_off).state).c_str()) - atoi((id(north_zone_next_on).state).c_str())) / 60);
+      }
+      return id(north_zone_next_duration).state;
+  #### South zone
+  - platform: template
+    name: South zone next duration
+    id: south_zone_next_duration
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(south_zone_next_on).state == "Sin programaciones" || id(south_zone_next_off).state == "Sin programaciones" ||
+      id(south_zone_next_on).state == "No hay más programaciones" || id(south_zone_next_off).state == "No hay más programaciones") 
+        return 0;
+      if (atoi((id(south_zone_next_off).state).c_str()) > atoi((id(south_zone_next_on).state).c_str())) {
+        return ((atoi((id(south_zone_next_off).state).c_str()) - atoi((id(south_zone_next_on).state).c_str())) / 60);
+      }
+      return id(south_zone_next_duration).state;
+
+# ============================================================================ #
+binary_sensor:
+  #### Irrigation status
+  - platform: status
+    name: "Irrigation status"
+
+# ============================================================================ #
+switch:
+  #### Restart switch
+  - platform: restart
+    name: "Irrigation restart"
+    
+  # ========================================================================= #
+  ## Switches to control each relay individually
+  #### Relay for the AC adaptor
+  - platform: gpio
+    id: ac_adaptor
+    pin:
+      number: 33
+    name: "Adaptador AC"
+    restore_mode: RESTORE_DEFAULT_OFF
+
+  ## Relays which trigger the solenoids
+  #### Main valve
+  - platform: gpio
+    id: main_valve
+    pin: 
+      number: 15
+      inverted: True
+    name: "Main valve"
+    restore_mode: RESTORE_DEFAULT_OFF
+
+  #### Swimming pool valve
+  - platform: gpio
+    id: swimming_pool_valve
+    pin: 
+      number: 14
+      inverted: True
+    name: "Swimming pool valve"
+    restore_mode: RESTORE_DEFAULT_OFF
+  #### North valve
+  - platform: gpio
+    id: north_valve
+    pin: 
+      number: 17
+      inverted: True
+    name: "North valve"
+    restore_mode: RESTORE_DEFAULT_OFF
+  #### South valve
+  - platform: gpio
+    id: south_valve
+    pin: 
+      number: 5
+      inverted: True
+    name: "South valve"
+    restore_mode: RESTORE_DEFAULT_OFF
+
+  # ========================================================================= #
+  # Virtual zone switches which toggle the relay and check others
+  #### Pool filling
+  - platform: template
+    name: Pool filling
+    id: pool_filling
+    internal: True
+    lambda: return (id(swimming_pool_valve).state && id(main_valve).state);
+    optimistic: true
+    turn_on_action:
+      - if:
+          condition:
+            - switch.is_off: ac_adaptor
+          then:
+            - switch.turn_on: ac_adaptor
+            - delay: 1s
+      - switch.turn_off: north_valve
+      - switch.turn_off: south_valve
+      - switch.turn_on: main_valve
+      - switch.turn_on: swimming_pool_valve
+      - component.update: pool_filling_left
+    turn_off_action:
+      - if:
+          condition:
+            and:
+              - switch.is_off: north_valve
+              - switch.is_off: south_valve
+          then:
+            - switch.turn_off: main_valve
+            - delay: 5s
+            - switch.turn_off: ac_adaptor
+      - switch.turn_off: swimming_pool_valve
+      - component.update: pool_filling_left
+  - platform: template
+    name: Pool filling manual
+    id: pool_filling_manual
+    lambda: return (id(pool_filling).state);
+    optimistic: True
+    turn_on_action:
+      - lambda: |-
+          manual_set_pool_filling();
+      - switch.turn_on: pool_filling
+    turn_off_action:
+      - switch.turn_off: pool_filling
+  - platform: template
+    name: Pool filling automation
+    id: pool_filling_automation
+    lambda: return id(pool_filling_automation_bool);
+    turn_on_action:
+      - lambda: |-
+          id(pool_filling_automation_bool) = true;
+    turn_off_action:
+      - lambda: |-
+          id(pool_filling_automation_bool) = false;
+
+
+  #### North zone
+  - platform: template
+    name: North zone
+    id: north_virtual
+    internal: True
+    lambda: return (id(north_valve).state && id(main_valve).state);
+    optimistic: true
+    turn_on_action:
+      - if:
+          condition:
+            - switch.is_off: ac_adaptor
+          then:
+            - switch.turn_on: ac_adaptor
+            - delay: 1s
+      - if:
+          condition:
+            - switch.is_on: swimming_pool_valve
+          then:
+            - switch.turn_off: swimming_pool_valve
+      - switch.turn_on: main_valve
+      - switch.turn_on: north_valve
+      - component.update: north_zone_left
+    turn_off_action:
+      - if:
+          condition:
+            and:
+              - switch.is_off: swimming_pool_valve
+              - switch.is_off: south_valve
+          then:
+            - switch.turn_off: main_valve
+            - delay: 5s
+            - switch.turn_off: ac_adaptor
+      - switch.turn_off: north_valve
+      - component.update: north_zone_left
+  - platform: template
+    name: North zone manual
+    id: north_zone_manual
+    lambda: return (id(north_virtual).state);
+    optimistic: True
+    turn_on_action:
+      - lambda: |-
+          manual_set_north_zone();
+      - switch.turn_on: north_virtual
+    turn_off_action:
+      - switch.turn_off: north_virtual
+  - platform: template
+    name: North zone automation
+    id: north_zone_automation
+    lambda: return id(north_zone_automation_bool);
+    turn_on_action:
+      - lambda: |-
+          id(north_zone_automation_bool) = true;
+    turn_off_action:
+      - lambda: |-
+          id(north_zone_automation_bool) = false;
+      
+  #### South zone
+  - platform: template
+    name: South zone
+    id: south_virtual
+    internal: True
+    lambda: return (id(south_valve).state && id(main_valve).state);
+    optimistic: true
+    turn_on_action:
+      - if:
+          condition:
+            - switch.is_off: ac_adaptor
+          then:
+            - switch.turn_on: ac_adaptor
+            - delay: 1s
+      - if:
+          condition:
+            - switch.is_on: swimming_pool_valve
+          then:
+            - switch.turn_off: swimming_pool_valve
+      - switch.turn_on: main_valve
+      - switch.turn_on: south_valve
+      - component.update: south_zone_left
+    turn_off_action:
+      - if:
+          condition:
+            and:
+              - switch.is_off: swimming_pool_valve
+              - switch.is_off: north_valve
+          then:
+            - switch.turn_off: main_valve
+            - delay: 5s
+            - switch.turn_off: ac_adaptor
+      - switch.turn_off: south_valve
+      - component.update: south_zone_left
+  - platform: template
+    name: South zone manual
+    id: south_zone_manual
+    lambda: return (id(south_virtual).state);
+    optimistic: True
+    turn_on_action:
+      - lambda: |-
+          manual_set_south_zone();
+      - switch.turn_on: south_virtual
+    turn_off_action:
+      - switch.turn_off: south_virtual
+  - platform: template
+    name: South zone automation
+    id: south_zone_automation
+    lambda: return id(south_zone_automation_bool);
+    turn_on_action:
+      - lambda: |-
+          id(south_zone_automation_bool) = true;
+    turn_off_action:
+      - lambda: |-
+          id(south_zone_automation_bool) = false;
+
+# ============================================================================ #
+text_sensor:
+  ## Local variables for timestamps
+  #### Pool filling times
+  - platform: template
+    name: Pool filling timestamps on
+    id: pool_filling_timestamps_on
+    internal: True
+    on_value:
+      then: 
+        # Update the next scheduled run time
+        - text_sensor.template.publish:
+            id: pool_filling_next_on
+            state: !lambda |-
+              return update_next_run(id(pool_filling_timestamps_on).state);
+        - text_sensor.template.publish:
+            id: pool_filling_next_on_ha
+            state: !lambda |-
+              return get_time_formated(id(pool_filling_next_on).state);
+  - platform: template
+    name: Pool filling timestamps off
+    id: pool_filling_timestamps_off
+    internal: True
+    on_value:
+      then: 
+        # Update the next scheduled run time
+        - text_sensor.template.publish:
+            id: pool_filling_next_off
+            state: !lambda |-
+              return update_next_run(id(pool_filling_timestamps_off).state);
+        - text_sensor.template.publish:
+                id: pool_filling_next_off_ha
+                state: !lambda |-
+                  return get_time_formated(id(pool_filling_next_off).state);
+
+  #### North zone times
+  - platform: template
+    name: North zone timestamps on
+    id: north_zone_timestamps_on
+    internal: True
+    on_value:
+      then: 
+        # Update the next scheduled run time
+        - text_sensor.template.publish:
+            id: north_zone_next_on
+            state: !lambda |-
+              return update_next_run(id(north_zone_timestamps_on).state);
+        - text_sensor.template.publish:
+                id: north_zone_next_on_ha
+                state: !lambda |-
+                  return get_time_formated(id(north_zone_next_on).state);
+  - platform: template
+    name: North zone timestamps off
+    id: north_zone_timestamps_off
+    internal: True
+    on_value:
+      then: 
+        # Update the next scheduled run time
+        - text_sensor.template.publish:
+            id: north_zone_next_off
+            state: !lambda |-
+              return update_next_run(id(north_zone_timestamps_off).state);
+        - text_sensor.template.publish:
+                id: north_zone_next_off_ha
+                state: !lambda |-
+                  return get_time_formated(id(north_zone_next_off).state);
+
+  #### South zone times
+  - platform: template
+    name: South zone timestamps on
+    id: south_zone_timestamps_on
+    internal: True
+    on_value:
+      then: 
+        # Update the next scheduled run time
+        - text_sensor.template.publish:
+            id: south_zone_next_on
+            state: !lambda |-
+              return update_next_run(id(south_zone_timestamps_on).state);
+        - text_sensor.template.publish:
+                id: south_zone_next_on_ha
+                state: !lambda |-
+                  return get_time_formated(id(south_zone_next_on).state);
+  - platform: template
+    name: South zone timestamps off
+    id: south_zone_timestamps_off
+    internal: True
+    on_value:
+      then: 
+        # Update the next scheduled run time
+        - text_sensor.template.publish:
+            id: south_zone_next_off
+            state: !lambda |-
+              return update_next_run(id(south_zone_timestamps_off).state);
+        - text_sensor.template.publish:
+                id: south_zone_next_off_ha
+                state: !lambda |-
+                  return get_time_formated(id(south_zone_next_off).state);
+
+  #### Next day of irrigation
+  - platform: template
+    id: next_day_irrigation
+    internal: True
+    on_value: 
+      then:
+        - text_sensor.template.publish:
+            id: next_day_irrigation_ha
+            state: !lambda |-
+              return get_time_formated(id(next_day_irrigation).state);
+
+  # ========================================================================= #
+  ## Local variables for next toogle
+  #### Time
+  - platform: template
+    id: irrigation_time
+    name: Irrigation time
+    icon: mdi:calendar-clock
+
+  #### Pool filling
+  - platform: template
+    id: pool_filling_next_on
+    internal: True
+  - platform: template
+    name: Pool filling next on
+    id: pool_filling_next_on_ha
+  - platform: template
+    id: pool_filling_next_off
+    internal: True
+    on_value:
+      - component.update: pool_filling_next_duration
+  - platform: template
+    name: Pool filling next off
+    id: pool_filling_next_off_ha
+
+  #### North zone
+  - platform: template
+    id: north_zone_next_on
+    internal: True
+  - platform: template
+    name: North zone next on
+    id: north_zone_next_on_ha
+  - platform: template
+    id: north_zone_next_off
+    internal: True
+    on_value:
+      - component.update: north_zone_next_duration
+  - platform: template
+    name: North zone next off
+    id: north_zone_next_off_ha
+
+  #### South zone
+  - platform: template
+    id: south_zone_next_on
+    internal: True
+  - platform: template
+    name: South zone next on
+    id: south_zone_next_on_ha
+  - platform: template
+    id: south_zone_next_off
+    internal: True
+    on_value:
+      - component.update: south_zone_next_duration
+  - platform: template
+    name: South zone next off
+    id: south_zone_next_off_ha
+
+  #### Next day of irrigation
+  - platform: template
+    name: Next day of irrigation
+    id: next_day_irrigation_ha
+  
+  #### Last automatic irrigation
+  - platform: template
+    name: North zone last automatic irrigation
+    id: north_zone_last_automatic_irrigation_ha
+  - platform: template
+    name: South zone last automatic irrigation
+    id: south_zone_last_automatic_irrigation_ha
+
+# ============================================================================ #
+time:
+  - platform: homeassistant
+    id: time_sntp
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: 0
+        minutes: 30
+        hours: 0
+        then:
+          - lambda: |-
+              set_new_irrigation_time();
+      - seconds: 0
+        minutes: /1
+        then:
+          - lambda: |-
+              id(irrigation_time).publish_state(get_time_formated(to_string(id(time_sntp).now().timestamp)));
+
+              if (id(pool_filling_automation_bool) && scheduled_run(id(pool_filling_next_on).state.c_str())) {
+                id(swimming_pool_filling_now).execute();
+              }
+              if (scheduled_run(id(pool_filling_next_off).state.c_str())) {
+                id(pool_filling).turn_off();
+              }
+              if (id(north_zone_automation_bool) && scheduled_run(id(north_zone_next_on).state.c_str())) {
+                id(north_virtual).turn_on();
+                id(north_zone_last_automatic_irrigation) = id(time_sntp).now().timestamp;
+                id(north_zone_last_automatic_irrigation_ha).publish_state(get_time_formated(to_string(id(north_zone_last_automatic_irrigation))));
+              }
+              if (scheduled_run(id(north_zone_next_off).state.c_str())) {
+                id(north_virtual).turn_off();
+              }
+              if (id(south_zone_automation_bool) && scheduled_run(id(south_zone_next_on).state.c_str())) {
+                id(south_virtual).turn_on();
+                id(south_zone_last_automatic_irrigation) = id(time_sntp).now().timestamp;
+                id(south_zone_last_automatic_irrigation_ha).publish_state(get_time_formated(to_string(id(south_zone_last_automatic_irrigation))));
+              }
+              if (scheduled_run(id(south_zone_next_off).state.c_str())) {
+                id(south_virtual).turn_off();
+              }
