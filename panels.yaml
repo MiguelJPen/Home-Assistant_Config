@@ -3,8 +3,3 @@
 #  icon: mdi:router-wireless
 #  url: "https://192.168.0.1:8443"
 #  require_admin: true
-# router_2:
-#     title: 'Router Livebox+'
-#     icon: mdi:router-wireless
-#     url: "https://192.168.0.2"
-#     require_admin: true
