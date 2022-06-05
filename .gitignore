@@ -38,3 +38,4 @@ id_rsa.pub
 google_assistant_service.json
 .google_maps_location_sharing.cookies.*
 .shopping_list.json
+.HA_VERSION
