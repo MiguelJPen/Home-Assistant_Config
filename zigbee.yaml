@@ -1,3 +1,4 @@
+# Code copied from zigbee2mqtt
 # TIMER
 timer:
   zigbee_permit_join:
@@ -20,7 +21,6 @@ sensor:
     icon: mdi:router-network
 
 # AUTOMATIONS
-# Code copied from zigbee2mqtt
 automation:
   - id: enable_zigbee_join
     alias: Zigbee - Enable Zigbee joining
