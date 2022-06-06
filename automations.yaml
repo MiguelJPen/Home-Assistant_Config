@@ -600,48 +600,6 @@
       data:
         value: Mañana
   mode: single
-- id: '1629292772134'
-  alias: Irrigation - Set water available
-  description: ''
-  trigger:
-  - platform: time
-    at: 08:00
-  - platform: time
-    at: '16:00'
-  - platform: time
-    at: '23:59:50'
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: and
-        conditions:
-        - condition: template
-          value_template: '{{ now().month % 2 == 1 }}'
-        - condition: time
-          after: 08:00
-          before: '15:59'
-      sequence:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.irrigation_water_available
-    - conditions:
-      - condition: and
-        conditions:
-        - condition: template
-          value_template: '{{ now().month % 2 == 0 }}'
-        - condition: time
-          after: '16:00'
-          before: '23:59'
-      sequence:
-      - service: input_boolean.turn_on
-        target:
-          entity_id: input_boolean.irrigation_water_available
-    default:
-    - service: input_boolean.turn_off
-      target:
-        entity_id: input_boolean.irrigation_water_available
-  mode: single
 - id: '1631442755979'
   alias: Alarm - Trigger when sensors go on - First (Home)
   description: ''

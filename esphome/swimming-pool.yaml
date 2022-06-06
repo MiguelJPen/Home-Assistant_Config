@@ -187,8 +187,7 @@ sensor:
     unit_of_measurement: min
     icon: mdi:timer-outline
     lambda: |-
-      if (id(pump_next_on).state == "Sin programaciones" || id(pump_next_off).state == "Sin programaciones" ||
-      id(pump_next_on).state == "No hay más programaciones" || id(pump_next_off).state == "No hay más programaciones") 
+      if (id(pump_next_on).state == "Sin programaciones" || id(pump_next_off).state == "Sin programaciones") 
         return 0;
       if (atoi((id(pump_next_off).state).c_str()) > atoi((id(pump_next_on).state).c_str())) {
         return ((atoi((id(pump_next_off).state).c_str()) - atoi((id(pump_next_on).state).c_str())) / 60);
@@ -227,7 +226,6 @@ switch:
       - delay: 100ms
       - lambda: |-
           if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state != "No hay más programaciones" && id(pump_next_off).state != "No hay más programaciones" &&
             id(pump_next_on).state > id(pump_next_off).state)
               id(swimming_pool_pump).turn_on();
           else id(swimming_pool_pump).turn_off();
@@ -264,7 +262,6 @@ switch:
       - delay: 100ms
       - lambda: |-
           if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state != "No hay más programaciones" && id(pump_next_off).state != "No hay más programaciones" &&
             id(pump_next_on).state > id(pump_next_off).state)
               id(swimming_pool_pump).turn_on();
           else id(swimming_pool_pump).turn_off();
@@ -287,6 +284,7 @@ text_sensor:
   - platform: template
     name: Pump timestamps on
     id: pump_timestamps_on
+    update_interval: never
     internal: True
     on_value:
       then: 
@@ -302,6 +300,7 @@ text_sensor:
   - platform: template
     name: Pump timestamps off
     id: pump_timestamps_off
+    update_interval: never
     internal: True
     on_value:
       then: 
@@ -375,3 +374,5 @@ time:
                 id(pool_filling_requested) = true;
                 id(pool_filling_request_today).execute();
               }
+              id(pump_timestamps_on).publish_state(update_list(id(pump_timestamps_on).state));
+              id(pump_timestamps_off).publish_state(update_list(id(pump_timestamps_off).state));

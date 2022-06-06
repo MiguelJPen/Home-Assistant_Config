@@ -26,8 +26,3 @@ sensor:
     sampling_size: 500
     max_age:
       hours: 48
-    
-input_boolean:
-  irrigation_water_available:
-    name: Agua de riego
-    icon: mdi:water-pump

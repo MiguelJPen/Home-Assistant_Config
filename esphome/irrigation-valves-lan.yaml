@@ -19,8 +19,8 @@ esphome:
           id(pool_filling_timestamps_off).publish_state("");
           id(north_zone_last_automatic_irrigation_ha).publish_state(get_time_formated(to_string(id(north_zone_last_automatic_irrigation))));
           id(south_zone_last_automatic_irrigation_ha).publish_state(get_time_formated(to_string(id(south_zone_last_automatic_irrigation))));
+          id(irrigation_available).publish_state(water_available());
           set_new_irrigation_time();
-
 
 # Enable logging
 logger:
@@ -325,6 +325,12 @@ binary_sensor:
   #### Irrigation status
   - platform: status
     name: "Irrigation status"
+
+  #### Water available boolean
+  - platform: template
+    id: irrigation_available
+    name: Agua de riego
+    icon: mdi:water-pump
 
 # ============================================================================ #
 switch:
@@ -748,6 +754,11 @@ time:
         then:
           - lambda: |-
               set_new_irrigation_time();
+      - seconds: 0
+        minutes: 0
+        hours: 0,8,16
+        then:
+          - lambda: id(irrigation_available).publish_state(water_available());
       - seconds: 0
         minutes: /1
         then:
