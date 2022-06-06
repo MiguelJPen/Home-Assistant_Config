@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <vector>
 #include <string>
 #include <clocale>
 #include <cmath>
@@ -10,14 +11,24 @@
 using namespace std;
 
 #define unknown "Sin programaciones"
-#define noTime "No hay más programaciones"
 
 string update_next_run(string);
+string update_list(string);
 string get_time_formated(string);
 bool scheduled_run(string);
 bool water_available();
 
 string update_next_run(string time_list) {
+    char * token;
+
+    if (time_list.empty()) return unknown;
+
+    // Split the list into a vector.
+    token = strtok(&time_list[0], ",");
+    return string(token);
+}
+
+/*string update_next_run(string time_list) {
     vector<string> times;
     char * token;
 
@@ -56,10 +67,45 @@ string update_next_run(string time_list) {
     }
 
     return noTime;
+}*/
+
+string update_list(string time_list){
+    vector<string> times;
+    string ret = "", comma = "";
+    char * token;
+
+    if (time_list.empty()) return "";
+
+    // Split the list into a vector.
+    token = strtok(&time_list[0], ",");
+    while (token != NULL) {
+        times.push_back(token);
+        token = strtok(NULL, ",");
+    }
+
+    // Retrieve the current time.
+    auto time_now = id(time_sntp).now();
+    int year = time_now.year, month = time_now.month, day = time_now.day_of_month;
+    int hour = time_now.hour, minute = time_now.minute;
+
+    for (string timestamp : times) {
+        time_t next_run_aux = atoi(timestamp.c_str());
+        struct tm next_run = *localtime(&next_run_aux);
+
+        int next_year = next_run.tm_year + 1900, next_month = next_run.tm_mon + 1, next_day = next_run.tm_mday;
+        int next_hour = next_run.tm_hour, next_minute = next_run.tm_min;
+
+        if (year < next_year || (year == next_year && (month < next_month || (month == next_month && (day < next_day || (day == next_day && (hour < next_hour || (hour == next_hour && (minute < next_minute))))))))) {
+            ret.append(comma + to_string(timestamp));
+            comma = ",";
+        }
+    }
+
+    return ret;
 }
 
 string get_time_formated(string time) {
-    if (!time.compare(unknown) || !time.compare(noTime))
+    if (!time.compare(unknown))
         return time;
     
     char date[100];
@@ -72,7 +118,7 @@ string get_time_formated(string time) {
 }
 
 bool scheduled_run(string time){
-    if (!time.compare(unknown) || !time.compare(noTime))
+    if (!time.compare(unknown))
         return false;
 
     auto time_now = id(time_sntp).now();

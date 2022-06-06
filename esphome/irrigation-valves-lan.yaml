@@ -82,6 +82,17 @@ globals:
     type: bool
     restore_value: yes
 
+  ## Valves manual status
+  - id: pool_filling_manual_bool
+    type: bool
+    restore_value: no
+  - id: north_zone_manual_bool
+    type: bool
+    restore_value: no
+  - id: south_zone_manual_bool
+    type: bool
+    restore_value: no
+
   ## Weather metrics
   - id: mean_temp
     type: float
@@ -274,8 +285,7 @@ sensor:
     unit_of_measurement: min
     icon: mdi:timer-outline
     lambda: |-
-      if (id(pool_filling_next_on).state == "Sin programaciones" || id(pool_filling_next_off).state == "Sin programaciones" ||
-      id(pool_filling_next_on).state == "No hay más programaciones" || id(pool_filling_next_off).state == "No hay más programaciones") 
+      if (id(pool_filling_next_on).state == "Sin programaciones" || id(pool_filling_next_off).state == "Sin programaciones") 
         return 0;
       if (atoi((id(pool_filling_next_off).state).c_str()) > atoi((id(pool_filling_next_on).state).c_str())) {
         return ((atoi((id(pool_filling_next_off).state).c_str()) - atoi((id(pool_filling_next_on).state).c_str())) / 60);
@@ -289,8 +299,7 @@ sensor:
     unit_of_measurement: min
     icon: mdi:timer-outline
     lambda: |-
-      if (id(north_zone_next_on).state == "Sin programaciones" || id(north_zone_next_off).state == "Sin programaciones" ||
-      id(north_zone_next_on).state == "No hay más programaciones" || id(north_zone_next_off).state == "No hay más programaciones") 
+      if (id(north_zone_next_on).state == "Sin programaciones" || id(north_zone_next_off).state == "Sin programaciones") 
         return 0;
       if (atoi((id(north_zone_next_off).state).c_str()) > atoi((id(north_zone_next_on).state).c_str())) {
         return ((atoi((id(north_zone_next_off).state).c_str()) - atoi((id(north_zone_next_on).state).c_str())) / 60);
@@ -304,8 +313,7 @@ sensor:
     unit_of_measurement: min
     icon: mdi:timer-outline
     lambda: |-
-      if (id(south_zone_next_on).state == "Sin programaciones" || id(south_zone_next_off).state == "Sin programaciones" ||
-      id(south_zone_next_on).state == "No hay más programaciones" || id(south_zone_next_off).state == "No hay más programaciones") 
+      if (id(south_zone_next_on).state == "Sin programaciones" || id(south_zone_next_off).state == "Sin programaciones")
         return 0;
       if (atoi((id(south_zone_next_off).state).c_str()) > atoi((id(south_zone_next_on).state).c_str())) {
         return ((atoi((id(south_zone_next_off).state).c_str()) - atoi((id(south_zone_next_on).state).c_str())) / 60);
@@ -409,10 +417,12 @@ switch:
     optimistic: True
     turn_on_action:
       - lambda: |-
-          manual_set_pool_filling();
+          id(pool_filling_timestamps_off).publish_state(manual_set(id(pool_filling_manual_duration).state, id(pool_filling_timestamps_off).state));
       - switch.turn_on: pool_filling
     turn_off_action:
       - switch.turn_off: pool_filling
+      - lambda: |-
+          id(pool_filling_timestamps_off).publish_state(delete_first_timestamp(id(pool_filling_timestamps_off).state));
   - platform: template
     name: Pool filling automation
     id: pool_filling_automation
@@ -466,10 +476,12 @@ switch:
     optimistic: True
     turn_on_action:
       - lambda: |-
-          manual_set_north_zone();
+          id(north_zone_timestamps_off).publish_state(manual_set(id(north_zone_manual_duration).state, id(north_zone_timestamps_off).state));
       - switch.turn_on: north_virtual
     turn_off_action:
       - switch.turn_off: north_virtual
+      - lambda: |-
+          id(north_zone_timestamps_off).publish_state(delete_first_timestamp(id(north_zone_timestamps_off).state));
   - platform: template
     name: North zone automation
     id: north_zone_automation
@@ -522,10 +534,12 @@ switch:
     optimistic: True
     turn_on_action:
       - lambda: |-
-          manual_set_south_zone();
+          id(south_zone_timestamps_off).publish_state(manual_set(id(south_zone_manual_duration).state, id(south_zone_timestamps_off).state));
       - switch.turn_on: south_virtual
     turn_off_action:
       - switch.turn_off: south_virtual
+      - lambda: |-
+          id(south_zone_timestamps_off).publish_state(delete_first_timestamp(id(south_zone_timestamps_off).state));
   - platform: template
     name: South zone automation
     id: south_zone_automation
@@ -544,6 +558,7 @@ text_sensor:
   - platform: template
     name: Pool filling timestamps on
     id: pool_filling_timestamps_on
+    update_interval: never
     internal: True
     on_value:
       then: 
@@ -559,6 +574,7 @@ text_sensor:
   - platform: template
     name: Pool filling timestamps off
     id: pool_filling_timestamps_off
+    update_interval: never
     internal: True
     on_value:
       then: 
@@ -576,6 +592,7 @@ text_sensor:
   - platform: template
     name: North zone timestamps on
     id: north_zone_timestamps_on
+    update_interval: never
     internal: True
     on_value:
       then: 
@@ -591,6 +608,7 @@ text_sensor:
   - platform: template
     name: North zone timestamps off
     id: north_zone_timestamps_off
+    update_interval: never
     internal: True
     on_value:
       then: 
@@ -608,6 +626,7 @@ text_sensor:
   - platform: template
     name: South zone timestamps on
     id: south_zone_timestamps_on
+    update_interval: never
     internal: True
     on_value:
       then: 
@@ -623,6 +642,7 @@ text_sensor:
   - platform: template
     name: South zone timestamps off
     id: south_zone_timestamps_off
+    update_interval: never
     internal: True
     on_value:
       then: 
@@ -756,3 +776,9 @@ time:
               if (scheduled_run(id(south_zone_next_off).state.c_str())) {
                 id(south_virtual).turn_off();
               }
+              id(north_zone_timestamps_on).publish_state(update_list(id(north_zone_timestamps_on).state));
+              id(north_zone_timestamps_off).publish_state(update_list(id(north_zone_timestamps_off).state));
+              id(south_zone_timestamps_on).publish_state(update_list(id(south_zone_timestamps_on).state));
+              id(south_zone_timestamps_off).publish_state(update_list(id(south_zone_timestamps_off).state));
+              id(pool_filling_timestamps_on).publish_state(update_list(id(pool_filling_timestamps_on).state));
+              id(pool_filling_timestamps_off).publish_state(update_list(id(pool_filling_timestamps_off).state));
