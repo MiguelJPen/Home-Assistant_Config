@@ -16,9 +16,6 @@ void set_pool_filling();
 void set_more_pool_filling();
 string manual_set(int, string);
 string delete_first_timestamp(string);
-//void manual_set_pool_filling();
-//void manual_set_north_zone();
-//void manual_set_south_zone();
 
 void set_new_irrigation_time() {
     int time_per_day = 15, no_water_days = 0, freq_day = 1, next_from_today = 0, last_day = 0;
@@ -176,20 +173,6 @@ void set_more_pool_filling() {
     id(pool_filling_timestamps_off).publish_state(to_string(aux + 3 * 60));
 }
 
-/*void manual_set_pool_filling() {
-    string pool_off = id(pool_filling_timestamps_off).state;
-    time_t now_timestamp = id(time_sntp).now().timestamp;
-    struct tm now_time = *localtime(&now_timestamp);
-    string comma = (pool_off.empty() ? "" : ", ");
-
-    now_time.tm_sec = 0;
-    time_t aux = mktime(&now_time);
-
-    pool_off.insert(0, to_string((long int)(aux + ((id(pool_filling_manual_duration).state - 1) * 60))) + comma);
-    id(pool_filling_timestamps_off).publish_state(pool_off);
-    id(pool_filling_manual_bool) = true;
-}*/
-
 string manual_set(int duration, string time_list) {
     time_t now_timestamp = id(time_sntp).now().timestamp;
     struct tm now_time = *localtime(&now_timestamp);
@@ -215,47 +198,3 @@ string delete_first_timestamp(string time_list) {
 
     return time_list;
 }
-
-/*void manual_unset_pool_filling() {
-    if (id(pool_filling_manual_bool)){
-        id(pool_filling_manual_bool) = false;
-        string pool_off = id(pool_filling_timestamps_off).state;
-
-        size_t pos = pool_off.find(",");
-        //ESP_LOGD("manual_unset_pool_filling", "POS: %zu, NPOS: %zu", pos, string::npos);
-        if (pos == string::npos) pool_off = "";
-        else pool_off.erase(0, pos + 1); 
-        
-        ESP_LOGD("manual_unset_pool_filling", "%s", pool_off);
-
-        id(pool_filling_timestamps_off).publish_state(pool_off);
-    }
-}*/
-
-/*void manual_set_north_zone() {
-    string north_off = id(north_zone_timestamps_off).state;
-    time_t now_timestamp = id(time_sntp).now().timestamp;
-    struct tm now_time = *localtime(&now_timestamp);
-    string comma = (north_off.empty() ? "" : ", ");
-
-    now_time.tm_sec = 0;
-    time_t aux = mktime(&now_time);
-
-    north_off.insert(0, to_string(aux + ((id(north_zone_manual_duration).state - 1) * 60)) + comma);
-    id(north_zone_timestamps_off).publish_state(north_off);
-    id(north_zone_manual_bool) = true;
-}*/
-
-/*void manual_set_south_zone() {
-    string south_off = id(south_zone_timestamps_off).state;
-    time_t now_timestamp = id(time_sntp).now().timestamp;
-    struct tm now_time = *localtime(&now_timestamp);
-    string comma = (south_off.empty() ? "" : ", ");
-
-    now_time.tm_sec = 0;
-    time_t aux = mktime(&now_time);
-
-    south_off.insert(0, to_string(aux + ((id(south_zone_manual_duration).state - 1) * 60)) + comma);
-    id(south_zone_timestamps_off).publish_state(south_off);
-    id(south_zone_manual_bool) = true;
-}*/

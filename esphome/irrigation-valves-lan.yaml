@@ -9,6 +9,7 @@ esphome:
     priority: 800.0
     then:
       - delay: 10s
+      - component.update: irrigation_period
       - lambda: |-
           // If this variable has been deleted for any reason, reset it
           if (id(north_zone_last_automatic_irrigation) == 0)
@@ -63,7 +64,7 @@ ethernet:
 
 # ============================================================================ #
 globals:
-  #### Last automatic irrigation
+  ## Last automatic irrigation
   - id: north_zone_last_automatic_irrigation
     type: long int
     restore_value: yes
@@ -329,8 +330,10 @@ binary_sensor:
   #### Water available boolean
   - platform: template
     id: irrigation_available
-    name: Agua de riego
-    icon: mdi:water-pump
+    internal: True
+    on_state: 
+      - then:
+        - component.update: irrigation_available_text
 
 # ============================================================================ #
 switch:
@@ -742,6 +745,27 @@ text_sensor:
     name: South zone last automatic irrigation
     id: south_zone_last_automatic_irrigation_ha
 
+  # ========================================================================= #
+  #### Period with water available
+  - platform: template
+    name: Periodo con agua de riego
+    id: irrigation_period
+    update_interval: never
+    icon: mdi:water-check
+    lambda: |-
+      time_t now_timestamp = id(time_sntp).now().timestamp;
+      struct tm now_time = *localtime(&now_timestamp);
+      if (now_time.tm_mon % 2 == 0) return {"Mañana"};
+      return {"Tarde"};
+  - platform: template
+    name: Agua de riego
+    id: irrigation_available_text
+    update_interval: never
+    icon: mdi:water-pump
+    lambda: |-
+      if(id(irrigation_available).state) return {"Disponible"};
+      return {"No disponible"};
+
 # ============================================================================ #
 time:
   - platform: homeassistant
@@ -754,6 +778,12 @@ time:
         then:
           - lambda: |-
               set_new_irrigation_time();
+      - seconds: 0
+        minutes: 0
+        hours: 0
+        days_of_month: 1
+        then:
+          - component.update: irrigation_period
       - seconds: 0
         minutes: 0
         hours: 0,8,16

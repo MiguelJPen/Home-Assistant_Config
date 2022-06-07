@@ -575,31 +575,6 @@
     default: []
   mode: parallel
   max: 4
-- id: '1629285415530'
-  alias: Irrigation - Change period
-  description: ''
-  trigger:
-  - platform: time
-    at: 02:10
-  condition: []
-  action:
-  - choose:
-    - conditions:
-      - condition: template
-        value_template: '{{ now().month % 2 == 0 }}'
-      sequence:
-      - service: input_text.set_value
-        target:
-          entity_id: input_text.periodo_riego
-        data:
-          value: Tarde
-    default:
-    - service: input_text.set_value
-      target:
-        entity_id: input_text.periodo_riego
-      data:
-        value: Mañana
-  mode: single
 - id: '1631442755979'
   alias: Alarm - Trigger when sensors go on - First (Home)
   description: ''

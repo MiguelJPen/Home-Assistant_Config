@@ -1,9 +1,3 @@
-input_text:
-  # To store the irrigation period
-  periodo_riego:
-    name: Periodo con agua de riego
-    icon: mdi:water-check
-    
 sensor:
   - platform: statistics
     name: "Exterior temperature mean over last 48 hours"
