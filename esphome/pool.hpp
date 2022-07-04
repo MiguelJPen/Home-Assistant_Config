@@ -51,6 +51,8 @@ void set_winter_timestamps(time_t today, int days_ahead, int mins) {
     new_time.tm_sec = 0;
     time_t aux = mktime(&new_time);
 
+    pump_on = update_list(pump_on);
+    pump_off = update_list(pump_off);
     pump_on.append(comma + to_string(aux));
     pump_off.append(comma + to_string(aux + mins * 60));
 
@@ -93,6 +95,8 @@ void set_pumping(time_t today, time_t sunrise, time_t sunset, int days_ahead, in
     pump_on.append(comma + to_string(sunset_local - 5400));
     pump_off.append(comma + to_string(sunset_local));
 
+    pump_on = update_list(pump_on);
+    pump_off = update_list(pump_off);
     id(pump_timestamps_on).publish_state(pump_on);
     id(pump_timestamps_off).publish_state(pump_off);
 }

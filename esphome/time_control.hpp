@@ -28,47 +28,6 @@ string update_next_run(string time_list) {
     return string(token);
 }
 
-/*string update_next_run(string time_list) {
-    vector<string> times;
-    char * token;
-
-    if (time_list.empty()) return unknown;
-
-    // Split the list into a vector.
-    token = strtok(&time_list[0], ",");
-    while (token != NULL) {
-        times.push_back(token);
-        token = strtok(NULL, ",");
-    }
-
-    // Retrieve the current time.
-    auto time_now = id(time_sntp).now();
-    int year = time_now.year;
-    int month = time_now.month;
-    int day = time_now.day_of_month;
-    int hour = time_now.hour;
-    int minute = time_now.minute;
-
-    //ESP_LOGD("update_next_run", "TODAY: year:%i month:%i day:%i hour:%i minute:%i", year, month, day, hour, minute);
-
-    // Compare the list of times with the current time, and return the next in the list.
-    for (string timestamp : times) {
-        time_t next_run_aux = atoi(timestamp.c_str());
-        struct tm next_run = *localtime(&next_run_aux);
-
-        int next_year = next_run.tm_year + 1900, next_month = next_run.tm_mon + 1, next_day = next_run.tm_mday;
-        int next_hour = next_run.tm_hour, next_minute = next_run.tm_min;
-
-        //ESP_LOGD("update_next_run", "timestamp:%s", timestamp.c_str());
-        //ESP_LOGD("update_next_run", "year:%i month:%i day:%i hour:%i minute:%i", next_year, next_month, next_day, next_hour, next_minute);
-        if (year < next_year || (year == next_year && (month < next_month || (month == next_month && (day < next_day || (day == next_day && (hour < next_hour || (hour == next_hour && (minute < next_minute))))))))) {
-            return timestamp.c_str();
-        }
-    }
-
-    return noTime;
-}*/
-
 string update_list(string time_list){
     vector<string> times;
     string ret = "", comma = "";
