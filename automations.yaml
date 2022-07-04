@@ -814,133 +814,116 @@
     at: '12:15'
   condition: []
   action:
-  - choose:
-    - conditions:
+  - if:
+    - condition: template
+      value_template: '{{ now().day == 1 }}'
+    then:
+    - service: input_boolean.turn_off
+      target:
+        entity_id:
+        - input_boolean.lau_maria_has_paid
+        - input_boolean.lau_patricia_has_paid
+      data: {}
+  - if:
+    - condition: template
+      value_template: '{{ (now().month % 3) == 0 and now().day == 5 }}'
+    then:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.lau_robleda_seguros_has_paid
+      data: {}
+  - if:
+    - condition: or
+      conditions:
       - condition: template
-        value_template: '{{ now().day == 1 }}'
-      sequence:
-      - service: input_boolean.turn_off
-        target:
-          entity_id:
-          - input_boolean.lau_lara_has_paid
-          - input_boolean.lau_maria_has_paid
-          - input_boolean.lau_patricia_has_paid
-          - input_boolean.lau_ivan_has_paid
-        data: {}
-    default: []
-  - choose:
-    - conditions:
+        value_template: '{{ (now().day < 7) and ( is_state(''input_boolean.lau_maria_has_paid'',
+          ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') )  }}'
       - condition: template
-        value_template: '{{ (now().day < 7) and ( is_state(''input_boolean.lau_lara_has_paid'',
-          ''off'') or is_state(''input_boolean.lau_maria_has_paid'', ''off'') or is_state(''input_boolean.lau_patricia_has_paid'',
-          ''off'') or is_state(''input_boolean.lau_ivan_has_paid'', ''off'') )  }}'
-      sequence:
+        value_template: '{{ (now().month % 3 == 0) and (now().day >= 5) and (now().day
+          < 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off''))
+          }}'
+    then:
+    - service: notify.lau
+      data:
+        message: 'Los que no han pagado todavía este mes son:'
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 3
+        milliseconds: 0
+    - if:
+      - condition: template
+        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_patricia_has_paid'',
+          ''off'') }}'
+      then:
+      - service: telegram_bot.send_message
+        data:
+          message: Patricia Madrid
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/patri_has_paid, Morosa!:/patri_has_not_paid
+    - if:
+      - condition: template
+        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_maria_has_paid'',
+          ''off'') }}'
+      then:
+      - service: telegram_bot.send_message
+        data:
+          message: María García Burgos 144
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/maria_has_paid, Morosa!:/maria_has_not_paid
+    - if:
+      - condition: template
+        value_template: '{{ (now().month % 3 == 0) and (now().day >= 5) and (now().day
+          < 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off'')
+          ) }}'
+      then:
+      - service: telegram_bot.send_message
+        data:
+          message: Robleda Seguros Burgos 48 (2 plazas y trimestral)
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/robleda_has_paid, Moroso!:/robleda_has_not_paid
+  - if:
+    - condition: or
+      conditions:
+      - condition: template
+        value_template: '{{ (now().day == 7) and ( is_state(''input_boolean.lau_maria_has_paid'',
+          ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') )
+          }}'
+      - condition: template
+        value_template: '{{ (now().month % 3 == 0) and (now().day == 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'',
+          ''off'') ) }}'
+    then:
+    - service: notify.lau
+      data:
+        message: ¡Morosos a la vista!
+        title: 🚨 ALERTA 🚨
+    - if:
+      - condition: template
+        value_template: '{{ (now().day == 7) and is_state(''input_boolean.lau_patricia_has_paid'',
+          ''off'') }}'
+      then:
       - service: notify.lau
         data:
-          message: 'Los que no han pagado todavía este mes son:'
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ is_state(''input_boolean.lau_patricia_has_paid'',
-              ''off'') }}'
-          sequence:
-          - service: telegram_bot.send_message
-            data:
-              message: Patricia Madrid
-              target: 303515965
-              inline_keyboard:
-              - Pagado!:/patri_has_paid, Morosa!:/patri_has_not_paid
-        default: []
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ is_state(''input_boolean.lau_lara_has_paid'', ''off'')
-              }}'
-          sequence:
-          - service: telegram_bot.send_message
-            data:
-              message: Lara Burgos 48
-              target: 303515965
-              inline_keyboard:
-              - Pagado!:/lara_has_paid, Morosa!:/lara_has_not_paid
-        default: []
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ is_state(''input_boolean.lau_maria_has_paid'', ''off'')
-              }}'
-          sequence:
-          - service: telegram_bot.send_message
-            data:
-              message: María García Burgos 144
-              target: 303515965
-              inline_keyboard:
-              - Pagado!:/maria_has_paid, Morosa!:/maria_has_not_paid
-        default: []
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ is_state(''input_boolean.lau_ivan_has_paid'', ''off'')
-              }}'
-          sequence:
-          - service: telegram_bot.send_message
-            data:
-              message: Iván Gutiérrez Burgos 48
-              target: 303515965
-              inline_keyboard:
-              - Pagado!:/ivan_has_paid, Moroso!:/ivan_has_not_paid
-        default: []
-    - conditions:
+          message: Patricia Madrid
+    - if:
       - condition: template
-        value_template: '{{ (now().day == 7) and ( is_state(''input_boolean.lau_lara_has_paid'',
-          ''off'') or is_state(''input_boolean.lau_maria_has_paid'', ''off'') or is_state(''input_boolean.lau_patricia_has_paid'',
-          ''off'') or is_state(''input_boolean.lau_ivan_has_paid'', ''off'')) }}'
-      sequence:
+        value_template: '{{ (now().day == 7) and is_state(''input_boolean.lau_maria_has_paid'',
+          ''off'') }}'
+      then:
       - service: notify.lau
         data:
-          message: ¡Morosos a la vista!
-          title: 🚨 ALERTA 🚨
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ is_state(''input_boolean.lau_patricia_has_paid'',
-              ''off'') }}'
-          sequence:
-          - service: notify.lau
-            data:
-              message: Patricia Madrid
-        default: []
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ is_state(''input_boolean.lau_lara_has_paid'', ''off'')
-              }}'
-          sequence:
-          - service: notify.lau
-            data:
-              message: Lara Burgos 48
-        default: []
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ is_state(''input_boolean.lau_maria_has_paid'', ''off'')
-              }}'
-          sequence:
-          - service: notify.lau
-            data:
-              message: María García Burgos 144
-        default: []
-      - choose:
-        - conditions:
-          - condition: template
-            value_template: '{{ is_state(''input_boolean.lau_ivan_has_paid'', ''off'')
-              }}'
-          sequence:
-          - service: notify.lau
-            data:
-              message: Iván Gutiérrez Burgos 48
-        default: []
-    default: []
+          message: María García Burgos 144
+    - if:
+      - condition: template
+        value_template: '{{ (now().month % 3 == 0) and (now().day == 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'',
+          ''off'') ) }}'
+      then:
+      - service: notify.lau
+        data:
+          message: Robleda Seguros Burgos 48 (2 plazas y trimestral)
   mode: single
 - id: '1643907231416'
   alias: Lau - Changes input boolean values
@@ -959,16 +942,6 @@
   - platform: event
     event_type: telegram_callback
     event_data:
-      command: /lara_has_paid
-    id: lara_has_paid
-  - platform: event
-    event_type: telegram_callback
-    event_data:
-      command: /lara_has_not_paid
-    id: lara_has_not_paid
-  - platform: event
-    event_type: telegram_callback
-    event_data:
       command: /maria_has_paid
     id: maria_has_paid
   - platform: event
@@ -978,14 +951,14 @@
     id: maria_has_not_paid
   - platform: event
     event_type: telegram_callback
+    id: robleda_has_paid
     event_data:
-      command: /ivan_has_paid
-    id: ivan_has_paid
+      command: /robleda_has_paid
   - platform: event
     event_type: telegram_callback
+    id: robleda_has_not_paid
     event_data:
-      command: /ivan_has_not_paid
-    id: ivan_has_not_paid
+      command: /robleda_has_not_paid
   condition: []
   action:
   - choose:
@@ -1014,30 +987,6 @@
           message: Pues no eh, resulta que Patri no ha pagado :(
     - conditions:
       - condition: trigger
-        id: lara_has_paid
-      sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.lau_lara_has_paid
-      - service: notify.lau
-        data:
-          message: Ya podrías invitar a algo!
-          title: '*¡Lara ha pagado!* 🎉'
-    - conditions:
-      - condition: trigger
-        id: lara_has_not_paid
-      sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.lau_lara_has_paid
-      - service: notify.lau
-        data:
-          message: Y así fue como nos quedamos sin subvención para la cena... Qué
-            orgullo Lara...
-    - conditions:
-      - condition: trigger
         id: maria_has_paid
       sequence:
       - service: input_boolean.turn_on
@@ -1061,27 +1010,27 @@
           message: Pues na', no hay viajesito por culpa de María :(
     - conditions:
       - condition: trigger
-        id: ivan_has_paid
+        id: robleda_has_paid
       sequence:
       - service: input_boolean.turn_on
         data: {}
         target:
-          entity_id: input_boolean.lau_ivan_has_paid
+          entity_id: input_boolean.lau_robleda_seguros_has_paid
       - service: notify.lau
         data:
-          message: ¿Habrá más regalos para Migui?
-          title: '*¡Iván ha pagado!* 🎉'
+          title: '*¡Robleda Seguros ha pagado!* 🎉'
+          message: Cómo les gusta tener su coche seguro, jejejeje
     - conditions:
       - condition: trigger
-        id: ivan_has_not_paid
+        id: robleda_has_not_paid
       sequence:
       - service: input_boolean.turn_off
         data: {}
         target:
-          entity_id: input_boolean.lau_ivan_has_paid
+          entity_id: input_boolean.lau_robleda_seguros_has_paid
       - service: notify.lau
         data:
-          message: Y Migui se quedó triste y sin regalos :(
+          message: Últimamente no nos aseguramos ni un buen cliente...
     default: []
   mode: single
 - id: '1649799780278'
