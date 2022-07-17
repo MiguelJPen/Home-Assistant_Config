@@ -99,7 +99,10 @@ void set_irrigation(time_t today, int days_ahead, int mins) {
     string north_off = id(north_zone_timestamps_off).state;
     string south_on = id(south_zone_timestamps_on).state;
     string south_off = id(south_zone_timestamps_off).state;
-    string comma = (north_on.empty() ? "" : ",");
+    string comma_north_on = (north_on.empty() ? "" : ",");
+    string comma_north_off = (north_off.empty() ? "" : ",");
+    string comma_south_on = (south_on.empty() ? "" : ",");
+    string comma_south_off = (south_off.empty() ? "" : ",");
 
     if (new_time.tm_mon % 2 == 0) new_time.tm_hour = 11;
     else new_time.tm_hour = 18;
@@ -107,10 +110,10 @@ void set_irrigation(time_t today, int days_ahead, int mins) {
     new_time.tm_sec = 0;
 
     time_t aux = mktime(&new_time);
-    north_on.append(comma + to_string(aux));
-    south_on.append(comma + to_string(aux + 2 * 60));
-    north_off.append(comma + to_string(aux + mins * 60));
-    south_off.append(comma + to_string(aux + (mins + 2) * 60));
+    north_on.append(comma_north_on + to_string(aux));
+    south_on.append(comma_south_on + to_string(aux + 2 * 60));
+    north_off.append(comma_north_off + to_string(aux + mins * 60));
+    south_off.append(comma_south_off + to_string(aux + (mins + 2) * 60));
 
     //ESP_LOGD("set_irrigation", "TIME PER DAY: %i", mins);
 
