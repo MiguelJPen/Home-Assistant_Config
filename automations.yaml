@@ -117,7 +117,7 @@
     - binary_sensor.pir_exterior_este_contact
     - binary_sensor.pir_exterior_sureste_contact
     - binary_sensor.pir_exterior_sur_contact
-    - binary_sensor.ventana_del_salon
+    - binary_sensor.ventana_del_salon_tamper
     to: 'on'
   - platform: state
     entity_id:
