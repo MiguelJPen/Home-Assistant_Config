@@ -89,8 +89,6 @@ globals:
 script:
   - id: pool_filling_request_loop
     then:
-      - lambda: |-
-          id(pool_filling_requested) = false;
       - switch.turn_off: swimming_pool_pump
       - while:
           condition:
@@ -101,6 +99,8 @@ script:
           - homeassistant.service: 
               service: esphome.irrigation_valves_lan_request_more_pool_water
           - delay: 60s
+      - lambda: |-
+          id(pool_filling_requested) = false;
   - id: pool_filling_request_today
     then:
       - homeassistant.service:
