@@ -55,19 +55,15 @@ void set_new_irrigation_time() {
     id(next_day_irrigation).publish_state(to_string(add_day(now_timestamp, no_water_days)));
 
     // Set the time per day
+    time_per_day += (int) (pow(2, 3.2 + max((float)0, (mean_tmp - 10)/5)));
+
     if (mean_tmp <= 14) {
         freq_day = 3;
     }
     else if (mean_tmp > 14 && mean_tmp < 19) {
-        time_per_day += 15;
         freq_day = 2;
     }
-    else if (mean_tmp >= 19 && mean_tmp < 24) {
-        time_per_day += 30;
-        freq_day = 1;
-    }
-    else if (mean_tmp >= 24) {
-        time_per_day += 45;
+    else if (mean_tmp >= 19) {
         freq_day = 1;
     }
     if (min_hum < 25 || mean_hum < 50)
