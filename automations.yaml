@@ -50,7 +50,7 @@
     data:
       message: La alarma ha detectado algo en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}.
-      title: 🚨 *¡AVISO DE DETECCIÓN!* 🚨
+      title: "\U0001F6A8 *¡AVISO DE DETECCIÓN!* \U0001F6A8"
   - service: automation.turn_on
     data: {}
     entity_id: automation.alarm_trigger_when_sensors_go_on_second
@@ -141,9 +141,9 @@
     entity_id: alarm_control_panel.el_nino_alarm
   - service: notify.group
     data:
-      message: Se ha detectado un movimiento en el sensor {{trigger.to_state.attributes.friendly_name
-        }} a las {{states('sensor.time')}}. 🚓
-      title: 🚨🚨🚨 *¡SE HA DISPARADO LA ALARMA!* 🚨🚨🚨
+      message: "Se ha detectado un movimiento en el sensor {{trigger.to_state.attributes.friendly_name
+        }} a las {{states('sensor.time')}}. \U0001F693"
+      title: "\U0001F6A8\U0001F6A8\U0001F6A8 *¡SE HA DISPARADO LA ALARMA!* \U0001F6A8\U0001F6A8\U0001F6A8"
   mode: single
 - id: '1600622835627'
   alias: Alarm - When disarmed (Home and Away)
@@ -617,7 +617,7 @@
     data:
       message: La alarma ha detectado algo en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}.
-      title: 🚨 *¡AVISO DE DETECCIÓN!* 🚨
+      title: "\U0001F6A8 *¡AVISO DE DETECCIÓN!* \U0001F6A8"
   - service: automation.turn_on
     target:
       entity_id: automation.alarm_trigger_when_sensors_go_on_second_home
@@ -685,9 +685,9 @@
     data: {}
   - service: notify.group
     data:
-      message: Se ha detectado un movimiento en el sensor {{trigger.to_state.attributes.friendly_name
-        }} a las {{states('sensor.time')}}. 🚓
-      title: 🚨🚨🚨 *¡SE HA DISPARADO LA ALARMA!* 🚨🚨🚨
+      message: "Se ha detectado un movimiento en el sensor {{trigger.to_state.attributes.friendly_name
+        }} a las {{states('sensor.time')}}. \U0001F693"
+      title: "\U0001F6A8\U0001F6A8\U0001F6A8 *¡SE HA DISPARADO LA ALARMA!* \U0001F6A8\U0001F6A8\U0001F6A8"
   mode: single
 - id: '1632435586236'
   alias: Security - Reboot Home Assistant if router reboots
@@ -823,6 +823,7 @@
         entity_id:
         - input_boolean.lau_maria_has_paid
         - input_boolean.lau_patricia_has_paid
+        - input_boolean.lau_angela_has_paid
       data: {}
   - if:
     - condition: template
@@ -837,7 +838,8 @@
       conditions:
       - condition: template
         value_template: '{{ (now().day < 7) and ( is_state(''input_boolean.lau_maria_has_paid'',
-          ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') )  }}'
+          ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
+          is_state(''input_boolean.lau_angela_has_paid'', ''off'') )  }}'
       - condition: template
         value_template: '{{ (now().month % 3 == 0) and (now().day >= 5) and (now().day
           < 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off''))
@@ -875,6 +877,17 @@
           - Pagado!:/maria_has_paid, Morosa!:/maria_has_not_paid
     - if:
       - condition: template
+        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_angela_has_paid'',
+          ''off'') }}'
+      then:
+      - service: telegram_bot.send_message
+        data:
+          message: Ángela Burgos 48
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/angela_has_paid, Morosa!:/angela_has_not_paid
+    - if:
+      - condition: template
         value_template: '{{ (now().month % 3 == 0) and (now().day >= 5) and (now().day
           < 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off'')
           ) }}'
@@ -885,13 +898,18 @@
           target: 303515965
           inline_keyboard:
           - Pagado!:/robleda_has_paid, Moroso!:/robleda_has_not_paid
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 5
+        milliseconds: 0
   - if:
     - condition: or
       conditions:
       - condition: template
         value_template: '{{ (now().day == 7) and ( is_state(''input_boolean.lau_maria_has_paid'',
           ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') )
-          }}'
+          }} or is_state(''input_boolean.lau_angela_has_paid'', ''off'') )  }}'
       - condition: template
         value_template: '{{ (now().month % 3 == 0) and (now().day == 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'',
           ''off'') ) }}'
@@ -899,7 +917,12 @@
     - service: notify.lau
       data:
         message: ¡Morosos a la vista!
-        title: 🚨 ALERTA 🚨
+        title: "\U0001F6A8 ALERTA \U0001F6A8"
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 3
+        milliseconds: 0
     - if:
       - condition: template
         value_template: '{{ (now().day == 7) and is_state(''input_boolean.lau_patricia_has_paid'',
@@ -916,6 +939,14 @@
       - service: notify.lau
         data:
           message: María García Burgos 144
+    - if:
+      - condition: template
+        value_template: '{{ (now().day == 7) and is_state(''input_boolean.lau_angela_has_paid'',
+          ''off'') }}'
+      then:
+      - service: notify.lau
+        data:
+          message: Ángela Burgos 48
     - if:
       - condition: template
         value_template: '{{ (now().month % 3 == 0) and (now().day == 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'',
@@ -959,6 +990,16 @@
     id: robleda_has_not_paid
     event_data:
       command: /robleda_has_not_paid
+  - platform: event
+    event_type: telegram_callback
+    id: angela_has_paid
+    event_data:
+      command: /angela_has_paid
+  - platform: event
+    event_type: telegram_callback
+    id: angela_has_not_paid
+    event_data:
+      command: /angela_has_not_paid
   condition: []
   action:
   - choose:
@@ -973,7 +1014,7 @@
       - service: notify.lau
         data:
           message: Pa' la saca!
-          title: '*¡Patricia ha pagado!* 🎉'
+          title: "*¡Patricia ha pagado!* \U0001F389"
     - conditions:
       - condition: trigger
         id: patri_has_not_paid
@@ -996,7 +1037,7 @@
       - service: notify.lau
         data:
           message: Se viene viajesito!!!
-          title: '*¡María ha pagado!* 🎉'
+          title: "*¡María ha pagado!* \U0001F389"
     - conditions:
       - condition: trigger
         id: maria_has_not_paid
@@ -1018,7 +1059,7 @@
           entity_id: input_boolean.lau_robleda_seguros_has_paid
       - service: notify.lau
         data:
-          title: '*¡Robleda Seguros ha pagado!* 🎉'
+          title: "*¡Robleda Seguros ha pagado!* \U0001F389"
           message: Cómo les gusta tener su coche seguro, jejejeje
     - conditions:
       - condition: trigger
@@ -1031,6 +1072,29 @@
       - service: notify.lau
         data:
           message: Últimamente no nos aseguramos ni un buen cliente...
+    - conditions:
+      - condition: trigger
+        id: angela_has_paid
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.lau_angela_has_paid
+      - service: notify.lau
+        data:
+          title: "*¡Ángela ha pagado!* \U0001F389"
+          message: ¿Me vas a regalar un cochesito?
+    - conditions:
+      - condition: trigger
+        id: angela_has_not_paid
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.lau_angela_has_paid
+      - service: notify.lau
+        data:
+          message: Joe con la people, ni coche ni na. Esto es una ruina
     default: []
   mode: single
 - id: '1649799780278'
