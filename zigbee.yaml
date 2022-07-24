@@ -1,9 +1,4 @@
 # Code copied from zigbee2mqtt
-# TIMER
-timer:
-  zigbee_permit_join:
-    name: Time remaining
-    duration: 180 # Number of seconds to wait for devices to join
 
 # INPUT BOOLEAN
 input_boolean:
