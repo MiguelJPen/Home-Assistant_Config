@@ -1196,6 +1196,9 @@
       - condition: trigger
         id: sunset
       sequence:
+      - condition: state
+        entity_id: input_boolean.dining_mode
+        state: 'off'
       - service: script.turn_on
         data: {}
         target:
@@ -1230,6 +1233,9 @@
           - script.security_lights_dining_room
           - script.security_lights_living_room_sofa
           - script.security_lights_living_room_window
+      - condition: state
+        entity_id: input_boolean.dining_mode
+        state: 'off'
       - service: script.turn_on
         data: {}
         target:
@@ -1275,8 +1281,10 @@
           data: {}
           target:
             entity_id: script.security_lights_living_room_sofa
-        - service: script.security_lights_turn_on_lights
+        - service: script.turn_on
           data: {}
+          target:
+            entity_id: script.security_lights_turn_on_lights
     - conditions:
       - condition: trigger
         id: modo_tv_off
