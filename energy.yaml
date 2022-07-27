@@ -126,6 +126,37 @@ sensor:
 
           {{ ((((cost_valle + cost_llana + cost_punta) + ((valle * peaje_valle) + (llana * peaje_llana) + (punta * peaje_punta)) + ((valle * cargos_valle) + (llana * cargos_llana) + (punta * cargos_punta))) * (1 + (imp_elec / 100))) * (1 + (iva / 100))) | round(2) }}
 
+      valle_with_taxes:
+        unit_of_measurement: "€/kWh"
+        value_template: >
+          {% set cargos_valle = states('input_text.energia_cargos_valle') | float(0) %}
+          {% set peaje_valle = states('input_text.energia_peaje_valle') | float(0) %}
+          {% set imp_elec = states('input_text.impuesto_electricidad') | float(0) %}
+          {% set iva = states('input_text.impuesto_valor_annadido_energia') | float(0) %}
+
+          {{ ((states('sensor.pvpc') | float(0)) + cargos_valle + peaje_valle) * (1 + (imp_elec / 100)) * (1 + (iva / 100))  | round(2) }}
+
+      llana_with_taxes:
+        unit_of_measurement: "€/kWh"
+        value_template: >
+          {% set cargos_llana = states('input_text.energia_cargos_llana') | float(0) %}
+          {% set peaje_llana = states('input_text.energia_peaje_llana') | float(0) %}
+          {% set imp_elec = states('input_text.impuesto_electricidad') | float(0) %}
+          {% set iva = states('input_text.impuesto_valor_annadido_energia') | float(0) %}
+
+          {{ ((states('sensor.pvpc') | float(0)) + cargos_llana + peaje_llana) * (1 + (imp_elec / 100)) * (1 + (iva / 100))  | round(2) }}
+
+      punta_with_taxes:
+        unit_of_measurement: "€/kWh"
+        value_template: >
+          {% set cargos_punta = states('input_text.energia_cargos_punta') | float(0) %}
+          {% set peaje_punta = states('input_text.energia_peaje_punta') | float(0) %}
+          {% set imp_elec = states('input_text.impuesto_electricidad') | float(0) %}
+          {% set iva = states('input_text.impuesto_valor_annadido_energia') | float(0) %}
+
+          {{ ((states('sensor.pvpc') | float(0)) + cargos_punta + peaje_punta) * (1 + (imp_elec / 100)) * (1 + (iva / 100))  | round(2) }}
+
+
 # NOTIFY
 notify:
   # For storing data to file
