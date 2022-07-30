@@ -9,8 +9,10 @@ esphome:
       - delay: 10s
       - lambda: |-
           // If this variable has been deleted for any reason, reset it
-          if (id(last_automatic_pump) == 0)
+          if (id(last_automatic_pump) == 0) {
             id(last_automatic_pump) = (id(time_sntp).now().timestamp - (3600 * 24 * 3));
+            id(secure_pumping) = id(pool_low_level).state;
+          }
           id(last_automatic_pump_ha).publish_state(get_time_formated(to_string(id(last_automatic_pump))));
           set_new_pumping_time();
           id(filling_available) = water_available();
@@ -70,6 +72,9 @@ globals:
     type: bool
     restore_value: yes
   - id: pool_filling_requested
+    type: bool
+    restore_value: yes
+  - id: secure_pumping
     type: bool
     restore_value: yes
 
@@ -133,6 +138,15 @@ binary_sensor:
     device_class: moisture
     filters:
       delayed_on_off: 700ms
+    on_state: 
+      then:
+        - lambda: |-
+            if(!id(pool_low_level).state) {
+              id(secure_pumping) = false;
+              if(id(pump_automation_bool))
+                id(swimming_pool_pump).turn_off();
+            }
+
   - platform: gpio
     pin:
       number: 15
@@ -144,6 +158,14 @@ binary_sensor:
     device_class: moisture
     filters:
       delayed_on_off: 700ms
+    on_state: 
+      then:
+        - lambda: |-
+            if(!id(pool_high_level).state){
+              id(pool_filling_requested) = true;
+              id(pool_filling_request_today).execute();
+            }
+            else id(secure_pumping) = true;
 
   #### For saving filling state
   - platform: homeassistant
@@ -154,6 +176,13 @@ binary_sensor:
       then:
         - lambda: |-
             id(pool_filling_bool) = id(ui_pool_filling).state;
+            if (id(pool_filling_bool) && !id(pool_high_level).state && !id(pool_filling_requested)) {
+              id(pool_filling_requested) = true;
+              id(pool_filling_request_today).execute();
+            }
+            else if(!id(pool_filling_bool)) {
+              id(pool_filling_requested) = false;
+            }
 
 # ============================================================================ #
 sensor:
@@ -229,7 +258,7 @@ switch:
       - delay: 100ms
       - lambda: |-
           if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state > id(pump_next_off).state && id(pool_low_level).state)
+            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping))
               id(swimming_pool_pump).turn_on();
           else id(swimming_pool_pump).turn_off();
     turn_off_action:
@@ -377,7 +406,7 @@ time:
           - lambda: |-
               id(pool_time).publish_state(get_time_formated(to_string(id(time_sntp).now().timestamp)));
 
-              if ((id(pump_winter_mode_bool) || (id(pool_low_level).state && id(pump_automation_bool))) && scheduled_run(id(pump_next_on).state.c_str())) {
+              if ((id(pump_winter_mode_bool) || (id(secure_pumping) && id(pump_automation_bool))) && scheduled_run(id(pump_next_on).state.c_str())) {
                 id(swimming_pool_pump).turn_on();
                 id(last_automatic_pump) = id(time_sntp).now().timestamp;
                 id(last_automatic_pump_ha).publish_state(get_time_formated(to_string(id(last_automatic_pump))));
@@ -386,10 +415,6 @@ time:
                 id(swimming_pool_pump).turn_off();
                 id(last_automatic_pump) = id(time_sntp).now().timestamp;
                 id(last_automatic_pump_ha).publish_state(get_time_formated(to_string(id(last_automatic_pump))));
-              }
-              if (id(pool_filling_bool) && !id(pool_low_level).state && !id(pool_filling_requested)) {
-                id(pool_filling_requested) = true;
-                id(pool_filling_request_today).execute();
               }
               id(pump_timestamps_on).publish_state(update_list(id(pump_timestamps_on).state));
               id(pump_timestamps_off).publish_state(update_list(id(pump_timestamps_off).state));
