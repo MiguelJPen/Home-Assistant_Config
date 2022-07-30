@@ -83,20 +83,27 @@ void set_pumping(time_t today, time_t sunrise, time_t sunset, int days_ahead, in
     //ESP_LOGD("set_pumping", "SUNRISE: %ld, SUNSET: %ld", sunrise, sunset);
     //ESP_LOGD("set_pumping", "SUNRISE: %ld, SUNSET: %ld", aux, sunset_local);
 
-    // First and last one and half hours of the day it must be on, due to ineficient pumping
-    pump_on.append(comma_on + to_string(aux));
-    pump_off.append(comma_off + to_string(aux + 5400));
-    aux += 9000;
-    comma_on = ", ";
-    comma_off = ", ";
-
-    while (aux < sunset_local - 10800) { // Three hours before sunset, to prevent overlapping
+    if(id(pump_automation_full_bool)){
         pump_on.append(comma_on + to_string(aux));
-        pump_off.append(comma_off + to_string(aux + mins * 60));
-        aux += 9000;
+        pump_off.append(comma_off + to_string(sunset_local));
     }
-    pump_on.append(comma_on + to_string(sunset_local - 5400));
-    pump_off.append(comma_off + to_string(sunset_local));
+
+    else {
+        // First and last one and half hours of the day it must be on, due to ineficient pumping
+        pump_on.append(comma_on + to_string(aux));
+        pump_off.append(comma_off + to_string(aux + 5400));
+        aux += 9000;
+        comma_on = ", ";
+        comma_off = ", ";
+
+        while (aux < sunset_local - 10800) { // Three hours before sunset, to prevent overlapping
+            pump_on.append(comma_on + to_string(aux));
+            pump_off.append(comma_off + to_string(aux + mins * 60));
+            aux += 9000;
+        }
+        pump_on.append(comma_on + to_string(sunset_local - 5400));
+        pump_off.append(comma_off + to_string(sunset_local));
+    }
 
     pump_on = update_list(pump_on);
     pump_off = update_list(pump_off);

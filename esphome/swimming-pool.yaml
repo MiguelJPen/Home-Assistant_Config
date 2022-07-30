@@ -55,6 +55,9 @@ globals:
   - id: pump_automation_bool
     type: bool
     restore_value: yes
+  - id: pump_automation_full_bool
+    type: bool
+    restore_value: yes
   - id: pump_manual_bool
     type: bool
     restore_value: yes
@@ -226,13 +229,27 @@ switch:
       - delay: 100ms
       - lambda: |-
           if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state > id(pump_next_off).state)
+            id(pump_next_on).state > id(pump_next_off).state && id(pool_low_level).state)
               id(swimming_pool_pump).turn_on();
           else id(swimming_pool_pump).turn_off();
     turn_off_action:
       - lambda: |-
           id(pump_automation_bool) = false;
       - switch.turn_off: swimming_pool_pump
+
+  #### Switch for pump running full time, but still turning off with no water
+  - platform: template
+    name: Pool pump full time
+    id: pump_automation_full
+    lambda: return id(pump_automation_full_bool);
+    turn_on_action:
+      - lambda: |-
+          id(pump_automation_full_bool) = true;
+          set_new_pumping_time();
+    turn_off_action:
+      - lambda: |-
+          id(pump_automation_full_bool) = false;
+          set_new_pumping_time();
 
   #### Switch for manual use of the pump
   - platform: template
