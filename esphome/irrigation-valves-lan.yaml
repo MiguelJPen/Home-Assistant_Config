@@ -442,6 +442,8 @@ switch:
     turn_off_action:
       - lambda: |-
           id(pool_filling_automation_bool) = false;
+          id(pool_filling_timestamps_on).publish_state("");
+          id(pool_filling_timestamps_off).publish_state("");
 
 
   #### North zone
@@ -795,7 +797,8 @@ time:
           - lambda: |-
               id(irrigation_time).publish_state(get_time_formated(to_string(id(time_sntp).now().timestamp)));
 
-              if (id(pool_filling_automation_bool) && scheduled_run(id(pool_filling_next_on).state.c_str())) {
+              if (scheduled_run(id(pool_filling_next_on).state.c_str())) {
+                // No need to check automation, it deletes the timestamp
                 id(swimming_pool_filling_now).execute();
               }
               if (scheduled_run(id(pool_filling_next_off).state.c_str())) {
