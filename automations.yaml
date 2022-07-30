@@ -907,12 +907,13 @@
     - condition: or
       conditions:
       - condition: template
-        value_template: '{{ (now().day == 7) and ( is_state(''input_boolean.lau_maria_has_paid'',
-          ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') )
-          }} or is_state(''input_boolean.lau_angela_has_paid'', ''off'') )  }}'
+        value_template: '{{ not((now().day < 7)) and ( is_state(''input_boolean.lau_maria_has_paid'',
+          ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
+          is_state(''input_boolean.lau_angela_has_paid'', ''off'') )  }}'
       - condition: template
-        value_template: '{{ (now().month % 3 == 0) and (now().day == 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'',
-          ''off'') ) }}'
+        value_template: '{{ not((now().month % 3 == 0) and (now().day >= 5) and (now().day
+          < 15)) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off'')
+          ) }}'
     then:
     - service: notify.lau
       data:
@@ -925,36 +926,49 @@
         milliseconds: 0
     - if:
       - condition: template
-        value_template: '{{ (now().day == 7) and is_state(''input_boolean.lau_patricia_has_paid'',
+        value_template: '{{ not((now().day < 7)) and is_state(''input_boolean.lau_patricia_has_paid'',
           ''off'') }}'
       then:
-      - service: notify.lau
+      - service: telegram_bot.send_message
         data:
           message: Patricia Madrid
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/patri_has_paid, Morosa!:/patri_has_not_paid
     - if:
       - condition: template
-        value_template: '{{ (now().day == 7) and is_state(''input_boolean.lau_maria_has_paid'',
+        value_template: '{{ not((now().day < 7)) and is_state(''input_boolean.lau_maria_has_paid'',
           ''off'') }}'
       then:
-      - service: notify.lau
+      - service: telegram_bot.send_message
         data:
           message: María García Burgos 144
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/maria_has_paid, Morosa!:/maria_has_not_paid
     - if:
       - condition: template
-        value_template: '{{ (now().day == 7) and is_state(''input_boolean.lau_angela_has_paid'',
+        value_template: '{{ not((now().day < 7)) and is_state(''input_boolean.lau_angela_has_paid'',
           ''off'') }}'
       then:
-      - service: notify.lau
+      - service: telegram_bot.send_message
         data:
           message: Ángela Burgos 48
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/angela_has_paid, Morosa!:/angela_has_not_paid
     - if:
       - condition: template
-        value_template: '{{ (now().month % 3 == 0) and (now().day == 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'',
-          ''off'') ) }}'
+        value_template: '{{ not((now().month % 3 == 0) and (now().day >= 5) and (now().day
+          < 15)) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off'')
+          ) }}'
       then:
-      - service: notify.lau
+      - service: telegram_bot.send_message
         data:
           message: Robleda Seguros Burgos 48 (2 plazas y trimestral)
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/robleda_has_paid, Moroso!:/robleda_has_not_paid
   mode: single
 - id: '1643907231416'
   alias: Lau - Changes input boolean values
