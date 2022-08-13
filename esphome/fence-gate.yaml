@@ -1,0 +1,67 @@
+esphome:
+  name: fence-gate
+
+esp32:
+  board: esp-wrover-kit
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO0_IN
+  phy_addr: 1
+  power_pin: GPIO16
+  
+#  manual_ip:
+#    static_ip: 192.168.0.65
+#    gateway: 192.168.0.1
+#    subnet: 255.255.255.0
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_fence_gate
+
+ota:
+  password: !secret ota_fence_gate
+    
+# ============================================================================ #
+binary_sensor:
+  #### Irrigation status
+  - platform: status
+    name: "Fence gate status"
+
+  - platform: gpio
+    pin:
+      number: 39
+      inverted: True
+      mode: INPUT
+    name: "Main gate"
+    device_class: garage_door
+    filters:
+      delayed_on_off: 100ms
+    
+# ============================================================================ #
+button:
+  #### Restart button
+  - platform: restart
+    name: "Fence gate restart"
+
+  #### Button for Home Assistant
+  - platform: output
+    name: "Wicket door"
+    output: wicket_door_output
+    duration: 1000ms
+
+output:
+  #### Output gpio to open the wicket door
+  - platform: gpio
+    id: wicket_door_output
+    pin:
+      number: 15
+      inverted: True
