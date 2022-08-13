@@ -136,6 +136,15 @@ script:
             - delay: 45 min
 
 # ============================================================================ #
+button:
+  #### Restart button
+  - platform: restart
+    name: "Irrigation restart"
+  #### Restart button for safe mode
+  - platform: safe_mode
+    name: "Irrigation restart (safe mode)"
+
+# ============================================================================ #
 number:
   ## To set manual times in the Home Assistant frontend
   - platform: template
@@ -337,10 +346,6 @@ binary_sensor:
 
 # ============================================================================ #
 switch:
-  #### Restart switch
-  - platform: restart
-    name: "Irrigation restart"
-    
   # ========================================================================= #
   ## Switches to control each relay individually
   #### Relay for the AC adaptor

@@ -31,10 +31,16 @@ logger:
 
 ota:
 
-switch:
+# ============================================================================ #
+button:
+  #### Restart button
   - platform: restart
-    name: "Interior sensors restart"
-    
+    name: "Interior alarm restart"
+  #### Restart button for safe mode
+  - platform: safe_mode
+    name: "Interior alarm restart (safe mode)"
+  
+switch:
   - platform: gpio
     id: exterior_siren
     pin:

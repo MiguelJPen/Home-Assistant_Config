@@ -32,9 +32,14 @@ api:
 
 ota:
 
-switch:
+# ============================================================================ #
+button:
+  #### Restart button
   - platform: restart
-    name: "Barriers restart"
+    name: "Exterior alarm restart"
+  #### Restart button for safe mode
+  - platform: safe_mode
+    name: "Exterior alarm restart (safe mode)"
 
 binary_sensor:
   - platform: status
@@ -47,51 +52,51 @@ binary_sensor:
       return {myBarr->Barriers[0], myBarr->Barriers[1], myBarr->Barriers[2], myBarr->Barriers[3], myBarr->Barriers[4], myBarr->Barriers[5], myBarr->Tampers[0], myBarr->Tampers[1], myBarr->Tampers[2], myBarr->Tampers[3], myBarr->Tampers[4], myBarr->Tampers[5]};
 
     binary_sensors:
-     - name: "Barrera Norte"
-       device_class: safety
-       filters:
-        delayed_on_off: 700ms
-     - name: "Ventana del Salón"
-       device_class: safety
-       filters:
-        delayed_on_off: 700ms
-     - name: "Barrera Sur"
-       device_class: safety
-       filters:
-        delayed_on_off: 700ms
-     - name: "Barrera Este"
-       device_class: safety
-       filters:
-        delayed_on_off: 700ms
-     - name: "Barrera Noroeste"
-       device_class: safety
-       filters:
-        delayed_on_off: 700ms
-     - name: "Barrera Oeste"
-       device_class: safety
-       filters:
-        delayed_on_off: 700ms
-     - name: "Barrera Norte Tamper"
-       device_class: opening
-       filters:
-        delayed_on_off: 700ms
-     - name: "Ventana del Salón Tamper"
-       device_class: opening
-       filters:
-        delayed_on_off: 700ms
-     - name: "Barrera Sur Tamper"
-       device_class: opening
-       filters:
-        delayed_on_off: 700ms
-     - name: "Barrera Este Tamper"
-       device_class: opening
-       filters:
-        delayed_on_off: 700ms
-     - name: "Barrera Noroeste Tamper"
-       device_class: opening
-       filters:
-        delayed_on_off: 700ms
-     - name: "Barrera Oeste Tamper"
-       device_class: opening
-       filters:
-        delayed_on_off: 700ms
+      - name: "Barrera Norte"
+        device_class: safety
+        filters:
+          delayed_on_off: 700ms
+      - name: "Ventana del Salón"
+        device_class: safety
+        filters:
+          delayed_on_off: 700ms
+      - name: "Barrera Sur"
+        device_class: safety
+        filters:
+          delayed_on_off: 700ms
+      - name: "Barrera Este"
+        device_class: safety
+        filters:
+          delayed_on_off: 700ms
+      - name: "Barrera Noroeste"
+        device_class: safety
+        filters:
+          delayed_on_off: 700ms
+      - name: "Barrera Oeste"
+        device_class: safety
+        filters:
+          delayed_on_off: 700ms
+      - name: "Barrera Norte Tamper"
+        device_class: opening
+        filters:
+          delayed_on_off: 700ms
+      - name: "Ventana del Salón Tamper"
+        device_class: opening
+        filters:
+          delayed_on_off: 700ms
+      - name: "Barrera Sur Tamper"
+        device_class: opening
+        filters:
+          delayed_on_off: 700ms
+      - name: "Barrera Este Tamper"
+        device_class: opening
+        filters:
+          delayed_on_off: 700ms
+      - name: "Barrera Noroeste Tamper"
+        device_class: opening
+        filters:
+          delayed_on_off: 700ms
+      - name: "Barrera Oeste Tamper"
+        device_class: opening
+        filters:
+          delayed_on_off: 700ms

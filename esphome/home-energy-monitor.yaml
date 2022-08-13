@@ -31,9 +31,13 @@ wifi:
 
 captive_portal:
 
-switch:
+button:
+  #### Restart button
   - platform: restart
     name: "Home energy monitor restart"
+  #### Restart button for safe mode
+  - platform: safe_mode
+    name: "Home energy monitor restart (safe mode)"
     
 uart:
   rx_pin: GPIO3

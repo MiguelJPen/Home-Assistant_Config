@@ -121,6 +121,15 @@ sun:
   id: sun_sun
 
 # ============================================================================ #
+button:
+  #### Restart button
+  - platform: restart
+    name: "Swimming pool restart"
+  #### Restart button for safe mode
+  - platform: safe_mode
+    name: "Swimming pool restart (safe mode)"
+
+# ============================================================================ #
 binary_sensor:
   #### Status sensor
   - platform: status
@@ -228,10 +237,6 @@ sensor:
 
 # ============================================================================ #
 switch:
-  #### Restart switch
-  - platform: restart
-    name: "Swimming pool restart"
-    
   #### Pool pump relay switch
   - platform: gpio
     id: swimming_pool_pump
