@@ -12,7 +12,6 @@ wifi:
   networks:
   - ssid: !secret wifi_ssid
     password: !secret wifi_password
-    priority: 5
   
 #  manual_ip:
 #   static_ip: 192.168.0.60
@@ -47,7 +46,7 @@ switch:
       number: 19
       inverted: True
     name: "Sirena exterior"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
     
   - platform: gpio
     id: interior_siren
@@ -55,7 +54,7 @@ switch:
       number: 18
       inverted: True
     name: "Sirena interior"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
     
 script:
   - id: alarm_siren_beep

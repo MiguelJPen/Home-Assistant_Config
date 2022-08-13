@@ -51,6 +51,9 @@ button:
   #### Restart button
   - platform: restart
     name: "Fence gate restart"
+  #### Restart button for safe mode
+  - platform: safe_mode
+    name: "Fence gate restart (safe mode)"
 
   #### Button for Home Assistant
   - platform: output
@@ -63,5 +66,5 @@ output:
   - platform: gpio
     id: wicket_door_output
     pin:
-      number: 15
+      number: 14
       inverted: True
