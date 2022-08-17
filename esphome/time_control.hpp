@@ -19,24 +19,21 @@ bool scheduled_run(string);
 bool water_available();
 
 string update_next_run(string time_list) {
-    char * token;
-
     if (time_list.empty()) return unknown;
 
     // Split the list into a vector.
-    token = strtok(&time_list[0], ",");
+    char * token = strtok(&time_list[0], ",");
     return string(token);
 }
 
 string update_list(string time_list){
     vector<string> times;
     string ret = "", comma = "";
-    char * token;
 
     if (time_list.empty()) return "";
 
     // Split the list into a vector.
-    token = strtok(&time_list[0], ",");
+    char * token = strtok(&time_list[0], ",");
     while (token != NULL) {
         times.push_back(token);
         token = strtok(NULL, ",");
@@ -96,7 +93,7 @@ bool scheduled_run(string time){
     //ESP_LOGD("scheduled_run", "TODAY: year:%i month:%i day:%i hour:%i minute:%i", year, month, day, hour, minute);
     //ESP_LOGD("scheduled_run", "year:%i month:%i day:%i hour:%i minute:%i", next_year, next_month, next_day, next_hour, next_minute);
 
-    return (year == next_year && month && next_month && day == next_day && hour == next_hour && minute == next_minute);
+    return (year == next_year && month == next_month && day == next_day && hour == next_hour && minute == next_minute);
 }
 
 bool water_available() {

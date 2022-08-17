@@ -6,7 +6,7 @@ esphome:
   on_boot: 
     priority: 800.0
     then:
-      - delay: 10s
+      - delay: 20s
       - lambda: |-
           // If this variable has been deleted for any reason, reset it
           if (id(last_automatic_pump) == 0) {
@@ -16,6 +16,9 @@ esphome:
           id(last_automatic_pump_ha).publish_state(get_time_formated(to_string(id(last_automatic_pump))));
           set_new_pumping_time();
           id(filling_available) = water_available();
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+          id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
+            id(swimming_pool_pump).turn_on();
 
 esp32:
   board: esp32-poe
@@ -30,10 +33,30 @@ api:
   services:
     - service: filling_start
       then:
+        - switch.turn_off: swimming_pool_pump
+        - delay: 2s
+        - lambda: id(filling_rn) = true;
+        - homeassistant.service: # Opens the valve
+            service: esphome.irrigation_valves_lan_filling_start
         - script.execute: pool_filling_request_loop
-    - service: pump_off
+    - service: manual_filling_start
       then:
         - switch.turn_off: swimming_pool_pump
+        - delay: 2s
+        - lambda: id(filling_rn) = true;
+        - homeassistant.service:
+            service: esphome.irrigation_valves_lan_filling_start
+    - service: filling_completed
+      then:
+        - lambda: |-
+            id(filling_rn) = false;
+            if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping))
+              id(swimming_pool_pump).turn_on();
+    - service: filling_requested
+      then:
+        - lambda: |-
+            id(pool_filling_requested) = true;
 
 ota:
   password: !secret ota_swimming_pool
@@ -47,8 +70,8 @@ ethernet:
   power_pin: GPIO12
   
 #  manual_ip:
-#   static_ip: 192.168.0.64
-#   gateway: 192.168.0.1
+#   static_ip: 10.133.100.64
+#   gateway: 10.133.100.1
 #   subnet: 255.255.255.0
 
 # ============================================================================ #
@@ -74,6 +97,9 @@ globals:
   - id: pool_filling_requested
     type: bool
     restore_value: yes
+  - id: filling_rn
+    type: bool
+    restore_value: yes
   - id: secure_pumping
     type: bool
     restore_value: yes
@@ -97,7 +123,6 @@ globals:
 script:
   - id: pool_filling_request_loop
     then:
-      - switch.turn_off: swimming_pool_pump
       - while:
           condition:
             and:
@@ -138,7 +163,7 @@ binary_sensor:
   #### Pool level sensors
   - platform: gpio
     pin:
-      number: 14
+      number: 35
       inverted: true
       mode:
         input: true
@@ -158,7 +183,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: 15
+      number: 36
       inverted: true
       mode:
         input: true
@@ -170,11 +195,10 @@ binary_sensor:
     on_state: 
       then:
         - lambda: |-
-            if(!id(pool_high_level).state){
-              id(pool_filling_requested) = true;
+            if (id(pool_filling_bool) && !id(pool_high_level).state && !id(pool_filling_requested)) {
               id(pool_filling_request_today).execute();
             }
-            else id(secure_pumping) = true;
+            else if (id(pool_high_level).state) id(secure_pumping) = true;
 
   #### For saving filling state
   - platform: homeassistant
@@ -186,7 +210,6 @@ binary_sensor:
         - lambda: |-
             id(pool_filling_bool) = id(ui_pool_filling).state;
             if (id(pool_filling_bool) && !id(pool_high_level).state && !id(pool_filling_requested)) {
-              id(pool_filling_requested) = true;
               id(pool_filling_request_today).execute();
             }
             else if(!id(pool_filling_bool)) {
@@ -242,9 +265,10 @@ switch:
     id: swimming_pool_pump
     internal: True
     pin:
-      number: 13
+      number: 33
+      inverted: True
     name: "Bomba de la piscina"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
     on_turn_on:
       - component.update: pump_left
     on_turn_off:
@@ -263,13 +287,12 @@ switch:
       - delay: 100ms
       - lambda: |-
           if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping))
+            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
               id(swimming_pool_pump).turn_on();
           else id(swimming_pool_pump).turn_off();
     turn_off_action:
       - lambda: |-
           id(pump_automation_bool) = false;
-      - switch.turn_off: swimming_pool_pump
 
   #### Switch for pump running full time, but still turning off with no water
   - platform: template
@@ -280,10 +303,22 @@ switch:
       - lambda: |-
           id(pump_automation_full_bool) = true;
           set_new_pumping_time();
+      - delay: 100ms
+      - lambda: |-
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
+              id(swimming_pool_pump).turn_on();
+          else id(swimming_pool_pump).turn_off();
     turn_off_action:
       - lambda: |-
           id(pump_automation_full_bool) = false;
           set_new_pumping_time();
+      - delay: 100ms
+      - lambda: |-
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
+              id(swimming_pool_pump).turn_on();
+          else id(swimming_pool_pump).turn_off();
 
   #### Switch for manual use of the pump
   - platform: template
@@ -294,7 +329,6 @@ switch:
       - lambda: |-
           id(pump_automation_bool) = false;
           id(pump_winter_mode_bool) = false;
-      - delay: 50ms
       - switch.turn_on: swimming_pool_pump
     turn_off_action:
       - switch.turn_off: swimming_pool_pump
@@ -320,6 +354,26 @@ switch:
       - lambda: |-
           id(pump_winter_mode_bool) = false;
           set_new_pumping_time();
+
+  #### Switches for debugging
+  - platform: template
+    name: Secure pumping (debug)
+    icon: mdi:security
+    disabled_by_default: True
+    lambda: return id(secure_pumping);
+    turn_on_action:
+      - lambda: id(secure_pumping) = true;
+    turn_off_action:
+      - lambda: id(secure_pumping) = false;
+  - platform: template
+    name: Filling right now (debug)
+    icon: mdi:security
+    disabled_by_default: True
+    lambda: return id(filling_rn);
+    turn_on_action:
+      - lambda: id(filling_rn) = true;
+    turn_off_action:
+      - lambda: id(filling_rn) = false;
 
 # ============================================================================ #
 text_sensor:
@@ -411,7 +465,7 @@ time:
           - lambda: |-
               id(pool_time).publish_state(get_time_formated(to_string(id(time_sntp).now().timestamp)));
 
-              if ((id(pump_winter_mode_bool) || (id(secure_pumping) && id(pump_automation_bool))) && scheduled_run(id(pump_next_on).state.c_str())) {
+              if ((id(pump_winter_mode_bool) || (id(secure_pumping) && id(pump_automation_bool))) && !id(filling_rn) && scheduled_run(id(pump_next_on).state.c_str())) {
                 id(swimming_pool_pump).turn_on();
                 id(last_automatic_pump) = id(time_sntp).now().timestamp;
                 id(last_automatic_pump_ha).publish_state(get_time_formated(to_string(id(last_automatic_pump))));
@@ -420,6 +474,9 @@ time:
                 id(swimming_pool_pump).turn_off();
                 id(last_automatic_pump) = id(time_sntp).now().timestamp;
                 id(last_automatic_pump_ha).publish_state(get_time_formated(to_string(id(last_automatic_pump))));
+              }
+              if (id(pool_filling_bool) && !id(pool_high_level).state && !id(pool_filling_requested)) {
+                id(pool_filling_request_today).execute();
               }
               id(pump_timestamps_on).publish_state(update_list(id(pump_timestamps_on).state));
               id(pump_timestamps_off).publish_state(update_list(id(pump_timestamps_off).state));

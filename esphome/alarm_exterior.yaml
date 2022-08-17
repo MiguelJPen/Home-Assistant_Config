@@ -12,8 +12,8 @@ wifi:
     password: !secret wifi_password
   
 #  manual_ip:
-#   static_ip: 192.168.0.61
-#   gateway: 192.168.0.1
+#   static_ip: 10.133.100.61
+#   gateway: 10.133.100.1
 #   subnet: 255.255.255.0
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails

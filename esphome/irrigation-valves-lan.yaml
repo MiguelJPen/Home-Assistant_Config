@@ -8,7 +8,7 @@ esphome:
   on_boot: 
     priority: 800.0
     then:
-      - delay: 10s
+      - delay: 20s
       - component.update: irrigation_period
       - lambda: |-
           // If this variable has been deleted for any reason, reset it
@@ -33,10 +33,15 @@ api:
       then:
         - lambda: |-
             set_new_irrigation_time();
+    - service: filling_start
+      then:
+        - switch.turn_on: pool_filling
     - service: request_pool_water
       then:
         - lambda: |-
             set_pool_filling();
+        - homeassistant.service:
+            service: esphome.swimming_pool_filling_requested
     - service: request_more_pool_water
       then:
         - lambda: |-
@@ -58,8 +63,8 @@ ethernet:
   power_pin: GPIO16
   
 #  manual_ip:
-#    static_ip: 192.168.0.63
-#    gateway: 192.168.0.1
+#    static_ip: 10.133.100.63
+#    gateway: 10.133.100.1
 #    subnet: 255.255.255.0
 
 # ============================================================================ #
@@ -112,11 +117,7 @@ globals:
 script:
   - id: swimming_pool_filling_now
     then:
-      - homeassistant.service:
-          service: esphome.swimming_pool_pump_off
-      - delay: 10s
-      - switch.turn_on: pool_filling
-      - homeassistant.service:
+      - homeassistant.service: # Turns off the pump and then opens the valve
           service: esphome.swimming_pool_filling_start
   - id: avoid_freezing_pipes
     then:
@@ -129,7 +130,7 @@ script:
             - switch.turn_on: north_virtual
             - delay: 15s
             - switch.turn_on: south_virtual
-            - delay: 240s
+            - delay: 4 min
             - switch.turn_off: north_virtual
             - delay: 15s
             - switch.turn_off: south_virtual
@@ -152,7 +153,7 @@ number:
     id: pool_filling_manual_duration
     optimistic: true
     restore_value: true
-    min_value: 1
+    min_value: 3
     max_value: 480
     step: 1
     unit_of_measurement: min
@@ -162,7 +163,7 @@ number:
     id: north_zone_manual_duration
     optimistic: true
     restore_value: true
-    min_value: 1
+    min_value: 3
     max_value: 240
     step: 1
     unit_of_measurement: min
@@ -172,7 +173,7 @@ number:
     id: south_zone_manual_duration
     optimistic: true
     restore_value: true
-    min_value: 1
+    min_value: 3
     max_value: 240
     step: 1
     unit_of_measurement: min
@@ -354,7 +355,7 @@ switch:
     pin:
       number: 33
     name: "Adaptador AC"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
 
   ## Relays which trigger the solenoids
   #### Main valve
@@ -364,7 +365,7 @@ switch:
       number: 15
       inverted: True
     name: "Main valve"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
 
   #### Swimming pool valve
   - platform: gpio
@@ -373,7 +374,7 @@ switch:
       number: 14
       inverted: True
     name: "Swimming pool valve"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
   #### North valve
   - platform: gpio
     id: north_valve
@@ -381,7 +382,7 @@ switch:
       number: 17
       inverted: True
     name: "North valve"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
   #### South valve
   - platform: gpio
     id: south_valve
@@ -389,7 +390,7 @@ switch:
       number: 5
       inverted: True
     name: "South valve"
-    restore_mode: RESTORE_DEFAULT_OFF
+    restore_mode: ALWAYS_OFF
 
   # ========================================================================= #
   # Virtual zone switches which toggle the relay and check others
@@ -424,6 +425,8 @@ switch:
             - switch.turn_off: ac_adaptor
       - switch.turn_off: swimming_pool_valve
       - component.update: pool_filling_left
+      - homeassistant.service:
+          service: esphome.swimming_pool_filling_completed
   - platform: template
     name: Pool filling manual
     id: pool_filling_manual
@@ -432,7 +435,8 @@ switch:
     turn_on_action:
       - lambda: |-
           id(pool_filling_timestamps_off).publish_state(manual_set(id(pool_filling_manual_duration).state, id(pool_filling_timestamps_off).state));
-      - switch.turn_on: pool_filling
+      - homeassistant.service:
+          service: esphome.swimming_pool_manual_filling_start
     turn_off_action:
       - switch.turn_off: pool_filling
       - lambda: |-

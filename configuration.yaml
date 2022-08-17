@@ -111,7 +111,7 @@ device_tracker:
 # BINARY SENSORS
 binary_sensor:
   - platform: ping
-    host: 192.168.0.1
+    host: 10.133.100.1
     name: "Router"
     count: 2
     scan_interval: 120

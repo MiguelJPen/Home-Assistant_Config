@@ -18,8 +18,8 @@ ethernet:
   power_pin: GPIO16
   
 #  manual_ip:
-#    static_ip: 192.168.0.65
-#    gateway: 192.168.0.1
+#    static_ip: 10.133.100.65
+#    gateway: 10.133.100.1
 #    subnet: 255.255.255.0
 
 # Enable Home Assistant API

@@ -100,8 +100,8 @@ void set_irrigation(time_t today, int days_ahead, int mins) {
     string comma_south_on = (south_on.empty() ? "" : ",");
     string comma_south_off = (south_off.empty() ? "" : ",");
 
-    if (new_time.tm_mon % 2 == 0) new_time.tm_hour = 11;
-    else new_time.tm_hour = 18;
+    if (new_time.tm_mon % 2 == 0) new_time.tm_hour = 9;
+    else new_time.tm_hour = 17;
     new_time.tm_min = 0;
     new_time.tm_sec = 0;
 
