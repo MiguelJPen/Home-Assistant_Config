@@ -89,17 +89,17 @@ void set_pumping(time_t today, time_t sunrise, time_t sunset, int days_ahead, in
     }
 
     else {
-        // First and last one and half hours of the day it must be on, due to ineficient pumping
+        // First and last 1.5 hours of the day it must be on, due to ineficient pumping
         pump_on.append(comma_on + to_string(aux));
         pump_off.append(comma_off + to_string(aux + 5400));
-        aux += 9000;
+        aux += 8400;
         comma_on = ", ";
         comma_off = ", ";
 
-        while (aux < sunset_local - 10800) { // Three hours before sunset, to prevent overlapping
+        while (aux + mins * 60 < sunset_local - 5400) { // To prevent overlapping (max time stopped: 50 mins)
             pump_on.append(comma_on + to_string(aux));
             pump_off.append(comma_off + to_string(aux + mins * 60));
-            aux += 9000;
+            aux += mins * 60 + 3000; // Turn ON every 50 mins to clean the surface
         }
         pump_on.append(comma_on + to_string(sunset_local - 5400));
         pump_off.append(comma_off + to_string(sunset_local));

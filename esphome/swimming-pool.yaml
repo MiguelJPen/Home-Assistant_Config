@@ -163,7 +163,7 @@ binary_sensor:
   #### Pool level sensors
   - platform: gpio
     pin:
-      number: 35
+      number: 36
       inverted: true
       mode:
         input: true
@@ -171,7 +171,7 @@ binary_sensor:
     id: pool_low_level
     device_class: moisture
     filters:
-      delayed_on_off: 700ms
+      delayed_on_off: 500ms
     on_state: 
       then:
         - lambda: |-
@@ -183,7 +183,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: 36
+      number: 35
       inverted: true
       mode:
         input: true
@@ -191,7 +191,7 @@ binary_sensor:
     id: pool_high_level
     device_class: moisture
     filters:
-      delayed_on_off: 700ms
+      delayed_on_off: 500ms
     on_state: 
       then:
         - lambda: |-

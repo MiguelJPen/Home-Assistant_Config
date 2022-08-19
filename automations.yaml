@@ -163,6 +163,7 @@
       - switch.sirena_interior
       - switch.entrada_ftp
       - switch.comedor_motion_detection
+      - switch.comedor_video_streaming
   - service: automation.turn_off
     data:
       stop_actions: true
@@ -203,6 +204,7 @@
           entity_id:
           - switch.entrada_ftp
           - switch.comedor_motion_detection
+          - switch.comedor_video_streaming
         data: {}
       - service: notify.group
         data:
