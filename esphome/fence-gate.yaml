@@ -41,7 +41,7 @@ binary_sensor:
       number: 39
       inverted: True
       mode: INPUT
-    name: "Main gate"
+    name: "Main gate sensor"
     device_class: garage_door
     filters:
       delayed_on_off: 100ms
@@ -60,6 +60,10 @@ button:
     name: "Wicket door"
     output: wicket_door_output
     duration: 1000ms
+  - platform: output
+    name: "Main gate"
+    output: main_gate_output
+    duration: 700ms
 
 output:
   #### Output gpio to open the wicket door
@@ -67,4 +71,10 @@ output:
     id: wicket_door_output
     pin:
       number: 14
+      inverted: True
+  #### Output gpio to fully open the main gate
+  - platform: gpio
+    id: main_gate_output
+    pin:
+      number: 32
       inverted: True

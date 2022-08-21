@@ -524,7 +524,7 @@
   - choose:
     - conditions:
       - condition: template
-        value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/Entrada'')
+        value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/entrada'')
           }}'
       sequence:
       - choose:
