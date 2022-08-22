@@ -829,6 +829,14 @@
       data: {}
   - if:
     - condition: template
+      value_template: '{{ now().day == 13 }}'
+    then:
+    - service: input_boolean.turn_off
+      data: {}
+      target:
+        entity_id: input_boolean.lau_hector_has_paid
+  - if:
+    - condition: template
       value_template: '{{ (now().month % 3) == 0 and now().day == 5 }}'
     then:
     - service: input_boolean.turn_off
@@ -842,6 +850,9 @@
         value_template: '{{ (now().day < 7) and ( is_state(''input_boolean.lau_maria_has_paid'',
           ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
           is_state(''input_boolean.lau_angela_has_paid'', ''off'') )  }}'
+      - condition: template
+        value_template: '{{ (now().day >= 13) and (now().day < 20) and ( is_state(''input_boolean.lau_hector_has_paid'',
+          ''off'') ) }}'
       - condition: template
         value_template: '{{ (now().month % 3 == 0) and (now().day >= 5) and (now().day
           < 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off''))
@@ -890,6 +901,17 @@
           - Pagado!:/angela_has_paid, Morosa!:/angela_has_not_paid
     - if:
       - condition: template
+        value_template: '{{ (now().day >= 13) and (now().day < 20) and ( is_state(''input_boolean.lau_hector_has_paid'',
+          ''off'') ) }}'
+      then:
+      - service: telegram_bot.send_message
+        data:
+          message: Héctor Díaz Burgos 48
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/hector_has_paid, Moroso!:/hector_has_not_paid
+    - if:
+      - condition: template
         value_template: '{{ (now().month % 3 == 0) and (now().day >= 5) and (now().day
           < 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off'')
           ) }}'
@@ -912,6 +934,9 @@
         value_template: '{{ not((now().day < 7)) and ( is_state(''input_boolean.lau_maria_has_paid'',
           ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
           is_state(''input_boolean.lau_angela_has_paid'', ''off'') )  }}'
+      - condition: template
+        value_template: '{{ not((now().day >= 13) and (now().day < 20) and ( is_state(''input_boolean.lau_hector_has_paid'',
+          ''off'') ) ) }}'
       - condition: template
         value_template: '{{ not((now().month % 3 == 0) and (now().day >= 5) and (now().day
           < 15)) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off'')
@@ -959,6 +984,17 @@
           target: 303515965
           inline_keyboard:
           - Pagado!:/angela_has_paid, Morosa!:/angela_has_not_paid
+    - if:
+      - condition: template
+        value_template: '{{ not((now().day >= 13) and (now().day < 20) and ( is_state(''input_boolean.lau_hector_has_paid'',
+          ''off'') ) ) }}'
+      then:
+      - service: telegram_bot.send_message
+        data:
+          message: Héctor Díaz Burgos 48
+          target: 303515965
+          inline_keyboard:
+          - Pagado!:/hector_has_paid, Morosa!:/hector_has_not_paid
     - if:
       - condition: template
         value_template: '{{ not((now().month % 3 == 0) and (now().day >= 5) and (now().day
@@ -1016,6 +1052,16 @@
     id: angela_has_not_paid
     event_data:
       command: /angela_has_not_paid
+  - platform: event
+    event_type: telegram_callback
+    id: hector_has_paid
+    event_data:
+      command: /hector_has_paid
+  - platform: event
+    event_type: telegram_callback
+    id: hector_has_not_paid
+    event_data:
+      command: /hector_has_not_paid
   condition: []
   action:
   - choose:
@@ -1111,6 +1157,29 @@
       - service: notify.lau
         data:
           message: Joe con la people, ni coche ni na. Esto es una ruina
+    - conditions:
+      - condition: trigger
+        id: hector_has_paid
+      sequence:
+      - service: input_boolean.turn_on
+        data: {}
+        target:
+          entity_id: input_boolean.lau_hector_has_paid
+      - service: notify.lau
+        data:
+          title: "*¡Héctor ha pagado!* \U0001F389"
+          message: ¡Menos mal que hay alguien fiel!
+    - conditions:
+      - condition: trigger
+        id: hector_has_not_paid
+      sequence:
+      - service: input_boolean.turn_off
+        data: {}
+        target:
+          entity_id: input_boolean.lau_hector_has_paid
+      - service: notify.lau
+        data:
+          message: Son todos un poquito agarraos, ¿no?
     default: []
   mode: single
 - id: '1649799780278'

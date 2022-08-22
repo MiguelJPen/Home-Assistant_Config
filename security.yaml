@@ -27,7 +27,9 @@ alarm_control_panel:
 
 # For checking when a new file is uploaded from the camera by FTP
 folder_watcher:
-  - folder: /media/securityCameras/Entrada
+  - folder: /media/securityCameras/entrada
+  - folder: /media/securityCameras/fachadaSur
+  - folder: /media/securityCameras/fachadaEste
   - folder: /media/securityCameras/Comedor
 
 template:
