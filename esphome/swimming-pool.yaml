@@ -200,6 +200,34 @@ binary_sensor:
             }
             else if (id(pool_high_level).state) id(secure_pumping) = true;
 
+  - platform: gpio
+    pin:
+      number: 39
+      inverted: true
+      mode:
+        input: true
+    name: Pool pump running
+    id: pool_pump_running_sensor
+    device_class: running
+    filters:
+      delayed_on_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: 34
+      inverted: true
+      mode:
+        input: true
+    name: Pool lights switch (debug)
+    id: pool_lights_physical_switch
+    filters:
+      delayed_on_off: 50ms
+    on_state: 
+      then:
+        - lambda: |-
+            if (id(pool_lights_physical_switch).state) id(pool_lights).turn_on();
+            else if (!id(pool_lights_physical_switch).state) id(pool_lights).turn_off();
+
   #### For saving filling state
   - platform: homeassistant
     id: ui_pool_filling
@@ -273,6 +301,15 @@ switch:
       - component.update: pump_left
     on_turn_off:
         - component.update: pump_left
+
+  #### Pool lights relay switch
+  - platform: gpio
+    id: pool_lights
+    pin:
+      number: 32
+      inverted: True
+    name: "Luces de la piscina"
+    restore_mode: RESTORE_DEFAULT_OFF
 
   #### Switch for automation
   - platform: template
