@@ -215,7 +215,6 @@ binary_sensor:
   - platform: gpio
     pin:
       number: 34
-      inverted: true
       mode:
         input: true
     name: Pool lights switch (debug)
