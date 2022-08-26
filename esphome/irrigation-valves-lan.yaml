@@ -10,6 +10,7 @@ esphome:
     then:
       - delay: 20s
       - component.update: irrigation_period
+      - component.update: pool_filling_state
       - lambda: |-
           // If this variable has been deleted for any reason, reset it
           if (id(north_zone_last_automatic_irrigation) == 0)
@@ -413,6 +414,7 @@ switch:
       - switch.turn_on: main_valve
       - switch.turn_on: swimming_pool_valve
       - component.update: pool_filling_left
+      - component.update: pool_filling_state
     turn_off_action:
       - if:
           condition:
@@ -425,6 +427,7 @@ switch:
             - switch.turn_off: ac_adaptor
       - switch.turn_off: swimming_pool_valve
       - component.update: pool_filling_left
+      - component.update: pool_filling_state
       - homeassistant.service:
           service: esphome.swimming_pool_filling_completed
   - platform: template
@@ -776,6 +779,16 @@ text_sensor:
     lambda: |-
       if(id(irrigation_available).state) return {"Disponible"};
       return {"No disponible"};
+
+  #### Pool filling readable state
+  - platform: template
+    name: Estado del llenado
+    id: pool_filling_state
+    update_interval: never
+    icon: mdi:waves-arrow-up
+    lambda: |-
+      if (id(main_valve).state && id(ac_adaptor).state && id(swimming_pool_valve).state) return {"Llenando..."};
+      return {"Parado"};
 
 # ============================================================================ #
 time:

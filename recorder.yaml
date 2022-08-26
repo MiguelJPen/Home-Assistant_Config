@@ -1,7 +1,7 @@
 recorder:
   db_url: !secret mariadb_url
   purge_keep_days: 6
-  commit_interval: 30
+  commit_interval: 60
   include:
     domains:
       - automation
@@ -40,14 +40,15 @@ recorder:
       - sensor.edata_cv1p
       - binary_sensor.pantry_flood_sensor_water_leak
       - sensor.precipitation
+      - binary_sensor.low_level_pool_sensor
+      - binary_sensor.high_level_pool_sensor
+      - sensor.pool_filling_today
 
   exclude:
     entity_globs:
       - binary_sensor.barrera_*_tamper
+      - sensor.aemet_*temperature
+      - sensor.aemet_*humidity
     entities:
-      - sensor.aemet_daily_forecast_temperature
-      - sensor.aemet_hourly_forecast_temperature
-      - sensor.aemet_temperature
-      - sensor.aemet_humidity
       - sensor.0x00158d00053e7f5f_temperature
       - sensor.0x00158d00053ed958_temperature

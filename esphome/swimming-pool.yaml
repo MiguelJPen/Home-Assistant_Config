@@ -1,3 +1,11 @@
+substitutions:
+  low_level_sensor_pin: "36"
+  high_level_sensor_pin: "35"
+  pump_running_sensor_pin: "39"
+  pool_lights_physical_switch_pin: "34"
+  pump_relay_pin: "33"
+  pool_lights_relay_pin: "32"
+
 esphome:
   name: swimming-pool
   includes:
@@ -163,7 +171,7 @@ binary_sensor:
   #### Pool level sensors
   - platform: gpio
     pin:
-      number: 36
+      number: ${low_level_sensor_pin}
       inverted: true
       mode:
         input: true
@@ -183,7 +191,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: 35
+      number: ${high_level_sensor_pin}
       inverted: true
       mode:
         input: true
@@ -202,7 +210,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: 39
+      number: ${pump_running_sensor_pin}
       inverted: true
       mode:
         input: true
@@ -214,7 +222,7 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: 34
+      number: ${pool_lights_physical_switch_pin}
       mode:
         input: true
     name: Pool lights switch (debug)
@@ -292,7 +300,7 @@ switch:
     id: swimming_pool_pump
     internal: True
     pin:
-      number: 33
+      number: ${pump_relay_pin}
       inverted: True
     name: "Bomba de la piscina"
     restore_mode: ALWAYS_OFF
@@ -300,15 +308,6 @@ switch:
       - component.update: pump_left
     on_turn_off:
         - component.update: pump_left
-
-  #### Pool lights relay switch
-  - platform: gpio
-    id: pool_lights
-    pin:
-      number: 32
-      inverted: True
-    name: "Luces de la piscina"
-    restore_mode: RESTORE_DEFAULT_OFF
 
   #### Switch for automation
   - platform: template
@@ -410,6 +409,23 @@ switch:
       - lambda: id(filling_rn) = true;
     turn_off_action:
       - lambda: id(filling_rn) = false;
+
+# ============================================================================ #
+light:
+  #### Pool lights
+  - platform: binary
+    name: "Luces de la piscina"
+    id: pool_lights
+    output: pool_lights_output
+    icon: mdi:light-flood-down
+    restore_mode: RESTORE_DEFAULT_OFF
+
+output: 
+  - id: pool_lights_output
+    platform: gpio
+    pin:
+      number: ${pool_lights_relay_pin}
+      inverted: True
 
 # ============================================================================ #
 text_sensor:
