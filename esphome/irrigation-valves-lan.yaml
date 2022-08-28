@@ -23,6 +23,7 @@ esphome:
           id(south_zone_last_automatic_irrigation_ha).publish_state(get_time_formated(to_string(id(south_zone_last_automatic_irrigation))));
           id(irrigation_available).publish_state(water_available());
           set_new_irrigation_time();
+          if(id(pool_filling_requested)) set_pool_filling();
 
 # Enable logging
 logger:
@@ -41,6 +42,7 @@ api:
       then:
         - lambda: |-
             set_pool_filling();
+            id(pool_filling_requested) = true;
         - homeassistant.service:
             service: esphome.swimming_pool_filling_requested
     - service: request_more_pool_water
@@ -73,32 +75,26 @@ globals:
   ## Last automatic irrigation
   - id: north_zone_last_automatic_irrigation
     type: long int
-    restore_value: yes
+    restore_value: True
   - id: south_zone_last_automatic_irrigation
     type: long int
-    restore_value: yes
+    restore_value: True
 
   ## Bool to save automation mode
   - id: pool_filling_automation_bool
     type: bool
-    restore_value: yes
+    restore_value: True
   - id: north_zone_automation_bool
     type: bool
-    restore_value: yes
+    restore_value: True
   - id: south_zone_automation_bool
     type: bool
-    restore_value: yes
+    restore_value: True
 
-  ## Valves manual status
-  - id: pool_filling_manual_bool
+  ## Bool to save if pool filling requested when the device is restarted
+  - id: pool_filling_requested
     type: bool
-    restore_value: no
-  - id: north_zone_manual_bool
-    type: bool
-    restore_value: no
-  - id: south_zone_manual_bool
-    type: bool
-    restore_value: no
+    restore_value: True
 
   ## Weather metrics
   - id: mean_temp
@@ -182,24 +178,6 @@ number:
 
 # ============================================================================ #
 sensor:
-  #### Precipitation sensor
-  - platform: pulse_meter
-    pin:
-      number: 12
-      mode:
-        input: true
-    name: "Rain flips"
-    internal_filter_mode: PULSE
-    internal_filter: 1ms
-    internal: true
-    total:
-      unit_of_measurement: 'mm'
-      name: 'Pluviometer'
-      accuracy_decimals: 1
-      filters:
-        - multiply: 0.30303
-
-  # ========================================================================= #
   ## To store weather metrics
   - platform: template
     name: Actual temperature
@@ -430,6 +408,7 @@ switch:
       - component.update: pool_filling_state
       - homeassistant.service:
           service: esphome.swimming_pool_filling_completed
+      - lambda: id(pool_filling_requested) = false;
   - platform: template
     name: Pool filling manual
     id: pool_filling_manual
@@ -454,6 +433,7 @@ switch:
     turn_off_action:
       - lambda: |-
           id(pool_filling_automation_bool) = false;
+          id(pool_filling_requested) = false;
           id(pool_filling_timestamps_on).publish_state("");
           id(pool_filling_timestamps_off).publish_state("");
 
@@ -820,7 +800,7 @@ time:
               id(irrigation_time).publish_state(get_time_formated(to_string(id(time_sntp).now().timestamp)));
 
               if (scheduled_run(id(pool_filling_next_on).state.c_str())) {
-                // No need to check automation, it deletes the timestamp
+                // No need to check automation here, it deletes the timestamp
                 id(swimming_pool_filling_now).execute();
               }
               if (scheduled_run(id(pool_filling_next_off).state.c_str())) {

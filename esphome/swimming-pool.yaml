@@ -5,6 +5,10 @@ substitutions:
   pool_lights_physical_switch_pin: "34"
   pump_relay_pin: "33"
   pool_lights_relay_pin: "32"
+  pump_manual_physical_switch_pin: "16"
+  pump_automation_physical_switch_pin: "13"
+  rain_sensor_pin: "3"
+  #### Do not use pin 14, as it caused some errors restarting the device when pulled down
 
 esphome:
   name: swimming-pool
@@ -25,7 +29,7 @@ esphome:
           set_new_pumping_time();
           id(filling_available) = water_available();
           if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-          id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
+          id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn) && id(pump_automation_bool))
             id(swimming_pool_pump).turn_on();
 
 esp32:
@@ -58,6 +62,7 @@ api:
       then:
         - lambda: |-
             id(filling_rn) = false;
+            id(pool_filling_requested) = false;
             if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
             id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping))
               id(swimming_pool_pump).turn_on();
@@ -140,8 +145,6 @@ script:
           - homeassistant.service: 
               service: esphome.irrigation_valves_lan_request_more_pool_water
           - delay: 60s
-      - lambda: |-
-          id(pool_filling_requested) = false;
   - id: pool_filling_request_today
     then:
       - homeassistant.service:
@@ -178,6 +181,7 @@ binary_sensor:
     name: "Low level pool sensor"
     id: pool_low_level
     device_class: moisture
+    publish_initial_state: True
     filters:
       delayed_on_off: 500ms
     on_state: 
@@ -198,6 +202,7 @@ binary_sensor:
     name: "High level pool sensor"
     id: pool_high_level
     device_class: moisture
+    publish_initial_state: True
     filters:
       delayed_on_off: 500ms
     on_state: 
@@ -211,12 +216,13 @@ binary_sensor:
   - platform: gpio
     pin:
       number: ${pump_running_sensor_pin}
-      inverted: true
       mode:
         input: true
     name: Pool pump running
     id: pool_pump_running_sensor
+    icon: mdi:pump
     device_class: running
+    publish_initial_state: True
     filters:
       delayed_on_off: 50ms
 
@@ -227,13 +233,51 @@ binary_sensor:
         input: true
     name: Pool lights switch (debug)
     id: pool_lights_physical_switch
+    publish_initial_state: True
     filters:
       delayed_on_off: 50ms
     on_state: 
       then:
         - lambda: |-
-            if (id(pool_lights_physical_switch).state) id(pool_lights).turn_on();
-            else if (!id(pool_lights_physical_switch).state) id(pool_lights).turn_off();
+            if (id(pool_lights_physical_switch).state) id(pool_lights).turn_on().perform();
+            else if (!id(pool_lights_physical_switch).state) id(pool_lights).turn_off().perform();
+
+  - platform: gpio
+    pin: 
+      number: ${pump_manual_physical_switch_pin}
+      mode:
+        input: True
+        pulldown: True
+    name: Pool pump manual switch (debug)
+    id: pump_manual_physical_switch
+    publish_initial_state: True
+    filters:
+      delayed_on_off: 70ms
+    on_state: 
+      then:
+        - lambda: |-
+            if (id(pump_manual_physical_switch).state) id(pump_manual).turn_on();
+            else if (!id(pump_manual_physical_switch).state) id(pump_manual).turn_off();
+
+  - platform: gpio
+    pin: 
+      number: ${pump_automation_physical_switch_pin}
+      mode:
+        input: True
+        pulldown: True
+    name: Pool pump automation switch (debug)
+    id: pump_automation_physical_switch
+    publish_initial_state: True
+    filters:
+      delayed_on_off: 40ms
+    on_state: 
+      then:
+        - lambda: |-
+            if (id(pump_automation_physical_switch).state) id(pump_automation).turn_on();
+            else if (!id(pump_automation_physical_switch).state) {
+              id(pump_manual).turn_off();
+              id(pump_automation).turn_off();
+            }
 
   #### For saving filling state
   - platform: homeassistant
@@ -253,6 +297,24 @@ binary_sensor:
 
 # ============================================================================ #
 sensor:
+  #### Precipitation sensor
+  - platform: pulse_meter
+    pin:
+      number: ${rain_sensor_pin}
+      mode:
+        input: true
+    name: "Rain flips"
+    internal_filter_mode: PULSE
+    internal_filter: 1ms
+    #internal: True
+    total:
+      unit_of_measurement: 'mm'
+      name: 'Pluviometer (debug)'
+      accuracy_decimals: 1
+      filters:
+        - multiply: 0.30303
+  
+  # ================================== #
   ## Home Assistant get sensors
   ### To retrieve weather metrics from home assistant
   - platform: homeassistant

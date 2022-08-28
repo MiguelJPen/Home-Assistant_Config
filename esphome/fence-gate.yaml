@@ -1,3 +1,8 @@
+substitutions:
+  wicket_door_relay_pin: "14"
+  main_gate_relay_pin: "32"
+  main_gate_sensor_pin: "39"
+
 esphome:
   name: fence-gate
 
@@ -38,10 +43,11 @@ binary_sensor:
 
   - platform: gpio
     pin:
-      number: 39
+      number: ${main_gate_sensor_pin}
       inverted: True
       mode: INPUT
     name: "Main gate sensor"
+    id: main_gate_sensor
     device_class: garage_door
     filters:
       delayed_on_off: 100ms
@@ -59,9 +65,10 @@ button:
   - platform: output
     name: "Wicket door"
     output: wicket_door_output
-    duration: 1000ms
+    duration: 1500ms
   - platform: output
     name: "Main gate"
+    id: main_gate_button
     output: main_gate_output
     duration: 700ms
 
@@ -70,11 +77,25 @@ output:
   - platform: gpio
     id: wicket_door_output
     pin:
-      number: 14
+      number: ${wicket_door_relay_pin}
       inverted: True
   #### Output gpio to fully open the main gate
   - platform: gpio
     id: main_gate_output
     pin:
-      number: 32
+      number: ${main_gate_relay_pin}
       inverted: True
+
+cover:
+  - platform: template
+    device_class: gate
+    name: "Main gate (cover)"
+    lambda: |-
+      if (id(main_gate_sensor).state) return COVER_CLOSED;
+      else return COVER_OPEN;
+    open_action:
+      - button.press: main_gate_button
+    close_action:
+      - button.press: main_gate_button
+    stop_action:
+      - button.press: main_gate_button
