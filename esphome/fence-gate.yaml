@@ -1,46 +1,20 @@
 substitutions:
+  name: fence_gate
+  upper_name: Fence gate
   wicket_door_relay_pin: "14"
   main_gate_relay_pin: "32"
   main_gate_sensor_pin: "39"
 
+packages:
+  device_base: !include common/device_base.fence-gate.yaml
+  ethernet: !include common/wt32-eth01.config.yaml
+  basic_control: !include common/basic_control.yaml
+
 esphome:
   name: fence-gate
 
-esp32:
-  board: esp-wrover-kit
-  framework:
-    type: arduino
-
-# Enable logging
-logger:
-
-ethernet:
-  type: LAN8720
-  mdc_pin: GPIO23
-  mdio_pin: GPIO18
-  clk_mode: GPIO0_IN
-  phy_addr: 1
-  power_pin: GPIO16
-  
-#  manual_ip:
-#    static_ip: 10.133.100.65
-#    gateway: 10.133.100.1
-#    subnet: 255.255.255.0
-
-# Enable Home Assistant API
-api:
-  encryption:
-    key: !secret api_fence_gate
-
-ota:
-  password: !secret ota_fence_gate
-    
 # ============================================================================ #
 binary_sensor:
-  #### Irrigation status
-  - platform: status
-    name: "Fence gate status"
-
   - platform: gpio
     pin:
       number: ${main_gate_sensor_pin}
@@ -54,24 +28,18 @@ binary_sensor:
     
 # ============================================================================ #
 button:
-  #### Restart button
-  - platform: restart
-    name: "Fence gate restart"
-  #### Restart button for safe mode
-  - platform: safe_mode
-    name: "Fence gate restart (safe mode)"
-
   #### Button for Home Assistant
   - platform: output
     name: "Wicket door"
     output: wicket_door_output
     duration: 1500ms
   - platform: output
-    name: "Main gate"
     id: main_gate_button
+    internal: True
     output: main_gate_output
     duration: 700ms
 
+# ============================================================================ #
 output:
   #### Output gpio to open the wicket door
   - platform: gpio
@@ -86,13 +54,14 @@ output:
       number: ${main_gate_relay_pin}
       inverted: True
 
+# ============================================================================ #
 cover:
   - platform: template
     device_class: gate
-    name: "Main gate (cover)"
+    name: "Main gate"
     lambda: |-
-      if (id(main_gate_sensor).state) return COVER_CLOSED;
-      else return COVER_OPEN;
+      if (id(main_gate_sensor).state) return COVER_OPEN;
+      else return COVER_CLOSED;
     open_action:
       - button.press: main_gate_button
     close_action:

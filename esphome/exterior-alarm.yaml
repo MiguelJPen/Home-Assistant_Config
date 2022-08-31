@@ -1,49 +1,19 @@
+substitutions:
+  upper_name: Exterior alarm
+  name: exterior_alarm
+
+packages:
+  device_base: !include common/device_base.exterior-alarm.yaml
+  basic_control: !include common/basic_control.yaml
+  wifi: !include common/wifi.yaml
+
 esphome:
-  name: alarm_exterior
-  platform: ESP32
-  board: nodemcu-32s
+  name: exterior-alarm
   includes:
   - BarrierSensor.h
 
-wifi:
-  power_save_mode: none
-  networks:
-  - ssid: !secret wifi_ssid
-    password: !secret wifi_password
-  
-#  manual_ip:
-#   static_ip: 10.133.100.61
-#   gateway: 10.133.100.1
-#   subnet: 255.255.255.0
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-    ssid: "Alarm Exterior Fallback Hotspot"
-    password: "URL9WC2ZQ5Y5"
-
-captive_portal:
-
-# Enable logging
-logger:
-
-# Enable Home Assistant API
-api:
-
-ota:
-
 # ============================================================================ #
-button:
-  #### Restart button
-  - platform: restart
-    name: "Exterior alarm restart"
-  #### Restart button for safe mode
-  - platform: safe_mode
-    name: "Exterior alarm restart (safe mode)"
-
 binary_sensor:
-  - platform: status
-    name: "Exterior alarm status"
-    
   - platform: custom
     lambda: |-
       auto myBarr = new BarrierSensor();

@@ -1,0 +1,15 @@
+# static_ip: 10.133.100.61
+
+esp32:
+  board: nodemcu-32s
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+ota:
+  password: !secret ota_exterior_alarm
+
+# Enable Home Assistant API
+api:

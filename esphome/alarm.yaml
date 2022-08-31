@@ -1,44 +1,19 @@
+substitutions:
+  upper_name: Interior alarm
+  name: alarm
+
+packages:
+  device_base: !include common/device_base.alarm.yaml
+  basic_control: !include common/basic_control.yaml
+  wifi: !include common/wifi.yaml
+
 esphome:
   name: alarm
-  platform: ESP32
-  board: nodemcu-32s
-  
   on_loop:
     then:
     - lambda: delay(30);
 
-wifi:
-  power_save_mode: none
-  networks:
-  - ssid: !secret wifi_ssid
-    password: !secret wifi_password
-  
-#  manual_ip:
-#   static_ip: 10.133.100.60
-#   gateway: 10.133.100.1
-#   subnet: 255.255.255.0
-
-  # Enable fallback hotspot (captive portal) in case wifi connection fails
-  ap:
-    ssid: "Alarm Fallback Hotspot"
-    password: "fIDEP893PCzE"
-
-captive_portal:
-
-# Enable logging
-logger:
-
-ota:
-
 # ============================================================================ #
-button:
-  #### Restart button
-  - platform: restart
-    name: "Interior alarm restart"
-  #### Restart button for safe mode
-  - platform: safe_mode
-    name: "Interior alarm restart (safe mode)"
-  
 switch:
   - platform: gpio
     id: exterior_siren
@@ -76,9 +51,6 @@ api:
         - script.execute: alarm_siren_beep
 
 binary_sensor:
-  - platform: status
-    name: "Interior alarm status"
-    
   - platform: gpio
     pin:
       number: 36

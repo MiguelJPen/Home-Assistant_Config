@@ -1,4 +1,6 @@
 substitutions:
+  name: pool
+  upper_name: "Swimming pool"
   low_level_sensor_pin: "36"
   high_level_sensor_pin: "35"
   pump_running_sensor_pin: "39"
@@ -10,8 +12,14 @@ substitutions:
   rain_sensor_pin: "3"
   #### Do not use pin 14, as it caused some errors restarting the device when pulled down
 
+packages:
+  device_base: !include common/device_base.pool.yaml
+  ethernet: !include common/olimex-esp32-poe.config.yaml
+  basic_control: !include common/basic_control.yaml
+  sun: !include common/sun.yaml
+
 esphome:
-  name: swimming-pool
+  name: pool
   includes:
     - time_control.hpp
     - pool.hpp
@@ -31,14 +39,6 @@ esphome:
           if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
           id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn) && id(pump_automation_bool))
             id(swimming_pool_pump).turn_on();
-
-esp32:
-  board: esp32-poe
-  framework:
-    type: arduino
-
-# Enable logging
-logger:
 
 # Enable Home Assistant API
 api:
@@ -63,29 +63,13 @@ api:
         - lambda: |-
             id(filling_rn) = false;
             id(pool_filling_requested) = false;
-            if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            if (id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
             id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping))
               id(swimming_pool_pump).turn_on();
     - service: filling_requested
       then:
         - lambda: |-
             id(pool_filling_requested) = true;
-
-ota:
-  password: !secret ota_swimming_pool
-
-ethernet:
-  type: LAN8720
-  mdc_pin: GPIO23
-  mdio_pin: GPIO18
-  clk_mode: GPIO17_OUT
-  phy_addr: 0
-  power_pin: GPIO12
-  
-#  manual_ip:
-#   static_ip: 10.133.100.64
-#   gateway: 10.133.100.1
-#   subnet: 255.255.255.0
 
 # ============================================================================ #
 globals: 
@@ -151,26 +135,7 @@ script:
           service: esphome.irrigation_valves_lan_request_pool_water
 
 # ============================================================================ #
-sun:
-  latitude: !secret latitude
-  longitude: !secret longitude
-  id: sun_sun
-
-# ============================================================================ #
-button:
-  #### Restart button
-  - platform: restart
-    name: "Swimming pool restart"
-  #### Restart button for safe mode
-  - platform: safe_mode
-    name: "Swimming pool restart (safe mode)"
-
-# ============================================================================ #
 binary_sensor:
-  #### Status sensor
-  - platform: status
-    name: "Swimming pool status"
-  
   #### Pool level sensors
   - platform: gpio
     pin:
@@ -183,7 +148,7 @@ binary_sensor:
     device_class: moisture
     publish_initial_state: True
     filters:
-      delayed_on_off: 500ms
+      delayed_on_off: 700ms
     on_state: 
       then:
         - lambda: |-
@@ -204,7 +169,7 @@ binary_sensor:
     device_class: moisture
     publish_initial_state: True
     filters:
-      delayed_on_off: 500ms
+      delayed_on_off: 700ms
     on_state: 
       then:
         - lambda: |-
@@ -298,6 +263,11 @@ binary_sensor:
 # ============================================================================ #
 sensor:
   #### Precipitation sensor
+  #### Surface of the rain gauge: 5.2cm * 11.2cm = 58.24cm^2
+  #### 7 flips per 11mL => 11/7 = 1.57mL per pulse
+  #### 1mm rain = 5.824mL in the rain gauge (due to surface)
+  #### pulses/mm = 5.824/(11/7) = 3.709554
+  #### mm/pulse = 0.269574
   - platform: pulse_meter
     pin:
       number: ${rain_sensor_pin}
@@ -306,13 +276,13 @@ sensor:
     name: "Rain flips"
     internal_filter_mode: PULSE
     internal_filter: 1ms
-    #internal: True
+    internal: True
     total:
       unit_of_measurement: 'mm'
-      name: 'Pluviometer (debug)'
+      name: 'Pluviometer'
       accuracy_decimals: 1
       filters:
-        - multiply: 0.30303
+        - multiply: 0.269574
   
   # ================================== #
   ## Home Assistant get sensors

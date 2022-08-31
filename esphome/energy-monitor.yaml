@@ -1,0 +1,33 @@
+substitutions:
+  upper_name: Energy monitor
+
+packages:
+  device_base: !include common/device_base.energy-monitor.yaml
+  basic_control: !include common/basic_control.yaml
+  wifi: !include common/wifi.yaml
+
+esphome:
+  name: energy-monitor
+  platform: ESP8266
+  board: nodemcuv2
+
+uart:
+  rx_pin: GPIO3
+  tx_pin: GPIO1
+  baud_rate: 9600
+
+sensor:
+  - platform: pzemac
+    current:
+      name: "Home Energy Monitor Current"
+    voltage:
+      name: "Home Energy Monitor Voltage"
+    energy:
+      name: "Home Energy Monitor Energy"
+    power:
+      name: "Home Energy Monitor Power"
+    frequency:
+      name: "Home Energy Monitor Frequency"
+    power_factor:
+      name: "Home Energy Monitor Power Factor"
+    update_interval: 10s

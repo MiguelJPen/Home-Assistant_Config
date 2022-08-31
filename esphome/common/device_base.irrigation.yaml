@@ -1,0 +1,12 @@
+# static_ip: 10.133.100.63
+
+esp32:
+    board: esp-wrover-kit
+    framework:
+        type: arduino
+
+ota:
+  password: !secret ota_irrigation
+
+# Enable logging
+logger:

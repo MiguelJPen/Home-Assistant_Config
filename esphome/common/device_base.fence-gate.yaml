@@ -1,0 +1,17 @@
+# static_ip: 10.133.100.65
+
+esp32:
+    board: esp-wrover-kit
+    framework:
+        type: arduino
+
+ota:
+    password: !secret ota_fence_gate
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+    encryption:
+        key: !secret api_fence_gate

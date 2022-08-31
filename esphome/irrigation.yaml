@@ -1,7 +1,19 @@
+substitutions:
+  name: irrigation
+  upper_name: Irrigation
+  ac_adaptor_relay_pin: "33"
+  main_valve_relay_pin: "15"
+  pool_valve_relay_pin: "14"
+  north_valve_relay_pin: "17"
+  south_valve_relay_pin: "5"
+
+packages:
+  device_base: !include common/device_base.irrigation.yaml
+  ethernet: !include common/wt32-eth01.config.yaml
+  basic_control: !include common/basic_control.yaml
+
 esphome:
-  name: irrigation-valves-lan
-  platform: ESP32
-  board: esp-wrover-kit
+  name: irrigation
   includes: 
     - time_control.hpp
     - irrigation.hpp
@@ -24,9 +36,6 @@ esphome:
           id(irrigation_available).publish_state(water_available());
           set_new_irrigation_time();
           if(id(pool_filling_requested)) set_pool_filling();
-
-# Enable logging
-logger:
 
 # Enable Home Assistant API
 api:
@@ -53,22 +62,6 @@ api:
       then:
         - lambda: |-
             id(next_day_irrigation).publish_state(to_string(id(time_sntp).now().timestamp));
-
-ota:
-  password: !secret ota_irrigation_valves_lan
-
-ethernet:
-  type: LAN8720
-  mdc_pin: GPIO23
-  mdio_pin: GPIO18
-  clk_mode: GPIO0_IN
-  phy_addr: 1
-  power_pin: GPIO16
-  
-#  manual_ip:
-#    static_ip: 10.133.100.63
-#    gateway: 10.133.100.1
-#    subnet: 255.255.255.0
 
 # ============================================================================ #
 globals:
@@ -132,15 +125,6 @@ script:
             - delay: 15s
             - switch.turn_off: south_virtual
             - delay: 45 min
-
-# ============================================================================ #
-button:
-  #### Restart button
-  - platform: restart
-    name: "Irrigation restart"
-  #### Restart button for safe mode
-  - platform: safe_mode
-    name: "Irrigation restart (safe mode)"
 
 # ============================================================================ #
 number:
@@ -312,10 +296,6 @@ sensor:
 
 # ============================================================================ #
 binary_sensor:
-  #### Irrigation status
-  - platform: status
-    name: "Irrigation status"
-
   #### Water available boolean
   - platform: template
     id: irrigation_available
@@ -332,7 +312,7 @@ switch:
   - platform: gpio
     id: ac_adaptor
     pin:
-      number: 33
+      number: $ac_adaptor_relay_pin
     name: "Adaptador AC"
     restore_mode: ALWAYS_OFF
 
@@ -341,7 +321,7 @@ switch:
   - platform: gpio
     id: main_valve
     pin: 
-      number: 15
+      number: $main_valve_relay_pin
       inverted: True
     name: "Main valve"
     restore_mode: ALWAYS_OFF
@@ -350,7 +330,7 @@ switch:
   - platform: gpio
     id: swimming_pool_valve
     pin: 
-      number: 14
+      number: $pool_valve_relay_pin
       inverted: True
     name: "Swimming pool valve"
     restore_mode: ALWAYS_OFF
@@ -358,7 +338,7 @@ switch:
   - platform: gpio
     id: north_valve
     pin: 
-      number: 17
+      number: $north_valve_relay_pin
       inverted: True
     name: "North valve"
     restore_mode: ALWAYS_OFF
@@ -366,7 +346,7 @@ switch:
   - platform: gpio
     id: south_valve
     pin: 
-      number: 5
+      number: $south_valve_relay_pin
       inverted: True
     name: "South valve"
     restore_mode: ALWAYS_OFF

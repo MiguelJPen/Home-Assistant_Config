@@ -1,0 +1,11 @@
+binary_sensor:
+  - platform: status
+    name: ${upper_name} status
+
+button:
+  #### Restart button
+  - platform: restart
+    name: ${upper_name} restart
+  #### Restart button for safe mode
+  - platform: safe_mode
+    name: ${upper_name} restart (safe mode)

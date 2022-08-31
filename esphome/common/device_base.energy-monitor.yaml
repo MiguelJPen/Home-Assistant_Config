@@ -1,0 +1,11 @@
+# static_ip: 10.133.100.62
+
+# Enable logging
+logger:
+  baud_rate: 0
+
+# Enable Home Assistant API
+api:
+
+ota:
+  password: !secret ota_energy_monitor

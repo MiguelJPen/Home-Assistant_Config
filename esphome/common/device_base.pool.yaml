@@ -1,0 +1,12 @@
+# static_ip: 10.133.100.64
+
+esp32:
+  board: esp32-poe
+  framework:
+    type: arduino
+
+ota:
+  password: !secret ota_pool
+
+# Enable logging
+logger:

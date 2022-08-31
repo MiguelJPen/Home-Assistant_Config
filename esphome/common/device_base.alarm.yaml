@@ -1,0 +1,12 @@
+# static_ip: 10.133.100.60
+
+esp32:
+  board: nodemcu-32s
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+ota:
+  password: !secret ota_alarm
