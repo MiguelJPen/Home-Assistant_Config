@@ -43,6 +43,8 @@ recorder:
       - binary_sensor.low_level_pool_sensor
       - binary_sensor.high_level_pool_sensor
       - sensor.pool_filling_today
+      - binary_sensor.pool_pump_running
+      - sensor.pump_running_today
 
   exclude:
     entity_globs:

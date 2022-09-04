@@ -11,6 +11,7 @@ homeassistant:
 
   packages:
     irrigation: !include irrigation.yaml
+    pool: !include pool.yaml
     climate: !include climate.yaml
     zigbee: !include zigbee.yaml
     energy: !include energy.yaml
