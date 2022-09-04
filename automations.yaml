@@ -162,8 +162,10 @@
       - switch.sirena_exterior
       - switch.sirena_interior
       - switch.entrada_ftp
-      - switch.comedor_motion_detection
       - switch.comedor_video_streaming
+      - switch.comedor_motion_detection
+      - switch.fachada_este_ftp
+      - switch.fachada_sur_ftp
   - service: automation.turn_off
     data:
       stop_actions: true
@@ -203,8 +205,10 @@
         target:
           entity_id:
           - switch.entrada_ftp
-          - switch.comedor_motion_detection
           - switch.comedor_video_streaming
+          - switch.comedor_motion_detection
+          - switch.fachada_este_ftp
+          - switch.fachada_sur_ftp
         data: {}
       - service: notify.group
         data:
@@ -215,6 +219,8 @@
       target:
         entity_id:
         - switch.entrada_ftp
+        - switch.fachada_este_ftp
+        - switch.fachada_sur_ftp
       data: {}
     - service: notify.group
       data:
@@ -541,6 +547,56 @@
         - service: notify.group
           data:
             message: ¡Se ha detectado un movimiento en la entrada! Adjuntando archivos...
+        - service: telegram_bot.send_document
+          data:
+            file: '{{ trigger.event.data.path }}'
+            target: -472161375
+            timeout: 10
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaSur'')
+          }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
+          sequence:
+          - service: telegram_bot.send_video
+            data:
+              file: '{{ trigger.event.data.path }}'
+              target: -472161375
+              timeout: 80
+        default:
+        - service: notify.group
+          data:
+            message: ¡Se ha detectado un movimiento en la fachada Sur de la casa!
+              Adjuntando archivos...
+        - service: telegram_bot.send_document
+          data:
+            file: '{{ trigger.event.data.path }}'
+            target: -472161375
+            timeout: 10
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaEste'')
+          }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
+          sequence:
+          - service: telegram_bot.send_video
+            data:
+              file: '{{ trigger.event.data.path }}'
+              target: -472161375
+              timeout: 80
+        default:
+        - service: notify.group
+          data:
+            message: ¡Se ha detectado un movimiento en la fachada Este de la casa!
+              Adjuntando archivos...
         - service: telegram_bot.send_document
           data:
             file: '{{ trigger.event.data.path }}'
@@ -1270,7 +1326,7 @@
         start: sunset+00:{{ "{:02}".format(range(0, 20)|random|int) }}
         actions:
         - service: light.turn_on
-          entity_id: light.guest_room_plug_switch
+          entity_id: light.guest_dresser
   - service: scheduler.edit
     data:
       entity_id: switch.schedule_habitacion_de_invitados_apagar
@@ -1278,7 +1334,7 @@
         start: 01:{{ "{:02}".format(range(0, 59)|random|int) }}
         actions:
         - service: light.turn_off
-          entity_id: light.guest_room_plug_switch
+          entity_id: light.guest_dresser
   variables:
     first_event_on: '{{ (state_attr(''sun.sun'', ''next_setting'') | as_datetime |
       as_timestamp) + ((range(-10, 20)|random|int) * 60) }}'
@@ -1465,3 +1521,86 @@
     default: []
   mode: queued
   max: 2
+- id: '1662239356385'
+  alias: Lau - Money control
+  description: ''
+  trigger:
+  - platform: event
+    event_type: telegram_command
+    event_data:
+      command: /saldo
+      chat_id: 303515965
+    id: saldo
+  - platform: event
+    event_type: telegram_command
+    event_data:
+      command: /add
+      chat_id: 303515965
+    id: add
+  - platform: event
+    event_type: telegram_command
+    event_data:
+      command: /substract
+      chat_id: 303515965
+    id: substract
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: saldo
+      sequence:
+      - service: notify.lau
+        data:
+          message: '¡Holii! Tu saldo es {{ states("input_number.lau_saldo") }} €.
+
+            Puedes escribir /add (cantidades de dinero a añadir) o /substract (cantidades
+            de dinero a retirar) para modificar la cantidad.'
+    - conditions:
+      - condition: trigger
+        id: add
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ (trigger.event.data[''args''] | count) >= 1 }}'
+        then:
+        - service: input_number.set_value
+          data:
+            value: "{% set aux = namespace(s=(0|float)) %} \n{% for i in range((trigger.event.data['args']|count))
+              %}\n  {% set aux.s = aux.s + (trigger.event.data['args'][i].replace(\"'\",'.').replace(',','.')
+              | float) %}\n{% endfor %} \n\n{{ (states('input_number.lau_saldo') |
+              float) + (aux.s | float) }}"
+          target:
+            entity_id: input_number.lau_saldo
+        - service: notify.lau
+          data:
+            message: Tu saldo ahora es {{ states("input_number.lau_saldo") }} €.
+        else:
+        - service: notify.lau
+          data:
+            message: Error en los argumentos, ¡vuelve a intentarlo!
+    - conditions:
+      - condition: trigger
+        id: substract
+      sequence:
+      - if:
+        - condition: template
+          value_template: '{{ (trigger.event.data[''args''] | count) >= 1 }}'
+        then:
+        - service: input_number.set_value
+          data:
+            value: "{% set aux = namespace(s=(0|float)) %} \n{% for i in range((trigger.event.data['args']|count))
+              %}\n  {% set aux.s = aux.s + (trigger.event.data['args'][i].replace(\"'\",'.').replace(',','.')
+              | float) %}\n{% endfor %} \n\n{{ (states('input_number.lau_saldo') |
+              float) - (aux.s | float) }}"
+          target:
+            entity_id: input_number.lau_saldo
+        - service: notify.lau
+          data:
+            message: Tu saldo ahora es {{ states("input_number.lau_saldo") }} €.
+        else:
+        - service: notify.lau
+          data:
+            message: Error en los argumentos, ¡vuelve a intentarlo!
+    default: []
+  mode: single

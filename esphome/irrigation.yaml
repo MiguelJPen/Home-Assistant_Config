@@ -53,7 +53,7 @@ api:
             set_pool_filling();
             id(pool_filling_requested) = true;
         - homeassistant.service:
-            service: esphome.swimming_pool_filling_requested
+            service: esphome.pool_filling_requested
     - service: request_more_pool_water
       then:
         - lambda: |-
@@ -108,7 +108,7 @@ script:
   - id: swimming_pool_filling_now
     then:
       - homeassistant.service: # Turns off the pump and then opens the valve
-          service: esphome.swimming_pool_filling_start
+          service: esphome.pool_filling_start
   - id: avoid_freezing_pipes
     then:
       - while:
@@ -387,7 +387,7 @@ switch:
       - component.update: pool_filling_left
       - component.update: pool_filling_state
       - homeassistant.service:
-          service: esphome.swimming_pool_filling_completed
+          service: esphome.pool_filling_completed
       - lambda: id(pool_filling_requested) = false;
   - platform: template
     name: Pool filling manual
@@ -398,7 +398,7 @@ switch:
       - lambda: |-
           id(pool_filling_timestamps_off).publish_state(manual_set(id(pool_filling_manual_duration).state, id(pool_filling_timestamps_off).state));
       - homeassistant.service:
-          service: esphome.swimming_pool_manual_filling_start
+          service: esphome.pool_manual_filling_start
     turn_off_action:
       - switch.turn_off: pool_filling
       - lambda: |-

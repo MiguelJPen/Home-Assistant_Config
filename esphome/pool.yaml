@@ -49,7 +49,7 @@ api:
         - delay: 2s
         - lambda: id(filling_rn) = true;
         - homeassistant.service: # Opens the valve
-            service: esphome.irrigation_valves_lan_filling_start
+            service: esphome.irrigation_filling_start
         - script.execute: pool_filling_request_loop
     - service: manual_filling_start
       then:
@@ -57,7 +57,7 @@ api:
         - delay: 2s
         - lambda: id(filling_rn) = true;
         - homeassistant.service:
-            service: esphome.irrigation_valves_lan_filling_start
+            service: esphome.irrigation_filling_start
     - service: filling_completed
       then:
         - lambda: |-
@@ -127,12 +127,12 @@ script:
               - lambda: return id(filling_available);
           then:
           - homeassistant.service: 
-              service: esphome.irrigation_valves_lan_request_more_pool_water
+              service: esphome.irrigation_request_more_pool_water
           - delay: 60s
   - id: pool_filling_request_today
     then:
       - homeassistant.service:
-          service: esphome.irrigation_valves_lan_request_pool_water
+          service: esphome.irrigation_request_pool_water
 
 # ============================================================================ #
 binary_sensor:
