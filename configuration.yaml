@@ -126,3 +126,9 @@ binary_sensor:
     name: "Router Murcia"
     count: 2
     scan_interval: 120
+
+template:
+  - binary_sensor:
+      - name: Open windows mode
+        icon: mdi:curtains
+        state: "{{ states('binary_sensor.living_room_window_contact') }}"

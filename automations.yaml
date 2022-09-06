@@ -1376,6 +1376,14 @@
     entity_id: input_boolean.modo_tv
     to: 'off'
     id: modo_tv_off
+  - platform: state
+    entity_id: binary_sensor.open_windows_mode
+    to: 'on'
+    id: windows_open
+  - platform: state
+    entity_id: binary_sensor.open_windows_mode
+    to: 'off'
+    id: windows_closed
   - platform: time
     at: 02:00:00
     id: two_am
@@ -1395,9 +1403,14 @@
       - condition: trigger
         id: sunset
       sequence:
-      - condition: state
-        entity_id: input_boolean.dining_mode
-        state: 'off'
+      - condition: and
+        conditions:
+        - condition: state
+          entity_id: input_boolean.dining_mode
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.open_windows_mode
+          state: 'off'
       - service: script.turn_on
         data: {}
         target:
@@ -1440,8 +1453,12 @@
         target:
           entity_id: script.security_lights_turn_on_lights
     - conditions:
-      - condition: trigger
-        id: dining_mode_on
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: dining_mode_on
+        - condition: trigger
+          id: windows_open
       sequence:
       - service: light.turn_off
         data: {}
@@ -1456,9 +1473,27 @@
           - script.security_lights_dining_room
           - script.security_lights_corridor
     - conditions:
-      - condition: trigger
-        id: dining_mode_off
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: dining_mode_off
+        - condition: trigger
+          id: windows_closed
       sequence:
+      - condition: and
+        conditions:
+        - condition: template
+          value_template: '{{  (utcnow().strftime(''%T'')) > (states(''sensor.sunset_offset'')
+            | as_datetime).strftime(''%T'') or (utcnow().strftime(''%T'')) < (states(''sensor.sunrise_offset'')
+            | as_datetime).strftime(''%T'') }}
+
+            '
+        - condition: state
+          entity_id: input_boolean.dining_mode
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.open_windows_mode
+          state: 'off'
       - service: script.turn_on
         data: {}
         target:
