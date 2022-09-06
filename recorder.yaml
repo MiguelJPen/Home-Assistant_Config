@@ -49,8 +49,4 @@ recorder:
   exclude:
     entity_globs:
       - binary_sensor.barrera_*_tamper
-      - sensor.aemet_*temperature
-      - sensor.aemet_*humidity
-    entities:
-      - sensor.0x00158d00053e7f5f_temperature
-      - sensor.0x00158d00053ed958_temperature
+      - sensor.aemet_*

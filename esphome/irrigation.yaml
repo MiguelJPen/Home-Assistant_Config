@@ -311,6 +311,7 @@ switch:
   #### Relay for the AC adaptor
   - platform: gpio
     id: ac_adaptor
+    icon: mdi:connection
     pin:
       number: $ac_adaptor_relay_pin
     name: "Adaptador AC"

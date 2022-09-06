@@ -1,35 +1,7 @@
 device_tracker.google_maps_100547873302931257193:
   friendly_name: Miguel
-binary_sensor.pir_exterior_entrada_contact:
-  device_class: motion
-binary_sensor.kitchen_fence_contact:
-  device_class: window
-binary_sensor.dining_room_fence_contact:
-  device_class: window
-binary_sensor.pir_exterior_oeste_contact:
-  device_class: motion
-binary_sensor.pir_exterior_noroeste_contact:
-  device_class: motion
-binary_sensor.pir_exterior_norte_contact:
-  device_class: motion
-binary_sensor.pir_exterior_este_contact:
-  device_class: motion
-binary_sensor.pir_exterior_sureste_contact:
-  device_class: motion
-binary_sensor.pir_exterior_sur_contact:
-  device_class: motion
-sensor.exterior_sensor_temperature:
-  friendly_name: Temperatura exterior
-sensor.hourly_energy:
-  friendly_name: Energía consumida cada hora
-sensor.home_energy_monitor_power:
-  friendly_name: Potencia instantánea
-sensor.exterior_sensor_humidity:
-  friendly_name: Humedad exterior
 sensor.average_pressure:
   friendly_name: Presión atmosférica
-switch.adaptador_ac:
-  icon: mdi:connection
 sensor.daily_energy_llana:
   friendly_name: Horas llanas
 sensor.daily_energy_punta:
