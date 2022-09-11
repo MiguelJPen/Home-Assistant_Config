@@ -321,6 +321,7 @@ switch:
   #### Main valve
   - platform: gpio
     id: main_valve
+    icon: mdi:pipe-valve
     pin: 
       number: $main_valve_relay_pin
       inverted: True
@@ -330,6 +331,7 @@ switch:
   #### Swimming pool valve
   - platform: gpio
     id: swimming_pool_valve
+    icon: mdi:pipe-valve
     pin: 
       number: $pool_valve_relay_pin
       inverted: True
@@ -338,6 +340,7 @@ switch:
   #### North valve
   - platform: gpio
     id: north_valve
+    icon: mdi:pipe-valve
     pin: 
       number: $north_valve_relay_pin
       inverted: True
@@ -346,6 +349,7 @@ switch:
   #### South valve
   - platform: gpio
     id: south_valve
+    icon: mdi:pipe-valve
     pin: 
       number: $south_valve_relay_pin
       inverted: True
@@ -406,6 +410,7 @@ switch:
           id(pool_filling_timestamps_off).publish_state(delete_first_timestamp(id(pool_filling_timestamps_off).state));
   - platform: template
     name: Pool filling automation
+    icon: mdi:refresh-auto
     id: pool_filling_automation
     lambda: return id(pool_filling_automation_bool);
     turn_on_action:
@@ -468,6 +473,7 @@ switch:
           id(north_zone_timestamps_off).publish_state(delete_first_timestamp(id(north_zone_timestamps_off).state));
   - platform: template
     name: North zone automation
+    icon: mdi:refresh-auto
     id: north_zone_automation
     lambda: return id(north_zone_automation_bool);
     turn_on_action:
@@ -526,6 +532,7 @@ switch:
           id(south_zone_timestamps_off).publish_state(delete_first_timestamp(id(south_zone_timestamps_off).state));
   - platform: template
     name: South zone automation
+    icon: mdi:refresh-auto
     id: south_zone_automation
     lambda: return id(south_zone_automation_bool);
     turn_on_action:
@@ -665,6 +672,7 @@ text_sensor:
     internal: True
   - platform: template
     name: Pool filling next on
+    icon: mdi:skip-next
     id: pool_filling_next_on_ha
   - platform: template
     id: pool_filling_next_off
@@ -681,6 +689,7 @@ text_sensor:
     internal: True
   - platform: template
     name: North zone next on
+    icon: mdi:skip-next
     id: north_zone_next_on_ha
   - platform: template
     id: north_zone_next_off
@@ -697,6 +706,7 @@ text_sensor:
     internal: True
   - platform: template
     name: South zone next on
+    icon: mdi:skip-next
     id: south_zone_next_on_ha
   - platform: template
     id: south_zone_next_off
@@ -715,9 +725,11 @@ text_sensor:
   #### Last automatic irrigation
   - platform: template
     name: North zone last automatic irrigation
+    icon: mdi:calendar-clock-outline
     id: north_zone_last_automatic_irrigation_ha
   - platform: template
     name: South zone last automatic irrigation
+    icon: mdi:calendar-clock-outline
     id: south_zone_last_automatic_irrigation_ha
 
   # ========================================================================= #

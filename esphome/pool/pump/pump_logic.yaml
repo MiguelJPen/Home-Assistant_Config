@@ -1,0 +1,150 @@
+esphome:
+  on_boot:
+    priority: 800.0
+    then:
+      - delay: 20s
+      - lambda: |-
+          id(secure_pumping) = id(pool_low_level).state;
+          set_new_pumping_time();
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+          id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn) && id(pump_automation_bool))
+            id(pool_pump).turn_on();
+
+# ============================================================================ #
+globals:
+  ## Bool to save virtual switches states
+  - id: pump_automation_bool
+    type: bool
+    restore_value: yes
+  - id: pump_automation_full_bool
+    type: bool
+    restore_value: yes
+  - id: pump_winter_mode_bool
+    type: bool
+    restore_value: yes
+
+# ============================================================================ #
+sensor:
+  ## Countdown sensor
+  - platform: template
+    name: ${pump_upper_id} left
+    id: pump_left
+    update_interval: never
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(pool_pump).state && (id(pump_automation_bool) || id(pump_winter_mode_bool))) {
+        return ((atoi((id(pump_next_off).state).c_str()) - id(time_pump).now().timestamp) / 60) + 1;
+      }
+      return 0;
+
+# ============================================================================ #
+switch:
+  #### Switch for automation
+  - platform: template
+    name: ${pump_upper_id} automation
+    icon: mdi:refresh-auto
+    id: pump_automation
+    lambda: return id(pump_automation_bool);
+    turn_on_action:
+      - lambda: |-
+          id(pump_automation_bool) = true;
+          id(pump_winter_mode_bool) = false;
+          set_new_pumping_time();
+      - delay: 100ms
+      - lambda: |-
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
+              id(pool_pump).turn_on();
+          else id(pool_pump).turn_off();
+    turn_off_action:
+      - lambda: |-
+          id(pump_automation_bool) = false;
+
+  #### Switch for pump running full time, but still turning off with no water
+  - platform: template
+    name: ${pump_upper_id} full time
+    icon: mdi:clock-fast
+    id: pump_automation_full
+    lambda: return id(pump_automation_full_bool);
+    turn_on_action:
+      - lambda: |-
+          id(pump_automation_full_bool) = true;
+          set_new_pumping_time();
+      - delay: 100ms
+      - lambda: |-
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
+              id(pool_pump).turn_on();
+          else id(pool_pump).turn_off();
+    turn_off_action:
+      - lambda: |-
+          id(pump_automation_full_bool) = false;
+          set_new_pumping_time();
+      - delay: 100ms
+      - lambda: |-
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
+              id(pool_pump).turn_on();
+          else id(pool_pump).turn_off();
+
+  #### Winter mode switch
+  - platform: template
+    name: Winter mode
+    id: pump_winter_mode
+    icon: mdi:snowflake
+    lambda: return id(pump_winter_mode_bool);
+    turn_on_action:
+      - lambda: |-
+          id(pump_automation_bool) = false;
+          id(pump_winter_mode_bool) = true;
+          set_new_pumping_time();
+      - delay: 100ms
+      - lambda: |-
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state)
+              id(pool_pump).turn_on();
+          else id(pool_pump).turn_off();
+    turn_off_action:
+      - lambda: |-
+          id(pump_winter_mode_bool) = false;
+          set_new_pumping_time();
+
+# ============================================================================ #
+# Cron jobs
+time:
+  - platform: homeassistant
+    id: time_pump
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: 35
+        minutes: 30
+        hours: 0
+        then:
+          - lambda: set_new_pumping_time();
+      - seconds: 3
+        minutes: /1
+        then:
+          - component.update: pump_left
+      - seconds: 5
+        minutes: /1
+        then:
+          - lambda: |-
+              if ((id(pump_winter_mode_bool) || (id(secure_pumping) && id(pump_automation_bool))) && !id(filling_rn) && scheduled_run(id(${pump_id}_next_on).state.c_str()))
+                id(pool_pump).turn_on();
+              if ((id(pump_winter_mode_bool) || id(pump_automation_bool)) && scheduled_run(id(${pump_id}_next_off).state.c_str()))
+                id(pool_pump).turn_off();
+              
+      - seconds: 15
+        minutes: /1
+        then:
+          - lambda: |-
+              if (scheduled_run(id(${pump_id}_next_on).state.c_str()))
+                id(${pump_id}_timestamps_on).publish_state(update_list(id(${pump_id}_timestamps_on).state));
+      - seconds: 20
+        minutes: /1
+        then:
+          - lambda: |-
+              if (scheduled_run(id(${pump_id}_next_off).state.c_str()))
+                id(${pump_id}_timestamps_off).publish_state(update_list(id(${pump_id}_timestamps_off).state));

@@ -1,0 +1,54 @@
+text_sensor:
+  ## Local variables for timestamps
+  - platform: template
+    name: ${upper_id} timestamps on
+    id: ${id}_timestamps_on
+    update_interval: never
+    internal: True
+    on_value:
+      then:
+        # Update the next scheduled run time
+        - component.update: ${id}_next_on
+  - platform: template
+    name: ${upper_id} timestamps off
+    id: ${id}_timestamps_off
+    update_interval: never
+    internal: True
+    on_value:
+      then:
+        # Update the next scheduled run time
+        - component.update: ${id}_next_off
+
+  # ================================== #
+  ## Local variables for next toogle
+  - platform: template
+    id: ${id}_next_on
+    internal: True
+    lambda: return update_next_run(id(${id}_timestamps_on).state);
+    update_interval: never
+    on_value:
+      then:
+        - component.update: ${id}_next_duration
+        - component.update: ${id}_next_on_ha
+  - platform: template
+    name: ${upper_id} next on
+    icon: mdi:skip-next
+    id: ${id}_next_on_ha
+    lambda: return get_time_formated(id(${id}_next_on).state);
+    update_interval: never
+
+  - platform: template
+    id: ${id}_next_off
+    internal: True
+    lambda: return update_next_run(id(${id}_timestamps_off).state);
+    update_interval: never
+    on_value:
+      - then:
+          - component.update: ${id}_next_duration
+          - component.update: ${id}_next_off_ha
+  - platform: template
+    name: ${upper_id} next off
+    icon: mdi:skip-next
+    id: ${id}_next_off_ha
+    lambda: return get_time_formated(id(${id}_next_off).state);
+    update_interval: never

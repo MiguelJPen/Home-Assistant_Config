@@ -1,0 +1,23 @@
+sensor:
+  #### Precipitation sensor
+  #### Surface of the rain gauge: 5.2cm * 11.2cm = 58.24cm^2
+  #### 7 flips per 11mL => 11/7 = 1.57mL per pulse
+  #### 1mm rain = 5.824mL in the rain gauge (due to surface)
+  #### pulses/mm = 5.824/(11/7) = 3.709554
+  #### mm/pulse = 0.269574
+  - platform: pulse_meter
+    pin:
+      number: ${rain_sensor_pin}
+      mode:
+        input: true
+    name: "Rain flips"
+    internal_filter_mode: PULSE
+    internal_filter: 1ms
+    internal: True
+    total:
+      unit_of_measurement: 'mm'
+      name: 'Pluviometer'
+      icon: mdi:weather-rainy
+      accuracy_decimals: 1
+      filters:
+        - multiply: 0.269574

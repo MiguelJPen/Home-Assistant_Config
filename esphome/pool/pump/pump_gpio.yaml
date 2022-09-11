@@ -1,0 +1,69 @@
+switch:
+  #### Pool pump relay switch
+  - platform: gpio
+    name: Pool pump
+    icon: mdi:pump
+    id: pool_pump
+    pin:
+      number: ${pump_relay_pin}
+      inverted: True
+    restore_mode: ALWAYS_OFF
+    on_turn_on:
+      - lambda: |-
+          id(pump_automation_bool) = false;
+          id(pump_winter_mode_bool) = false;
+      - component.update: pump_left
+    on_turn_off:
+      - component.update: pump_left
+
+# ============================================================================ #
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: ${pump_running_sensor_pin}
+      mode:
+        input: true
+    name: Pool pump running
+    id: pool_pump_running_sensor
+    icon: mdi:pump
+    device_class: running
+    publish_initial_state: True
+    filters:
+      delayed_on_off: 50ms
+
+  - platform: gpio
+    pin:
+      number: ${pump_manual_physical_switch_pin}
+      mode:
+        input: True
+        pulldown: True
+    name: Pool pump manual switch (debug)
+    id: pump_manual_physical_switch
+    publish_initial_state: True
+    filters:
+      delayed_on_off: 70ms
+    on_state:
+      then:
+        - lambda: |-
+            if (id(pump_manual_physical_switch).state) id(pool_pump).turn_on();
+            else if (!id(pump_manual_physical_switch).state) id(pool_pump).turn_off();
+
+  - platform: gpio
+    pin:
+      number: ${pump_automation_physical_switch_pin}
+      mode:
+        input: True
+        pulldown: True
+    name: Pool pump automation switch (debug)
+    id: pump_automation_physical_switch
+    publish_initial_state: True
+    filters:
+      delayed_on_off: 40ms
+    on_state:
+      then:
+        - lambda: |-
+            if (id(pump_automation_physical_switch).state) id(pump_automation).turn_on();
+            else if (!id(pump_automation_physical_switch).state) {
+              id(pool_pump).turn_off();
+              id(pump_automation).turn_off();
+            }

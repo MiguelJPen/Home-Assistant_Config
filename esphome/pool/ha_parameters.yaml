@@ -1,0 +1,34 @@
+globals:
+  #### Weather metrics
+  - id: mean_temp
+    type: float
+    restore_value: yes
+
+# ============================================================================ #
+sensor:
+  ## Home Assistant get sensors
+  ### To retrieve weather metrics from home assistant
+  - platform: homeassistant
+    id: ui_mean_temp
+    entity_id: sensor.exterior_temperature_mean_over_last_48_hours
+    on_value: 
+      then:
+        - lambda: id(mean_temp) = id(ui_mean_temp).state;
+
+# ============================================================================ #
+binary_sensor:
+  #### For saving filling state
+  - platform: homeassistant
+    id: ui_pool_filling
+    internal: True
+    entity_id: switch.pool_filling_automation
+    on_state:
+      then:
+        - lambda: |-
+            id(pool_filling_bool) = id(ui_pool_filling).state;
+            if (id(pool_filling_bool) && !id(pool_high_level).state && !id(pool_filling_requested)) {
+              id(pool_filling_request_today).execute();
+            }
+            else if(!id(pool_filling_bool)) {
+              id(pool_filling_requested) = false;
+            }

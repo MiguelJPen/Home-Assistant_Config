@@ -1,0 +1,17 @@
+text_sensor:
+  #### To see time in Home Assistant
+  - platform: template
+    id: ${name}_time
+    name: ${upper_name} time
+    icon: mdi:calendar-clock
+
+time:
+  - platform: homeassistant
+    id: time_sntp
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: 0
+        minutes: /1
+        then:
+          - lambda: |-
+              id(${name}_time).publish_state(get_time_formated(to_string(id(time_sntp).now().timestamp)));

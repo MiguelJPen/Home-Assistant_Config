@@ -1,0 +1,20 @@
+switch:
+  #### Switches for debugging
+  - platform: template
+    name: Secure pumping (debug)
+    icon: mdi:security
+    disabled_by_default: True
+    lambda: return id(secure_pumping);
+    turn_on_action:
+      - lambda: id(secure_pumping) = true;
+    turn_off_action:
+      - lambda: id(secure_pumping) = false;
+  - platform: template
+    name: Filling right now (debug)
+    icon: mdi:security
+    disabled_by_default: True
+    lambda: return id(filling_rn);
+    turn_on_action:
+      - lambda: id(filling_rn) = true;
+    turn_off_action:
+      - lambda: id(filling_rn) = false;

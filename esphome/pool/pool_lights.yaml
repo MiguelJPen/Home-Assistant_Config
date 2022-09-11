@@ -1,0 +1,33 @@
+light:
+  #### Pool lights
+  - platform: binary
+    name: "Luces de la piscina"
+    id: pool_lights
+    output: pool_lights_output
+    icon: mdi:light-flood-down
+    restore_mode: RESTORE_DEFAULT_OFF
+
+output: 
+  - id: pool_lights_output
+    platform: gpio
+    pin:
+      number: ${pool_lights_relay_pin}
+      inverted: True
+
+# ============================================================================ #
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: ${pool_lights_physical_switch_pin}
+      mode:
+        input: true
+    name: Pool lights switch (debug)
+    id: pool_lights_physical_switch
+    publish_initial_state: True
+    filters:
+      delayed_on_off: 50ms
+    on_state: 
+      then:
+        - lambda: |-
+            if (id(pool_lights_physical_switch).state) id(pool_lights).turn_on().perform();
+            else if (!id(pool_lights_physical_switch).state) id(pool_lights).turn_off().perform();
