@@ -2,7 +2,6 @@
 # For measuring consumption in separated periods
 utility_meter:
   hourly_energy:
-    name: Energía consumida cada hora
     source: sensor.energy_consumption
     cycle: hourly
   daily_energy:

@@ -1,13 +1,13 @@
 sensor:
   - platform: history_stats
-    name: Pool filling today
+    name: Pool filling statistics
     entity_id: switch.pool_filling_manual
     state: "on"
     type: time
     start: "{{ now().replace(hour=0, minute=0, second=0) }}"
     end: "{{ now() }}"
   - platform: history_stats
-    name: Pump running today
+    name: Pump running statistics
     entity_id: binary_sensor.pool_pump_running
     state: "on"
     type: time

@@ -151,7 +151,8 @@
     turn OFF security cameras.
   trigger:
   - platform: state
-    entity_id: alarm_control_panel.el_nino_alarm
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
     to: disarmed
   condition: []
   action:
@@ -162,10 +163,9 @@
       - switch.sirena_exterior
       - switch.sirena_interior
       - switch.entrada_ftp
-      - switch.comedor_video_streaming
-      - switch.comedor_motion_detection
       - switch.fachada_este_ftp
       - switch.fachada_sur_ftp
+      - switch.comedor_motion_detection
   - service: automation.turn_off
     data:
       stop_actions: true
@@ -179,6 +179,15 @@
       title: '*Desconexión de la alarma*'
   - service: esphome.alarm_alarm_beep_beep
     data: {}
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - service: switch.turn_off
+    data: {}
+    target:
+      entity_id: switch.comedor_video_streaming
   mode: single
 - id: '1600642629084'
   alias: Alarm - When armed (Home and Away)
@@ -189,7 +198,8 @@
     to: armed_away
     id: armed_away
   - platform: state
-    entity_id: alarm_control_panel.el_nino_alarm
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
     to: armed_home
     id: armed_home
   condition: []
@@ -205,15 +215,23 @@
         target:
           entity_id:
           - switch.entrada_ftp
-          - switch.comedor_video_streaming
-          - switch.comedor_motion_detection
           - switch.fachada_este_ftp
           - switch.fachada_sur_ftp
+          - switch.comedor_motion_detection
         data: {}
       - service: notify.group
         data:
           message: La alarma ha sido activada en el modo _Fuera de Casa_ a las {{states('sensor.time')}}.
           title: '*Conexión de la alarma*'
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 3
+          milliseconds: 0
+      - service: switch.turn_on
+        data: {}
+        target:
+          entity_id: switch.comedor_video_streaming
     default:
     - service: switch.turn_on
       target:

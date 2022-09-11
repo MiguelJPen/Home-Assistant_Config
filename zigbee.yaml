@@ -7,13 +7,13 @@ input_boolean:
     initial: off
     icon: mdi:cellphone-wireless
 
-# SENSORS
-sensor:
-  # For knowing the state of the zigbee network
-  - platform: mqtt
-    name: Bridge state
-    state_topic: "zigbee2mqtt/bridge/state"
-    icon: mdi:router-network
+# MQTT
+mqtt:
+  sensor:
+    # For knowing the state of the zigbee network
+    - name: Bridge state
+      state_topic: "zigbee2mqtt/bridge/state"
+      icon: mdi:router-network
 
 # AUTOMATIONS
 automation:

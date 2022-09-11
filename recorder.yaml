@@ -42,11 +42,18 @@ recorder:
       - sensor.precipitation
       - binary_sensor.low_level_pool_sensor
       - binary_sensor.high_level_pool_sensor
-      - sensor.pool_filling_today
       - binary_sensor.pool_pump_running
-      - sensor.pump_running_today
+      - sensor.pump_running_statistics
+      - sensor.pool_filling_statistics
 
   exclude:
     entity_globs:
       - binary_sensor.barrera_*_tamper
       - sensor.aemet_*
+    entities:
+      - sensor.aemet_humidity
+      - sensor.aemet_temperature
+      - sensor.aemet_madrid_humidity
+      - sensor.aemet_madrid_temperature
+      - sensor.aemet_murcia_humidity
+      - sensor.aemet_murcia_temperature

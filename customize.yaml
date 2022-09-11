@@ -2,6 +2,8 @@ device_tracker.google_maps_100547873302931257193:
   friendly_name: Miguel
 sensor.average_pressure:
   friendly_name: Presión atmosférica
+sensor.hourly_energy:
+  friendly_name: Energía consumida cada hora
 sensor.daily_energy_llana:
   friendly_name: Horas llanas
 sensor.daily_energy_punta:
