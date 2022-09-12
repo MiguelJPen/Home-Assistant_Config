@@ -5,6 +5,12 @@ esp32:
     framework:
         type: arduino
 
+esphome:
+  name: ${name}
+
+# Enable Home Assistant API
+api:
+
 ota:
   password: !secret ota_irrigation
 

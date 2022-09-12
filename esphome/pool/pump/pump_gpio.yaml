@@ -2,16 +2,13 @@ switch:
   #### Pool pump relay switch
   - platform: gpio
     name: Pool pump
-    icon: mdi:pump
     id: pool_pump
+    internal: True
     pin:
       number: ${pump_relay_pin}
       inverted: True
     restore_mode: ALWAYS_OFF
     on_turn_on:
-      - lambda: |-
-          id(pump_automation_bool) = false;
-          id(pump_winter_mode_bool) = false;
       - component.update: pump_left
     on_turn_off:
       - component.update: pump_left
@@ -45,8 +42,8 @@ binary_sensor:
     on_state:
       then:
         - lambda: |-
-            if (id(pump_manual_physical_switch).state) id(pool_pump).turn_on();
-            else if (!id(pump_manual_physical_switch).state) id(pool_pump).turn_off();
+            if (id(pump_manual_physical_switch).state) id(${pump_id}_manual).turn_on();
+            else if (!id(pump_manual_physical_switch).state) id(${pump_id}_manual).turn_off();
 
   - platform: gpio
     pin:
@@ -64,6 +61,5 @@ binary_sensor:
         - lambda: |-
             if (id(pump_automation_physical_switch).state) id(pump_automation).turn_on();
             else if (!id(pump_automation_physical_switch).state) {
-              id(pool_pump).turn_off();
-              id(pump_automation).turn_off();
+              id(${pump_id}_manual).turn_off();
             }

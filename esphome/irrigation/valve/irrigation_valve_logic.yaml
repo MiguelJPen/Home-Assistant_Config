@@ -1,0 +1,35 @@
+switch:
+  # Virtual zone switches which toggle the relay and check others
+  - platform: template
+    name: ${upper_id} zone
+    id: ${id}_virtual
+    internal: True
+    lambda: return (id(${id}_valve).state && id(${main_id}_valve).state);
+    optimistic: true
+    turn_on_action:
+      - if:
+          condition:
+            - switch.is_off: ${ac_adapter_id}
+          then:
+            - switch.turn_on: ${ac_adapter_id}
+            - delay: 2s
+      - if:
+          condition:
+            - switch.is_on: ${pool_id}_valve
+          then:
+            - switch.turn_off: ${pool_id}_valve
+      - switch.turn_on: ${main_id}_valve
+      - switch.turn_on: ${id}_valve
+      - component.update: ${id}_left
+    turn_off_action:
+      - if:
+          condition:
+            and:
+              - switch.is_off: ${pool_id}_valve
+              - switch.is_off: ${other_valve_id}_valve
+          then:
+            - switch.turn_off: ${main_id}_valve
+            - delay: 5s
+            - switch.turn_off: ${ac_adapter_id}
+      - switch.turn_off: ${id}_valve
+      - component.update: ${id}_left

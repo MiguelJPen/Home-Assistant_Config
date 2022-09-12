@@ -1,0 +1,16 @@
+time:
+  - platform: homeassistant
+    id: time_valve_automation_${id}
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: 20
+        minutes: /1
+        then:
+          - lambda: |-
+              if (scheduled_run(id(${id}_next_on).state.c_str())) {
+                // No need to check automation here, it deletes the timestamp
+                id(pool_filling_now).execute();
+              }
+              if (scheduled_run(id(${id}_next_off).state.c_str())) {
+                id(${id}_virtual).turn_off();
+              }

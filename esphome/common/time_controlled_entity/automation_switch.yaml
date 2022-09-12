@@ -1,0 +1,18 @@
+globals:
+  - id: ${id}_automation_bool
+    type: bool
+    restore_value: True
+
+# ============================================================================ #
+switch:
+  - platform: template
+    name: ${upper_id} automation
+    icon: mdi:refresh-auto
+    id: ${id}_automation
+    lambda: return id(${id}_automation_bool);
+    turn_on_action:
+      - lambda: |-
+          id(${id}_automation_bool) = true;
+    turn_off_action:
+      - lambda: |-
+          id(${id}_automation_bool) = false;

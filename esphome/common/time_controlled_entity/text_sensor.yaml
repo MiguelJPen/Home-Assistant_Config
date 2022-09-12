@@ -52,3 +52,23 @@ text_sensor:
     id: ${id}_next_off_ha
     lambda: return get_time_formated(id(${id}_next_off).state);
     update_interval: never
+
+# ============================================================================ #
+# Cron jobs
+time:
+  - platform: homeassistant
+    id: time_text_sensor_${id}
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: 15
+        minutes: /1
+        then:
+          - lambda: |-
+              if (scheduled_run(id(${id}_next_on).state.c_str()))
+                id(${id}_timestamps_on).publish_state(update_list(id(${id}_timestamps_on).state));
+      - seconds: 20
+        minutes: /1
+        then:
+          - lambda: |-
+              if (scheduled_run(id(${id}_next_off).state.c_str()))
+                id(${id}_timestamps_off).publish_state(update_list(id(${id}_timestamps_off).state));

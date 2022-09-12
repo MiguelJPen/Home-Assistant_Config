@@ -1,0 +1,15 @@
+switch:
+  - platform: template
+    name: ${upper_id} manual
+    id: ${id}_manual
+    lambda: return (id(${id}_virtual).state);
+    optimistic: True
+    turn_on_action:
+      - lambda: |-
+          id(${id}_timestamps_off).publish_state(manual_set(id(${id}_manual_duration).state, id(${id}_timestamps_off).state));
+      - switch.turn_on: ${id}_virtual
+    turn_off_action:
+      - switch.turn_off: ${id}_virtual
+      - lambda: |-
+          id(${id}_timestamps_off).publish_state(delete_first_timestamp(id(${id}_timestamps_off).state));
+      

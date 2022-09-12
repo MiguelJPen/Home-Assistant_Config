@@ -1,0 +1,22 @@
+api:
+  services:
+    - service: reset_next_irrigation_day
+      then:
+        - component.update: next_irrigation_day
+
+# ============================================================================ #
+text_sensor:
+  #### Next day of irrigation, based in temperature, rain...
+  - platform: template
+    id: next_irrigation_day
+    internal: True
+    lambda: return to_string(id(time_sntp).now().timestamp);
+    update_interval: never
+    on_value: 
+      then:
+        - component.update: next_irrigation_ha_day
+  - platform: template
+    name: Next day of irrigation
+    id: next_irrigation_ha_day
+    lambda: return get_time_formated(id(next_irrigation_day).state);
+    update_interval: never

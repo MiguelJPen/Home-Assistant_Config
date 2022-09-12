@@ -1,3 +1,7 @@
+substitutions:
+  pump_id: pump
+  pump_upper_id: Pool pump
+
 esphome:
   on_boot:
     priority: 800.0
@@ -9,6 +13,18 @@ esphome:
           if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
           id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn) && id(pump_automation_bool))
             id(pool_pump).turn_on();
+
+packages:
+  pump_text_sensor: !include
+    file: ../../common/time_controlled_entity/text_sensor.yaml
+    vars:
+      id: ${pump_id}
+      upper_id: ${pump_upper_id}
+  pump_next_duration: !include
+    file: ../../common/time_controlled_entity/next_duration_sensor.yaml
+    vars:
+      id: ${pump_id}
+      upper_id: ${pump_upper_id}
 
 # ============================================================================ #
 globals:
@@ -41,6 +57,23 @@ sensor:
 
 # ============================================================================ #
 switch:
+  #### Manual switch for pump
+  - platform: template
+    name: ${pump_upper_id}
+    id: ${pump_id}_manual
+    icon: mdi:pump
+    lambda: return id(pool_pump).state;
+    turn_on_action:
+      - switch.turn_on: pool_pump
+      - lambda: |-
+          id(pump_automation_bool) = false;
+          id(pump_winter_mode_bool) = false;
+    turn_off_action:
+      - switch.turn_off: pool_pump
+      - lambda: |-
+          id(pump_automation_bool) = false;
+          id(pump_winter_mode_bool) = false;
+    
   #### Switch for automation
   - platform: template
     name: ${pump_upper_id} automation
@@ -135,16 +168,3 @@ time:
                 id(pool_pump).turn_on();
               if ((id(pump_winter_mode_bool) || id(pump_automation_bool)) && scheduled_run(id(${pump_id}_next_off).state.c_str()))
                 id(pool_pump).turn_off();
-              
-      - seconds: 15
-        minutes: /1
-        then:
-          - lambda: |-
-              if (scheduled_run(id(${pump_id}_next_on).state.c_str()))
-                id(${pump_id}_timestamps_on).publish_state(update_list(id(${pump_id}_timestamps_on).state));
-      - seconds: 20
-        minutes: /1
-        then:
-          - lambda: |-
-              if (scheduled_run(id(${pump_id}_next_off).state.c_str()))
-                id(${pump_id}_timestamps_off).publish_state(update_list(id(${pump_id}_timestamps_off).state));

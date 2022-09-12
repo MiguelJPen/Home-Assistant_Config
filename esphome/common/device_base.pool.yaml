@@ -5,8 +5,14 @@ esp32:
   framework:
     type: arduino
 
+esphome:
+  name: $name
+
 ota:
   password: !secret ota_pool
 
 # Enable logging
 logger:
+
+# Enable Home Assistant API
+api:

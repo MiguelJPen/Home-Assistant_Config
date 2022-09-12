@@ -1,0 +1,3 @@
+packages:
+  pump_gpio: !include pump/pump_gpio.yaml
+  pump_logic: !include pump/pump_logic.yaml

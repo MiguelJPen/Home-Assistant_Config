@@ -22,14 +22,14 @@ sensor:
       hours: 48
   - platform: history_stats
     name: North zone irrigation statistics
-    entity_id: switch.north_zone_manual
+    entity_id: switch.north_manual
     state: "on"
     type: time
     start: "{{ now().replace(hour=0, minute=0, second=0) }}"
     end: "{{ now() }}"
   - platform: history_stats
     name: South zone irrigation statistics
-    entity_id: switch.south_zone_manual
+    entity_id: switch.south_manual
     state: "on"
     type: time
     start: "{{ now().replace(hour=0, minute=0, second=0) }}"

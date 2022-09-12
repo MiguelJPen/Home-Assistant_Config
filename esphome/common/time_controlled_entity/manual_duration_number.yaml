@@ -1,0 +1,11 @@
+number:
+  - platform: template
+    name: ${upper_id} manual duration
+    id: ${id}_manual_duration
+    optimistic: true
+    restore_value: true
+    min_value: 3
+    max_value: ${manual_max_duration}
+    step: 1
+    unit_of_measurement: min
+    icon: mdi:timer-sand

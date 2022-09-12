@@ -1,0 +1,23 @@
+sensor:
+  - platform: template
+    name: ${upper_id} left
+    id: ${id}_left
+    update_interval: never
+    accuracy_decimals: 0
+    unit_of_measurement: min
+    icon: mdi:timer-outline
+    lambda: |-
+      if (id(${sensor_id}).state) {
+        return ((atoi((id(${id}_next_off).state).c_str()) - id(time_${id}).now().timestamp) / 60) + 1;
+      }
+      return 0;
+
+time:
+  - platform: homeassistant
+    id: time_${id}
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: 3
+        minutes: /1
+        then:
+          - component.update: ${id}_left

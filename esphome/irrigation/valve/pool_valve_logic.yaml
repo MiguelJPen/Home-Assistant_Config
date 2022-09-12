@@ -1,0 +1,38 @@
+switch:
+  - platform: template
+    name: Pool filling
+    id: ${id}_virtual
+    internal: True
+    lambda: return (id(${id}_valve).state && id(${main_id}_valve).state);
+    optimistic: true
+    turn_on_action:
+      - if:
+          condition:
+            - switch.is_off: ${ac_adapter_id}
+          then:
+            - switch.turn_on: ${ac_adapter_id}
+            - delay: 1s
+      - switch.turn_off: ${north_id}_valve
+      - switch.turn_off: ${south_id}_valve
+      - switch.turn_on: ${main_id}_valve
+      - switch.turn_on: ${id}_valve
+      - component.update: ${id}_left
+      - component.update: ${id}_state
+    turn_off_action:
+      - if:
+          condition:
+            and:
+              - switch.is_off: ${north_id}_valve
+              - switch.is_off: ${south_id}_valve
+          then:
+            - switch.turn_off: ${main_id}_valve
+            - delay: 5s
+            - switch.turn_off: ${ac_adapter_id}
+      - switch.turn_off: ${id}_valve
+      - component.update: ${id}_left
+      - component.update: ${id}_state
+      - homeassistant.service:
+          service: esphome.pool_filling_completed
+      - lambda: id(${id}_filling_requested) = false;
+
+

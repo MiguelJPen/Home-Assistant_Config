@@ -1,0 +1,19 @@
+packages:
+  gpio_control: !include
+    file: valve_gpio.yaml
+  time_left_sensor: !include
+    file: ../../common/time_controlled_entity/left_sensor.yaml
+  next_duration_sensor: !include
+    file: ../../common/time_controlled_entity/next_duration_sensor.yaml
+  automation_switch: !include
+    file: ../../common/time_controlled_entity/automation_switch.yaml
+  manual_switch: !include 
+    file: ../../common/time_controlled_entity/manual_switch.yaml
+  manual_duration_number: !include 
+    file: ../../common/time_controlled_entity/manual_duration_number.yaml
+  text_sensor: !include 
+    file: ../../common/time_controlled_entity/text_sensor.yaml
+  last_automatic_irrigation: !include 
+    file: ../../common/time_controlled_entity/last_execution_sensor.yaml
+  valve_automation: !include 
+    file: irrigation_valve_automation.yaml

@@ -1,0 +1,22 @@
+packages:
+  gpio_control: !include
+    file: valve_gpio.yaml
+  time_left_sensor: !include
+    file: ../../common/time_controlled_entity/left_sensor.yaml
+  next_duration_sensor: !include
+    file: ../../common/time_controlled_entity/next_duration_sensor.yaml
+  manual_duration_number: !include 
+    file: ../../common/time_controlled_entity/manual_duration_number.yaml
+  text_sensor: !include 
+    file: ../../common/time_controlled_entity/text_sensor.yaml
+
+esphome:
+  on_boot: 
+    priority: 870.0
+    then:
+      - delay: 23s
+      - lambda: |-
+          id(${id}_timestamps_on).publish_state("");
+          id(${id}_timestamps_off).publish_state("");
+          if(id(${id}_filling_requested)) set_pool_filling();
+

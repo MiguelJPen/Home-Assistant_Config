@@ -23,8 +23,8 @@ void set_new_irrigation_time() {
     float mean_hum = id(mean_humid);
     float min_hum = id(min_humid);
     float precip = id(precip_yesterday);
-    time_t old_next_irrigation = atoi((id(next_day_irrigation).state).c_str());
-    time_t last_irrigation = id(north_zone_last_automatic_irrigation);
+    time_t old_next_irrigation = atoi((id(next_irrigation_day).state).c_str());
+    time_t last_irrigation = id(north_last_automatic_execution);
 
     time_t now_timestamp = id(time_sntp).now().timestamp;
     double diff_secs = difftime(old_next_irrigation, now_timestamp);
@@ -32,10 +32,10 @@ void set_new_irrigation_time() {
 
     //ESP_LOGD("set_new_irrigation_time", "DIFF SECS: %f, NO WATER DAYS: %i", diff_secs, no_water_days);
 
-    id(north_zone_timestamps_on).publish_state("");
-    id(north_zone_timestamps_off).publish_state("");
-    id(south_zone_timestamps_on).publish_state("");
-    id(south_zone_timestamps_off).publish_state("");
+    id(north_timestamps_on).publish_state("");
+    id(north_timestamps_off).publish_state("");
+    id(south_timestamps_on).publish_state("");
+    id(south_timestamps_off).publish_state("");
 
 
     // Set how many irrigation days
@@ -52,7 +52,7 @@ void set_new_irrigation_time() {
             no_water_days = max(2, no_water_days);
         else no_water_days = max(1, no_water_days);
     }
-    id(next_day_irrigation).publish_state(to_string(add_day(now_timestamp, no_water_days)));
+    id(next_irrigation_day).publish_state(to_string(add_day(now_timestamp, no_water_days)));
 
     // Set the time per day
     time_per_day += (int) (pow(2, 3.2 + max((float)0, (mean_tmp - 10)/5)));
@@ -91,10 +91,10 @@ void set_new_irrigation_time() {
 void set_irrigation(time_t today, int days_ahead, int mins) {
     time_t new_irrigation_day = today + (days_ahead * 3600 * 24);
     struct tm new_time = *localtime(&new_irrigation_day);
-    string north_on = id(north_zone_timestamps_on).state;
-    string north_off = id(north_zone_timestamps_off).state;
-    string south_on = id(south_zone_timestamps_on).state;
-    string south_off = id(south_zone_timestamps_off).state;
+    string north_on = id(north_timestamps_on).state;
+    string north_off = id(north_timestamps_off).state;
+    string south_on = id(south_timestamps_on).state;
+    string south_off = id(south_timestamps_off).state;
     string comma_north_on = (north_on.empty() ? "" : ",");
     string comma_north_off = (north_off.empty() ? "" : ",");
     string comma_south_on = (south_on.empty() ? "" : ",");
@@ -117,10 +117,10 @@ void set_irrigation(time_t today, int days_ahead, int mins) {
     north_off = update_list(north_off);
     south_on = update_list(south_on);
     south_off = update_list(south_off);
-    id(north_zone_timestamps_on).publish_state(north_on);
-    id(north_zone_timestamps_off).publish_state(north_off);
-    id(south_zone_timestamps_on).publish_state(south_on);
-    id(south_zone_timestamps_off).publish_state(south_off);
+    id(north_timestamps_on).publish_state(north_on);
+    id(north_timestamps_off).publish_state(north_off);
+    id(south_timestamps_on).publish_state(south_on);
+    id(south_timestamps_off).publish_state(south_off);
 }
 
 time_t add_day(time_t time, int days) {
@@ -159,8 +159,8 @@ void set_pool_filling() {
     new_time.tm_sec = 0;
 
     time_t aux = mktime(&new_time);
-    id(pool_filling_timestamps_on).publish_state(to_string(aux));
-    id(pool_filling_timestamps_off).publish_state(to_string(aux + 3 * 60));
+    id(pool_timestamps_on).publish_state(to_string(aux));
+    id(pool_timestamps_off).publish_state(to_string(aux + 3 * 60));
 }
 
 void set_more_pool_filling() {
@@ -169,7 +169,7 @@ void set_more_pool_filling() {
 
     new_time.tm_sec = 0;
     time_t aux = mktime(&new_time);
-    id(pool_filling_timestamps_off).publish_state(to_string(aux + 3 * 60));
+    id(pool_timestamps_off).publish_state(to_string(aux + 3 * 60));
 }
 
 string manual_set(int duration, string time_list) {

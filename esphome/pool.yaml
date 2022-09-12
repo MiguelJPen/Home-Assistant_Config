@@ -1,8 +1,6 @@
 substitutions:
   name: pool
   upper_name: Swimming pool
-  pump_id: pump
-  pump_upper_id: Pool pump
   ####
   low_level_sensor_pin: "36"
   high_level_sensor_pin: "35"
@@ -16,7 +14,6 @@ substitutions:
   #### Do not use pin 14, as it caused some errors restarting the device when pulled down
 
 esphome:
-  name: $name
   includes:
     - time_control.hpp
     - pool.hpp
@@ -33,19 +30,4 @@ packages:
   pool_lights: !include pool/pool_lights.yaml
   pool_level_sensor: !include pool/pool_level.yaml
   pool_filling: !include pool/pool_filling.yaml
-  pump_gpio: !include pool/pump/pump_gpio.yaml
-  pump_logic: !include pool/pump/pump_logic.yaml
-  ####
-  pump_text_sensor: !include
-    file: common/time_controlled_entity/text_sensor.yaml
-    vars:
-      id: ${pump_id}
-      upper_id: ${pump_upper_id}
-  pump_next_duration: !include
-    file: common/time_controlled_entity/next_duration_sensor.yaml
-    vars:
-      id: ${pump_id}
-      upper_id: ${pump_upper_id}
-
-# Enable Home Assistant API
-api:
+  pool_pump: !include pool/pool_pump.yaml

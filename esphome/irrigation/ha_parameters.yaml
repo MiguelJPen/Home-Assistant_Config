@@ -1,0 +1,59 @@
+globals:
+  ## Weather metrics
+  - id: mean_temp
+    type: float
+    restore_value: True
+  - id: mean_humid
+    type: float
+    restore_value: True
+  - id: min_humid
+    type: float
+    restore_value: True
+  - id: precip_yesterday
+    type: float
+    restore_value: True
+
+# ============================================================================ #
+sensor:
+  ## To store weather metrics
+  - platform: template
+    name: Actual temperature
+    id: act_temp
+    internal: True
+    on_value_range:
+      - below: 0
+        then:
+          - script.execute: avoid_freezing_pipes
+
+  ## To retrieve weather metrics from home assistant
+  - platform: homeassistant
+    id: ui_mean_temp
+    entity_id: sensor.exterior_temperature_mean_over_last_48_hours
+    on_value: 
+      then:
+        - lambda: id(mean_temp) = id(ui_mean_temp).state;
+  - platform: homeassistant
+    id: ui_mean_humid
+    entity_id: sensor.exterior_humidity_mean_over_last_48_hours
+    on_value: 
+      then:
+        - lambda: id(mean_humid) = id(ui_mean_humid).state;
+  - platform: homeassistant
+    id: ui_min_humid
+    entity_id: sensor.exterior_humidity_minimum_over_last_48_hours
+    on_value: 
+      then:
+        - lambda: id(min_humid) = id(ui_min_humid).state;
+  - platform: homeassistant
+    id: ui_precip_yesterday
+    entity_id: sensor.precipitation
+    attribute: last_period
+    on_value: 
+      then:
+        - lambda: id(precip_yesterday) = id(ui_precip_yesterday).state;
+  - platform: homeassistant
+    id: ui_act_temp
+    entity_id: sensor.exterior_sensor_temperature
+    on_value: 
+      then:
+        - lambda: id(act_temp).publish_state(id(ui_act_temp).state);

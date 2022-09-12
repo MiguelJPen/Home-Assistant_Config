@@ -1,0 +1,16 @@
+time:
+  - platform: homeassistant
+    id: time_valve_automation_${id}
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: 10
+        minutes: /1
+        then:
+          - lambda: |-
+              if (id(${id}_automation_bool) && scheduled_run(id(${id}_next_on).state.c_str())) {
+                id(${id}_virtual).turn_on();
+                id(update_last_automatic_execution_${id}).execute();
+              }
+              if (scheduled_run(id(${id}_next_off).state.c_str())) {
+                id(${id}_virtual).turn_off();
+              }

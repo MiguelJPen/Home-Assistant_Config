@@ -1,0 +1,10 @@
+switch:
+  ## Relay which trigger the solenoid
+  - platform: gpio
+    id: ${id}_valve
+    icon: mdi:pipe-valve
+    pin: 
+      number: ${relay_pin}
+      inverted: True
+    name: ${upper_id} valve
+    restore_mode: ALWAYS_OFF

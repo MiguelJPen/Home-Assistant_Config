@@ -1,0 +1,108 @@
+substitutions:
+  pool_sensor_id: pool_virtual
+  pool_manual_max_duration: "480"
+
+packages:
+  pool_valve: !include 
+    file: valve/pool_valve.yaml
+    vars:
+      id: ${pool_id}
+      upper_id: ${pool_upper_id}
+      sensor_id: ${pool_sensor_id}
+      manual_max_duration: ${pool_manual_max_duration}
+      relay_pin: ${pool_valve_relay_pin}
+  pool_valve_logic: !include 
+    file: valve/pool_valve_logic.yaml
+    vars:
+      id: ${pool_id}
+      upper_id: ${pool_upper_id}
+
+esphome:
+  on_boot:
+    priority: 950.0
+    then:
+      - delay: 24s
+      - component.update: ${pool_id}_state
+
+globals:
+  ## Bool to save automation mode
+  - id: ${pool_id}_automation_bool
+    type: bool
+    restore_value: True
+
+  ## Bool to save if pool filling requested when the device is restarted
+  - id: ${pool_id}_filling_requested
+    type: bool
+    restore_value: True
+
+# ============================================================================ #
+api:
+  services:
+    - service: filling_start
+      then:
+        - switch.turn_on: ${pool_id}_virtual
+    - service: request_pool_water
+      then:
+        - lambda: |-
+            set_pool_filling();
+            id(${pool_id}_filling_requested) = true;
+        - homeassistant.service:
+            service: esphome.pool_filling_requested
+    - service: request_more_pool_water
+      then:
+        - lambda: |-
+            set_more_pool_filling();
+
+# ============================================================================ #
+script:
+  # Script to execute when pool starts to fill
+  - id: pool_filling_now
+    then:
+      - homeassistant.service: # Turns off the pump and then opens the valve
+          service: esphome.pool_filling_start
+
+# ============================================================================ #
+switch:
+  #### A variation of the common switches
+  - platform: template
+    name: Pool filling automation
+    icon: mdi:refresh-auto
+    id: ${pool_id}_automation
+    lambda: return id(${pool_id}_automation_bool);
+    turn_on_action:
+      - lambda: |-
+          id(${pool_id}_automation_bool) = true;
+    turn_off_action:
+      - lambda: |-
+          id(${pool_id}_automation_bool) = false;
+          id(${pool_id}_filling_requested) = false;
+          id(${pool_id}_timestamps_on).publish_state("");
+          id(${pool_id}_timestamps_off).publish_state("");
+  - platform: template
+    name: Pool filling manual
+    id: ${pool_id}_manual
+    lambda: return (id(${pool_id}_virtual).state);
+    optimistic: True
+    turn_on_action:
+      - lambda: |-
+          id(${pool_id}_timestamps_off).publish_state(manual_set(id(${pool_id}_manual_duration).state, id(${pool_id}_timestamps_off).state));
+      - homeassistant.service:
+          service: esphome.pool_manual_filling_start
+    turn_off_action:
+      - switch.turn_off: ${pool_id}_virtual
+      - lambda: |-
+          id(${pool_id}_timestamps_off).publish_state(delete_first_timestamp(id(${pool_id}_timestamps_off).state));
+
+# ============================================================================ #
+text_sensor:
+  #### Pool filling readable state
+  - platform: template
+    name: Estado del llenado
+    id: ${pool_id}_state
+    update_interval: never
+    icon: mdi:waves-arrow-up
+    lambda: |-
+      if (!id(irrigation_available).state || id(${north_id}_valve).state || id(${south_id}_valve).state) return {"No disponible"};
+      if (id(main_valve).state && id(ac_adapter).state && id(${pool_id}_valve).state) return {"Llenando..."};
+      return {"Disponible"};
+

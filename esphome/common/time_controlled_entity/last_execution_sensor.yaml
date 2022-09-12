@@ -1,0 +1,39 @@
+esphome:
+  on_boot:
+    priority: 850.0
+    then:
+      - delay: 21s
+      - lambda: |-
+          // If this variable has been deleted for any reason, reset it
+          if (id(${id}_last_automatic_execution) == 0)
+            id(update_last_automatic_execution_${id}).execute();
+
+api:
+  services:
+    - service: reset_${id}_last_automatic_execution
+      then:
+        - script.execute: update_last_automatic_execution_${id}
+
+# ============================================================================ #
+globals:
+  ## Last automatic irrigation
+  - id: ${id}_last_automatic_execution
+    type: long int
+    restore_value: True
+
+# ============================================================================ #
+script:
+  - id: update_last_automatic_execution_${id}
+    then:
+      - lambda: id(${id}_last_automatic_execution) = (id(time_sntp).now().timestamp - (3600 * 24 * 3));
+      - component.update: ${id}_last_automatic_execution_ha
+
+# ============================================================================ #
+text_sensor:
+  #### Last automatic irrigation
+  - platform: template
+    id: ${id}_last_automatic_execution_ha
+    name: ${upper_id} last automatic execution
+    lambda: return get_time_formated(to_string(id(${id}_last_automatic_execution)));
+    icon: mdi:calendar-clock-outline
+    update_interval: never
