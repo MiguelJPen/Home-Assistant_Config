@@ -47,6 +47,8 @@ recorder:
       - sensor.pool_filling_statistics
       - sensor.north_zone_irrigation_statistics
       - sensor.south_zone_irrigation_statistics
+      - sensor.north_irrigation_statistics
+      - sensor.south_irrigation_statistics
 
   exclude:
     entity_globs:

@@ -13,14 +13,11 @@ switch:
           then:
             - switch.turn_on: ${ac_adapter_id}
             - delay: 2s
-      - if:
-          condition:
-            - switch.is_on: ${pool_id}_valve
-          then:
-            - switch.turn_off: ${pool_id}_valve
+      - switch.turn_off: ${pool_id}_valve
       - switch.turn_on: ${main_id}_valve
       - switch.turn_on: ${id}_valve
       - component.update: ${id}_left
+      - component.update: ${irrigation_id}_state
     turn_off_action:
       - if:
           condition:
@@ -33,3 +30,4 @@ switch:
             - switch.turn_off: ${ac_adapter_id}
       - switch.turn_off: ${id}_valve
       - component.update: ${id}_left
+      - component.update: ${irrigation_id}_state

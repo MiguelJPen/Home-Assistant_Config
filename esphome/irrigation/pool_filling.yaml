@@ -1,9 +1,8 @@
 substitutions:
   pool_sensor_id: pool_virtual
-  pool_manual_max_duration: "480"
 
 packages:
-  pool_valve: !include 
+  pool_valve: !include
     file: valve/pool_valve.yaml
     vars:
       id: ${pool_id}
@@ -11,7 +10,7 @@ packages:
       sensor_id: ${pool_sensor_id}
       manual_max_duration: ${pool_manual_max_duration}
       relay_pin: ${pool_valve_relay_pin}
-  pool_valve_logic: !include 
+  pool_valve_logic: !include
     file: valve/pool_valve_logic.yaml
     vars:
       id: ${pool_id}
@@ -19,9 +18,9 @@ packages:
 
 esphome:
   on_boot:
-    priority: 950.0
+    priority: 826.0
     then:
-      - delay: 24s
+      - delay: 22s
       - component.update: ${pool_id}_state
 
 globals:
@@ -102,7 +101,10 @@ text_sensor:
     update_interval: never
     icon: mdi:waves-arrow-up
     lambda: |-
-      if (!id(irrigation_available).state || id(${north_id}_valve).state || id(${south_id}_valve).state) return {"No disponible"};
-      if (id(main_valve).state && id(ac_adapter).state && id(${pool_id}_valve).state) return {"Llenando..."};
-      return {"Disponible"};
-
+      if (!id(${irrigation_id}_available).state && id(${pool_id}_virtual).state)
+        return {"¡Error!"};
+      if (id(${irrigation_id}_available).state && id(${pool_id}_virtual).state)
+        return {"Llenando..."};
+      if(id(${irrigation_id}_available).state && !(id(${north_id}_virtual).state || id(${south_id}_virtual).state)) 
+        return {"Disponible"};
+      return {"No disponible"};

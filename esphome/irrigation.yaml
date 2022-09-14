@@ -2,24 +2,31 @@ substitutions:
   name: irrigation
   upper_name: Irrigation
   ac_adapter_id: ac_adapter
+  irrigation_id: irrigation
   main_id: main
   main_upper_id: Main
   north_id: "north"
   north_upper_id: "North"
   north_sensor_id: north_virtual
-  north_manual_max_duration: "240"
   south_id: "south"
   south_upper_id: "South"
   south_sensor_id: south_virtual
-  south_manual_max_duration: "240"
   pool_id: "pool"
   pool_upper_id: "Pool"
-  ####
+  
+  #### GPIO Pins
   ac_adapter_relay_pin: "33"
   main_valve_relay_pin: "15"
   pool_valve_relay_pin: "14"
   north_valve_relay_pin: "17"
   south_valve_relay_pin: "5"
+
+  #### Maximum manual durations
+  north_manual_max_duration: "240"
+  south_manual_max_duration: "240"
+  pool_manual_max_duration: "480"
+
+  #### Update seconds to avoid overlapping in code
 
 packages:
   device_base: !include common/device_base.irrigation.yaml

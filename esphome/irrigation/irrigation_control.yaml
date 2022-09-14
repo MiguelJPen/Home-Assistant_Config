@@ -1,11 +1,11 @@
 packages:
   next_irrigation_day: !include irrigation_next_day_sensor.yaml
-  main_valve: !include
+  ${main_id}_valve: !include
     file: valve/valve_gpio.yaml
     vars:
       id: ${main_id}
       upper_id: ${main_upper_id}
-      relay_pin: ${main_valve_relay_pin}
+      relay_pin: ${${main_id}_valve_relay_pin}
   north_valve: !include
     file: valve/irrigation_valve.yaml
     vars:
@@ -14,7 +14,7 @@ packages:
       sensor_id: ${north_sensor_id}
       manual_max_duration: ${north_manual_max_duration}
       relay_pin: ${north_valve_relay_pin}
-  north_valve_logic: !include 
+  north_valve_logic: !include
     file: valve/irrigation_valve_logic.yaml
     vars:
       id: ${north_id}
@@ -28,7 +28,7 @@ packages:
       sensor_id: ${south_sensor_id}
       manual_max_duration: ${south_manual_max_duration}
       relay_pin: ${south_valve_relay_pin}
-  south_valve_logic: !include 
+  south_valve_logic: !include
     file: valve/irrigation_valve_logic.yaml
     vars:
       id: ${south_id}
@@ -37,14 +37,13 @@ packages:
 
 esphome:
   on_boot:
-    priority: 910.0
+    priority: 855.0
     then:
-      - delay: 25s
+      - delay: 18s
       - component.update: irrigation_period
       - lambda: |-
           set_new_irrigation_time();
-          id(irrigation_available).publish_state(water_available());
-
+          id(${irrigation_id}_available).publish_state(water_available());
 
 # ============================================================================ #
 api:
@@ -64,24 +63,24 @@ script:
               id: act_temp
               below: 0
           then:
-            - switch.turn_on: north_virtual
+            - switch.turn_on: ${north_id}_virtual
             - delay: 15s
-            - switch.turn_on: south_virtual
+            - switch.turn_on: ${south_id}_virtual
             - delay: 4 min
-            - switch.turn_off: north_virtual
+            - switch.turn_off: ${north_id}_virtual
             - delay: 15s
-            - switch.turn_off: south_virtual
+            - switch.turn_off: ${south_id}_virtual
             - delay: 45 min
 
 # ============================================================================ #
 binary_sensor:
   #### Water available boolean
   - platform: template
-    id: irrigation_available
+    id: ${irrigation_id}_available
     internal: True
-    on_state: 
+    on_state:
       - then:
-        - component.update: irrigation_available_text
+          - component.update: ${irrigation_id}_state
 
 # ============================================================================ #
 text_sensor:
@@ -97,13 +96,20 @@ text_sensor:
       if (now_time.tm_mon % 2 == 0) return {"Mañana"};
       return {"Tarde"};
   - platform: template
-    name: Agua de riego
-    id: irrigation_available_text
+    name: Estado del riego
+    id: ${irrigation_id}_state
     update_interval: never
-    icon: mdi:water-pump
+    icon: mdi:sprout
     lambda: |-
-      if(id(irrigation_available).state) return {"Disponible"};
+      if (!id(${irrigation_id}_available).state && (id(${north_id}_virtual).state || id(${south_id}_virtual).state))
+        return {"¡Error!"};
+      if (id(${irrigation_id}_available).state && (id(${north_id}_virtual).state || id(${south_id}_virtual).state))
+        return {"Regando..."};
+      if(id(${irrigation_id}_available).state && !id(${pool_id}_virtual).state) 
+        return {"Disponible"};
       return {"No disponible"};
+    on_value:
+      - component.update: ${pool_id}_state
 
 # ============================================================================ #
 time:
@@ -111,7 +117,7 @@ time:
     id: time_irrigation
     timezone: Europe/Madrid
     on_time:
-      - seconds: 0
+      - seconds: 40
         minutes: 30
         hours: 0
         then:
@@ -127,4 +133,4 @@ time:
         minutes: 0
         hours: 0,8,16
         then:
-          - lambda: id(irrigation_available).publish_state(water_available());
+          - lambda: id(${irrigation_id}_available).publish_state(water_available());

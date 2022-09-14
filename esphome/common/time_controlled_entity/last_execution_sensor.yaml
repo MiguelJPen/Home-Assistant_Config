@@ -16,7 +16,6 @@ api:
 
 # ============================================================================ #
 globals:
-  ## Last automatic irrigation
   - id: ${id}_last_automatic_execution
     type: long int
     restore_value: True
@@ -30,7 +29,6 @@ script:
 
 # ============================================================================ #
 text_sensor:
-  #### Last automatic irrigation
   - platform: template
     id: ${id}_last_automatic_execution_ha
     name: ${upper_id} last automatic execution

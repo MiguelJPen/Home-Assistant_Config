@@ -17,7 +17,7 @@ switch:
       - switch.turn_on: ${main_id}_valve
       - switch.turn_on: ${id}_valve
       - component.update: ${id}_left
-      - component.update: ${id}_state
+      - component.update: ${irrigation_id}_state
     turn_off_action:
       - if:
           condition:
@@ -30,7 +30,7 @@ switch:
             - switch.turn_off: ${ac_adapter_id}
       - switch.turn_off: ${id}_valve
       - component.update: ${id}_left
-      - component.update: ${id}_state
+      - component.update: ${irrigation_id}_state
       - homeassistant.service:
           service: esphome.pool_filling_completed
       - lambda: id(${id}_filling_requested) = false;
