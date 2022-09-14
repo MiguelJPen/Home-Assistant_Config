@@ -1,12 +1,18 @@
 packages:
   next_irrigation_day: !include irrigation_next_day_sensor.yaml
+
+  #### Main valve
   ${main_id}_valve: !include
     file: valve/valve_gpio.yaml
     vars:
       id: ${main_id}
       upper_id: ${main_upper_id}
-      relay_pin: ${${main_id}_valve_relay_pin}
-  north_valve: !include
+      relay_pin: ${main_valve_relay_pin}
+  turn_off_main_valve: !include 
+    file: valve/irrigation_turn_off_main.yaml
+
+  #### North valve
+  ${north_id}_valve: !include
     file: valve/irrigation_valve.yaml
     vars:
       id: ${north_id}
@@ -14,13 +20,18 @@ packages:
       sensor_id: ${north_sensor_id}
       manual_max_duration: ${north_manual_max_duration}
       relay_pin: ${north_valve_relay_pin}
-  north_valve_logic: !include
+      text_on_update: ${north_text_on_update}
+      text_off_update: ${north_text_off_update}
+      automation_check: ${north_automation_check}
+      left_update: ${north_left_update}
+  ${north_id}_valve_logic: !include
     file: valve/irrigation_valve_logic.yaml
     vars:
       id: ${north_id}
       upper_id: ${north_upper_id}
-      other_valve_id: ${south_id}
-  south_valve: !include
+  
+  #### South valve
+  ${south_id}_valve: !include
     file: valve/irrigation_valve.yaml
     vars:
       id: ${south_id}
@@ -28,18 +39,21 @@ packages:
       sensor_id: ${south_sensor_id}
       manual_max_duration: ${south_manual_max_duration}
       relay_pin: ${south_valve_relay_pin}
-  south_valve_logic: !include
+      text_on_update: ${south_text_on_update}
+      text_off_update: ${south_text_off_update}
+      automation_check: ${south_automation_check}
+      left_update: ${south_left_update}
+  ${south_id}_valve_logic: !include
     file: valve/irrigation_valve_logic.yaml
     vars:
       id: ${south_id}
       upper_id: ${south_upper_id}
-      other_valve_id: ${north_id}
 
 esphome:
   on_boot:
-    priority: 855.0
+    priority: 100.0
     then:
-      - delay: 18s
+      - delay: 10s
       - component.update: irrigation_period
       - lambda: |-
           set_new_irrigation_time();
@@ -117,19 +131,19 @@ time:
     id: time_irrigation
     timezone: Europe/Madrid
     on_time:
-      - seconds: 40
+      - seconds: ${update_irrigation_times}
         minutes: 30
         hours: 0
         then:
           - lambda: |-
               set_new_irrigation_time();
-      - seconds: 57
+      - seconds: ${update_irrigation_period}
         minutes: 0
         hours: 0
         days_of_month: 1
         then:
           - component.update: irrigation_period
-      - seconds: 55
+      - seconds: ${update_irrigation_available}
         minutes: 0
         hours: 0,8,16
         then:

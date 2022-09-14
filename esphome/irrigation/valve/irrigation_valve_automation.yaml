@@ -3,7 +3,7 @@ time:
     id: time_valve_automation_${id}
     timezone: Europe/Madrid
     on_time:
-      - seconds: 10
+      - seconds: ${automation_check}
         minutes: /1
         then:
           - lambda: |-

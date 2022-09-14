@@ -60,13 +60,13 @@ time:
     id: time_text_sensor_${id}
     timezone: Europe/Madrid
     on_time:
-      - seconds: 35
+      - seconds: ${text_on_update}
         minutes: /1
         then:
           - lambda: |-
               if (scheduled_run(id(${id}_next_on).state.c_str()))
                 id(${id}_timestamps_on).publish_state(update_list(id(${id}_timestamps_on).state));
-      - seconds: 38
+      - seconds: ${text_off_update}
         minutes: /1
         then:
           - lambda: |-

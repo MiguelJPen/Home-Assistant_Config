@@ -5,14 +5,14 @@ substitutions:
   irrigation_id: irrigation
   main_id: main
   main_upper_id: Main
-  north_id: "north"
-  north_upper_id: "North"
+  north_id: north
+  north_upper_id: North
   north_sensor_id: north_virtual
-  south_id: "south"
-  south_upper_id: "South"
+  south_id: south
+  south_upper_id: South
   south_sensor_id: south_virtual
-  pool_id: "pool"
-  pool_upper_id: "Pool"
+  pool_id: pool
+  pool_upper_id: Pool
   
   #### GPIO Pins
   ac_adapter_relay_pin: "33"
@@ -27,6 +27,21 @@ substitutions:
   pool_manual_max_duration: "480"
 
   #### Update seconds to avoid overlapping in code
+  north_left_update: "0"
+  south_left_update: "2"
+  pool_left_update: "4"
+  north_automation_check: "6"
+  south_automation_check: "11"
+  pool_automation_check: "16"
+  north_text_on_update: "21"
+  north_text_off_update: "24"
+  south_text_on_update: "27"
+  south_text_off_update: "30"
+  pool_text_on_update: "33"
+  pool_text_off_update: "36"
+  update_irrigation_times: "50"
+  update_irrigation_period: "56"
+  update_irrigation_available: "57"
 
 packages:
   device_base: !include common/device_base.irrigation.yaml

@@ -1,8 +1,9 @@
 esphome:
   on_boot:
-    priority: 850.0
+    priority: 102.0
     then:
-      - delay: 21s
+      - delay: 8s
+      - component.update: ${id}_last_automatic_execution_ha
       - lambda: |-
           // If this variable has been deleted for any reason, reset it
           if (id(${id}_last_automatic_execution) == 0)

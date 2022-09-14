@@ -9,25 +9,20 @@ switch:
     turn_on_action:
       - if:
           condition:
-            - switch.is_off: ${ac_adapter_id}
+            - or:
+              - switch.is_off: ${ac_adapter_id}
+              - switch.is_off: ${main_id}_valve
           then:
             - switch.turn_on: ${ac_adapter_id}
+            - switch.turn_on: ${main_id}_valve
             - delay: 2s
       - switch.turn_off: ${pool_id}_valve
-      - switch.turn_on: ${main_id}_valve
       - switch.turn_on: ${id}_valve
       - component.update: ${id}_left
       - component.update: ${irrigation_id}_state
     turn_off_action:
-      - if:
-          condition:
-            and:
-              - switch.is_off: ${pool_id}_valve
-              - switch.is_off: ${other_valve_id}_valve
-          then:
-            - switch.turn_off: ${main_id}_valve
-            - delay: 5s
-            - switch.turn_off: ${ac_adapter_id}
+      - script.execute: turn_off_main_valve
+      - delay: 3s
       - switch.turn_off: ${id}_valve
       - component.update: ${id}_left
       - component.update: ${irrigation_id}_state

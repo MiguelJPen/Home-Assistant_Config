@@ -17,7 +17,7 @@ time:
     id: time_${id}
     timezone: Europe/Madrid
     on_time:
-      - seconds: 3
+      - seconds: ${left_update}
         minutes: /1
         then:
           - component.update: ${id}_left

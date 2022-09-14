@@ -14,9 +14,9 @@ packages:
 
 esphome:
   on_boot: 
-    priority: 870.0
+    priority: 101.0
     then:
-      - delay: 15s
+      - delay: 14s
       - lambda: |-
           id(${id}_timestamps_on).publish_state("");
           id(${id}_timestamps_off).publish_state("");
