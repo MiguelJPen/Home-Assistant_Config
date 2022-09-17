@@ -1,8 +1,8 @@
 switch:
-  #### Pool pump relay switch
+  #### ${pump_upper_id} relay switch
   - platform: gpio
-    name: Pool pump
-    id: pool_pump
+    name: ${pump_upper_id}
+    id: ${pump_id}
     internal: True
     pin:
       number: ${pump_relay_pin}
@@ -20,8 +20,8 @@ binary_sensor:
       number: ${pump_running_sensor_pin}
       mode:
         input: true
-    name: Pool pump running
-    id: pool_pump_running_sensor
+    name: ${pump_upper_id} running
+    id: ${pump_id}_running_sensor
     icon: mdi:pump
     device_class: running
     publish_initial_state: True
@@ -34,7 +34,7 @@ binary_sensor:
       mode:
         input: True
         pulldown: True
-    name: Pool pump manual switch (debug)
+    name: ${pump_upper_id} manual switch (debug)
     id: pump_manual_physical_switch
     publish_initial_state: True
     filters:
@@ -51,7 +51,7 @@ binary_sensor:
       mode:
         input: True
         pulldown: True
-    name: Pool pump automation switch (debug)
+    name: ${pump_upper_id} automation switch (debug)
     id: pump_automation_physical_switch
     publish_initial_state: True
     filters:

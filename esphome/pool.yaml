@@ -1,7 +1,11 @@
 substitutions:
   name: pool
   upper_name: Swimming pool
-  ####
+  pool_id: pool
+  pump_id: pump
+  pump_upper_id: Pool pump
+
+  ### GPIO Pins
   low_level_sensor_pin: "36"
   high_level_sensor_pin: "35"
   pump_running_sensor_pin: "39"
@@ -12,6 +16,14 @@ substitutions:
   pump_automation_physical_switch_pin: "13"
   rain_sensor_pin: "3"
   #### Do not use pin 14, as it caused some errors restarting the device when pulled down
+
+  ### Update seconds to avoid overlapping in code
+  pump_left_update: "2"
+  pump_automation_check: "5"
+  pump_text_on_update: "15"
+  pump_text_off_update: "18"
+  pool_filling_check: "50"
+  update_pumping_times: "55"
 
 esphome:
   includes:

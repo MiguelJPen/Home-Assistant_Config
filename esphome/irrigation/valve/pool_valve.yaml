@@ -5,20 +5,20 @@ packages:
     file: ../../common/time_controlled_entity/left_sensor.yaml
   next_duration_sensor: !include
     file: ../../common/time_controlled_entity/next_duration_sensor.yaml
-  manual_duration_number: !include 
+  manual_duration_number: !include
     file: ../../common/time_controlled_entity/manual_duration_number.yaml
-  text_sensor: !include 
+  text_sensor: !include
     file: ../../common/time_controlled_entity/text_sensor.yaml
-  valve_automation: !include 
+  valve_automation: !include
     file: pool_valve_automation.yaml
 
 esphome:
-  on_boot: 
+  on_boot:
     priority: 101.0
     then:
       - delay: 14s
       - lambda: |-
           id(${id}_timestamps_on).publish_state("");
           id(${id}_timestamps_off).publish_state("");
-          if(id(${id}_filling_requested)) set_pool_filling();
-
+          if(id(${id}_filling_requested)) 
+            id(${pool_id}_update_time).execute();

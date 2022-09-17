@@ -1,0 +1,13 @@
+#### Options to change between irrigation modes
+select:
+  - platform: template
+    id: ${id}_irrigation_mode
+    name: ${upper_id} irrigation mode
+    optimistic: true
+    update_interval: never
+    restore_value: True
+    options:
+      - Hoja caduca
+      - Hoja perenne
+      - Frutales
+    initial_option: ${initial_option}

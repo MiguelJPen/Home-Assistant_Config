@@ -12,8 +12,8 @@ using namespace std;
 time_t add_day(time_t, int);
 void set_new_irrigation_time();
 void set_irrigation(time_t, int, int);
-void set_pool_filling();
-void set_more_pool_filling();
+time_t get_next_time_at(int, int, int, int);
+string add_three_minutes_from_now();
 string manual_set(int, string);
 string delete_first_timestamp(string);
 
@@ -23,7 +23,7 @@ void set_new_irrigation_time() {
     float mean_hum = id(mean_humid);
     float min_hum = id(min_humid);
     float precip = id(precip_yesterday);
-    time_t old_next_irrigation = atoi((id(next_irrigation_day).state).c_str());
+    time_t old_next_irrigation = atoi((id(north_next_irrigation_day).state).c_str());
     time_t last_irrigation = id(north_last_automatic_execution);
 
     time_t now_timestamp = id(time_sntp).now().timestamp;
@@ -52,7 +52,7 @@ void set_new_irrigation_time() {
             no_water_days = max(2, no_water_days);
         else no_water_days = max(1, no_water_days);
     }
-    id(next_irrigation_day).publish_state(to_string(add_day(now_timestamp, no_water_days)));
+    id(north_next_irrigation_day).publish_state(to_string(add_day(now_timestamp, no_water_days)));
 
     // Set the time per day
     time_per_day += (int) (pow(2, 3.2 + max((float)0, (mean_tmp - 10)/5)));
@@ -133,7 +133,7 @@ time_t add_day(time_t time, int days) {
     return mktime(&strtime);
 }
 
-void set_pool_filling() {
+/*void set_pool_filling() {
     time_t now_timestamp = id(time_sntp).now().timestamp;
     struct tm new_time = *localtime(&now_timestamp);
 
@@ -161,15 +161,67 @@ void set_pool_filling() {
     time_t aux = mktime(&new_time);
     id(pool_timestamps_on).publish_state(to_string(aux));
     id(pool_timestamps_off).publish_state(to_string(aux + 3 * 60));
+}*/
+
+time_t get_next_time_at(int h_morn, int m_morn, int h_afte, int m_afte) {
+    time_t now_timestamp = id(time_sntp).now().timestamp;
+    struct tm new_time = *localtime(&now_timestamp);
+
+    //ESP_LOGD("get_next_time_at", "HM: %i, MM: %i, HA %i, MA %i", h_morn, m_morn, h_afte, m_afte);
+
+
+    if (new_time.tm_mon % 2 == 0 && new_time.tm_hour < h_morn) {
+        new_time.tm_hour = h_morn;
+        new_time.tm_min = m_morn;
+    }
+    else if (new_time.tm_mon % 2 == 0) {
+        new_time.tm_mday++;
+        time_t aux = mktime(&new_time);
+        new_time = *localtime(&aux);
+
+        if (new_time.tm_mon % 2 == 0) {
+            new_time.tm_hour = h_morn;
+            new_time.tm_min = m_morn;
+        }
+        else {
+            new_time.tm_hour = h_afte;
+            new_time.tm_min = m_afte;
+        }
+    }
+    else if (new_time.tm_hour < h_afte) {
+        new_time.tm_hour = h_afte;
+        new_time.tm_min = m_afte;
+    }
+    else {
+        new_time.tm_mday++;
+        time_t aux = mktime(&new_time);
+        new_time = *localtime(&aux);
+
+        if (new_time.tm_mon % 2 != 0) {
+            new_time.tm_hour = h_afte;
+            new_time.tm_min = m_afte;
+        }
+        else {
+            new_time.tm_hour = h_morn;
+            new_time.tm_min = m_morn;
+        }
+    }
+    new_time.tm_sec = 0;
+
+    time_t aux = mktime(&new_time);
+
+    //ESP_LOGD("get_next_time_at", "Time aux: %ld", aux);
+
+    return aux;
 }
 
-void set_more_pool_filling() {
+string add_three_minutes_from_now() {
     time_t now_timestamp = id(time_sntp).now().timestamp;
     struct tm new_time = *localtime(&now_timestamp);
 
     new_time.tm_sec = 0;
     time_t aux = mktime(&new_time);
-    id(pool_timestamps_off).publish_state(to_string(aux + 3 * 60));
+    return to_string(aux + 3 * 60);
 }
 
 string manual_set(int duration, string time_list) {

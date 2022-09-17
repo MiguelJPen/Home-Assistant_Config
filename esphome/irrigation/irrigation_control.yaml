@@ -1,6 +1,4 @@
 packages:
-  next_irrigation_day: !include irrigation_next_day_sensor.yaml
-
   #### Main valve
   ${main_id}_valve: !include
     file: valve/valve_gpio.yaml
@@ -29,6 +27,29 @@ packages:
     vars:
       id: ${north_id}
       upper_id: ${north_upper_id}
+  ${north_id}_next_irrigation_day: !include
+    file: irrigation_next_day_sensor.yaml
+    vars:
+      id: ${north_id}
+      upper_id: ${north_upper_id}
+  ${north_id}_mode: !include 
+    file: irrigation_mode_select.yaml
+    vars:
+      id: ${north_id}
+      upper_id: ${north_upper_id}
+      initial_option: ${north_initial_option}
+  ${north_id}_morning_time: !include
+    file: time_morning_select.yaml
+    vars:
+      id: ${north_id}
+      upper_id: ${north_upper_id}
+      initial_option: ${north_morning_initial_option}
+  ${north_id}_afternoon_time: !include
+    file: time_afternoon_select.yaml
+    vars:
+      id: ${north_id}
+      upper_id: ${north_upper_id}
+      initial_option: ${north_afternoon_initial_option}
   
   #### South valve
   ${south_id}_valve: !include
@@ -48,6 +69,29 @@ packages:
     vars:
       id: ${south_id}
       upper_id: ${south_upper_id}
+  ${south_id}_next_irrigation_day: !include
+    file: irrigation_next_day_sensor.yaml
+    vars:
+      id: ${south_id}
+      upper_id: ${south_upper_id}
+  ${south_id}_mode: !include 
+    file: irrigation_mode_select.yaml
+    vars:
+      id: ${south_id}
+      upper_id: ${south_upper_id}
+      initial_option: ${south_initial_option}
+  ${south_id}_morning_time: !include
+    file: time_morning_select.yaml
+    vars:
+      id: ${south_id}
+      upper_id: ${south_upper_id}
+      initial_option: ${south_morning_initial_option}
+  ${south_id}_afternoon_time: !include
+    file: time_afternoon_select.yaml
+    vars:
+      id: ${south_id}
+      upper_id: ${south_upper_id}
+      initial_option: ${south_afternoon_initial_option}
 
 esphome:
   on_boot:
@@ -78,13 +122,19 @@ script:
               below: 0
           then:
             - switch.turn_on: ${north_id}_virtual
-            - delay: 15s
+            - delay: 5s
             - switch.turn_on: ${south_id}_virtual
             - delay: 4 min
             - switch.turn_off: ${north_id}_virtual
-            - delay: 15s
+            - delay: 5s
             - switch.turn_off: ${south_id}_virtual
             - delay: 45 min
+  - id: ${north_id}_update_time
+    then:
+      - lambda: set_new_irrigation_time();
+  - id: ${south_id}_update_time
+    then:
+      - lambda: set_new_irrigation_time();
 
 # ============================================================================ #
 binary_sensor:

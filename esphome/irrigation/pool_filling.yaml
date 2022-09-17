@@ -2,7 +2,7 @@ substitutions:
   pool_sensor_id: pool_virtual
 
 packages:
-  pool_valve: !include
+  ${pool_id}_valve: !include
     file: valve/pool_valve.yaml
     vars:
       id: ${pool_id}
@@ -14,11 +14,23 @@ packages:
       text_off_update: ${pool_text_off_update}
       automation_check: ${pool_automation_check}
       left_update: ${pool_left_update}
-  pool_valve_logic: !include
+  ${pool_id}_valve_logic: !include
     file: valve/pool_valve_logic.yaml
     vars:
       id: ${pool_id}
       upper_id: ${pool_upper_id}
+  ${pool_id}_morning_time: !include
+    file: time_morning_select.yaml
+    vars:
+      id: ${pool_id}
+      upper_id: ${pool_upper_id}
+      initial_option: ${pool_morning_initial_option}
+  ${pool_id}_afternoon_time: !include
+    file: time_afternoon_select.yaml
+    vars:
+      id: ${pool_id}
+      upper_id: ${pool_upper_id}
+      initial_option: ${pool_afternoon_initial_option}
 
 globals:
   ## Bool to save automation mode
@@ -40,14 +52,14 @@ api:
     - service: request_pool_water
       then:
         - lambda: |-
-            set_pool_filling();
             id(${pool_id}_filling_requested) = true;
+            id(${pool_id}_update_time).execute();
         - homeassistant.service:
             service: esphome.pool_filling_requested
     - service: request_more_pool_water
       then:
         - lambda: |-
-            set_more_pool_filling();
+            id(${pool_id}_timestamps_off).publish_state(add_three_minutes_from_now());
 
 # ============================================================================ #
 script:
@@ -56,6 +68,18 @@ script:
     then:
       - homeassistant.service: # Turns off the pump and then opens the valve
           service: esphome.pool_filling_start
+  - id: ${pool_id}_update_time
+    then:
+      - lambda:
+          if(id(${pool_id}_filling_requested)) {
+            int hour_morning = atoi(((id(${pool_id}_morning_time).state).substr(0,2)).c_str());
+            int minute_morning = atoi(((id(${pool_id}_morning_time).state).substr(3,2)).c_str());
+            int hour_afternoon = atoi(((id(${pool_id}_afternoon_time).state).substr(0,2)).c_str());
+            int minute_afternoon = atoi(((id(${pool_id}_afternoon_time).state).substr(3,2)).c_str());
+
+            time_t aux = get_next_time_at(hour_morning, minute_morning, hour_afternoon, minute_afternoon);
+            id(${pool_id}_timestamps_on).publish_state(to_string(aux));
+            id(${pool_id}_timestamps_off).publish_state(to_string(aux + 3 * 60)); }
 
 # ============================================================================ #
 switch:

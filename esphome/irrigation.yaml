@@ -14,31 +14,43 @@ substitutions:
   pool_id: pool
   pool_upper_id: Pool
   
-  #### GPIO Pins
-  ac_adapter_relay_pin: "33"
-  main_valve_relay_pin: "15"
-  pool_valve_relay_pin: "14"
-  north_valve_relay_pin: "17"
-  south_valve_relay_pin: "5"
+  ### GPIO Pins
+  ac_adapter_relay_pin: "33" #"3" # Gris 33
+  main_valve_relay_pin: "15" #"14" # Morado 15
+  pool_valve_relay_pin: "14" #"32" # Amarillo 14
+  north_valve_relay_pin: "17" #"17" # Azul 17
+  south_valve_relay_pin: "5" #"33" # Verde 5
 
-  #### Maximum manual durations
+  ### Maximum manual durations
   north_manual_max_duration: "240"
   south_manual_max_duration: "240"
   pool_manual_max_duration: "480"
 
-  #### Update seconds to avoid overlapping in code
-  north_left_update: "0"
-  south_left_update: "2"
-  pool_left_update: "4"
-  north_automation_check: "6"
-  south_automation_check: "11"
-  pool_automation_check: "16"
-  north_text_on_update: "21"
-  north_text_off_update: "24"
-  south_text_on_update: "27"
-  south_text_off_update: "30"
-  pool_text_on_update: "33"
-  pool_text_off_update: "36"
+  ### Initial time options
+  north_morning_initial_option: '09:00'
+  north_afternoon_initial_option: '16:30'
+  south_morning_initial_option: '09:00'
+  south_afternoon_initial_option: '16:30'
+  pool_morning_initial_option: '15:00'
+  pool_afternoon_initial_option: '23:00'
+
+  ### Irrigation mode initial options
+  north_initial_option: Frutales
+  south_initial_option: Hoja perenne
+
+  ### Update seconds to avoid overlapping in code
+  north_left_update: "1"
+  south_left_update: "3"
+  pool_left_update: "5"
+  north_automation_check: "7"
+  south_automation_check: "12"
+  pool_automation_check: "17"
+  north_text_on_update: "22"
+  north_text_off_update: "25"
+  south_text_on_update: "28"
+  south_text_off_update: "31"
+  pool_text_on_update: "34"
+  pool_text_off_update: "37"
   update_irrigation_times: "50"
   update_irrigation_period: "56"
   update_irrigation_available: "57"

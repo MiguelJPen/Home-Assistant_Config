@@ -1,0 +1,28 @@
+#### Options for possible running times in the afternoon
+select:
+  - platform: template
+    id: ${id}_morning_time
+    name: ${upper_id} morning time
+    optimistic: true
+    update_interval: never
+    restore_value: True
+    options:
+      - '08:00'
+      - '08:30'
+      - '09:00'
+      - '09:30'
+      - '10:00'
+      - '10:30'
+      - '11:00'
+      - '11:30'
+      - '12:00'
+      - '12:30'
+      - '13:00'
+      - '13:30'
+      - '14:00'
+      - '14:30'
+      - '15:00'
+      - '15:30'
+    initial_option: ${initial_option}
+    on_value:
+      - script.execute: ${id}_update_time
