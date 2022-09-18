@@ -801,26 +801,6 @@
   - service: hassio.host_reboot
     data: {}
   mode: single
-- id: '1638287372751'
-  alias: Update PVPC manually
-  description: ''
-  trigger:
-  - platform: homeassistant
-    event: start
-  - platform: time_pattern
-    minutes: '00'
-    seconds: '30'
-  condition: []
-  action:
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 30
-      milliseconds: 0
-  - service: homeassistant.update_entity
-    target:
-      entity_id: sensor.pvpc
-  mode: single
 - id: '1639942219645'
   alias: Wireguard - Reset connection when down
   description: If the connection with any wireguard server is lost (for example, due
