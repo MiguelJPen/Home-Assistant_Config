@@ -12,82 +12,41 @@ using namespace std;
 
 /* 
 Need to have in packages:
-- time.yaml
-- sun.yaml
+- common/time.yaml
+- common/sun.yaml
 */
 
-void set_new_pumping_time();
-pair<string,string> get_pumping_time();
-pair<string,string> get_winter_pumping_time();
-void set_winter_timestamps(time_t, int, int); // Internal
-void set_pumping(time_t, time_t, time_t, int, int); // Internal
+pair<string,string> get_automatic_pumping_time(float);
+void set_automatic_day_pumping(string&, string&, time_t, struct tm, struct tm, int); // Internal
+pair<string,string> get_automatic_full_pumping_time();
+void set_automatic_full_day_pumping(string&, string&, time_t, struct tm, struct tm); // Internal
+pair<string,string> get_winter_pumping_time(int);
+void set_winter_day_pumping(string&, string&, time_t, int); // Internal
 time_t get_sunrise(); // Internal
 time_t get_sunset(); // Internal
 
-void set_new_pumping_time() {
-    float mean_tmp = id(mean_temp);
-    int mins_per_cycle = 30 + (mean_tmp * 1.5); // Cycles are every 2 and a half hours
+pair<string,string> get_automatic_pumping_time(float mean_tmp) {
+    int mins = 30 + (mean_tmp * 1.5); // Cycles are every 2 and a half hours
     time_t now_timestamp = id(time_sntp).now().timestamp;
+    time_t tomorrow_timestamp = now_timestamp + (3600 * 24);
     time_t sunrise = get_sunrise(), sunset = get_sunset();
+    struct tm sunrise_st = *localtime(&sunrise), sunset_st = *localtime(&sunset);
+    string pump_on = "", pump_off = "";
 
-    //ESP_LOGD("set_new_pumping_time", "SUNRISE: %ld, SUNSET: %ld", sunrise, sunset);
-
-    id(pump_timestamps_on).publish_state("");
-    id(pump_timestamps_off).publish_state("");
-
-    // Set how many time per days
-    if (id(pump_winter_mode_bool)) {
-        set_winter_timestamps(now_timestamp, 0, 30);
-        set_winter_timestamps(now_timestamp, 1, 30);
-        return;
-    }
-
-    // If winter mode is not activated
-    set_pumping(now_timestamp, sunrise, sunset, 0, mins_per_cycle);
-    set_pumping(now_timestamp, sunrise, sunset, 1, mins_per_cycle);
-
-}
-
-void set_winter_timestamps(time_t today, int days_ahead, int mins) {
-    time_t new_pump_day = today + (days_ahead * 3600 * 24);
-    struct tm new_time = *localtime(&new_pump_day);
-    string pump_on = id(pump_timestamps_on).state;
-    string pump_off = id(pump_timestamps_off).state;
-    string comma_on = (pump_on.empty() ? "" : ", ");
-    string comma_off = (pump_off.empty() ? "" : ", ");
-
-    new_time.tm_hour = 13;
-    new_time.tm_min = 0;
-    new_time.tm_sec = 0;
-    time_t aux = mktime(&new_time);
+    set_automatic_day_pumping(pump_on, pump_off, now_timestamp, sunrise_st, sunset_st, mins);
+    set_automatic_day_pumping(pump_on, pump_off, tomorrow_timestamp, sunrise_st, sunset_st, mins);
 
     pump_on = update_list(pump_on);
     pump_off = update_list(pump_off);
-    pump_on.append(comma_on + to_string(aux));
-    pump_off.append(comma_off + to_string(aux + mins * 60));
 
-    //ESP_LOGD("set_winter_times", "TIME PER DAY: %i", mins);
-
-    id(pump_timestamps_on).publish_state(pump_on);
-    id(pump_timestamps_off).publish_state(pump_off);
+    return make_pair(pump_on, pump_off);
 }
 
-pair<string,string> get_winter_pumping_time(int mins) {
-    time_t now_timestamp = id(time_sntp).now().timestamp;
+void set_automatic_day_pumping(string &pump_on, string &pump_off, time_t timestamp, struct tm sunrise_st, struct tm sunset_st, int mins) {
+    struct tm new_time = *localtime(&timestamp);
+    string comma = (pump_on.empty()? "" : ",");
 
-    string pump_on = "", pump_off = "", comma = ",";
-    
-
-}
-
-void set_pumping(time_t today, time_t sunrise, time_t sunset, int days_ahead, int mins) {
-    time_t new_pump_day = today + (days_ahead * 3600 * 24);
-    struct tm new_time = *localtime(&new_pump_day);
-    string pump_on = id(pump_timestamps_on).state;
-    string pump_off = id(pump_timestamps_off).state;
-    string comma_on = (pump_on.empty() ? "" : ", ");
-    string comma_off = (pump_off.empty() ? "" : ", ");
-    struct tm sunrise_st = *localtime(&sunrise), sunset_st = *localtime(&sunset);
+    //ESP_LOGD("set_automatic_day_pumping", "pump_on: %s, comma: %s", pump_on, comma);
 
     new_time.tm_hour = sunrise_st.tm_hour;
     new_time.tm_min = sunrise_st.tm_min;
@@ -97,39 +56,78 @@ void set_pumping(time_t today, time_t sunrise, time_t sunset, int days_ahead, in
     new_time.tm_min = sunset_st.tm_min;
     time_t sunset_local = mktime(&new_time);
 
-    //ESP_LOGD("set_pumping", "SUNRISE: %ld, SUNSET: %ld", sunrise, sunset);
-    //ESP_LOGD("set_pumping", "SUNRISE: %ld, SUNSET: %ld", aux, sunset_local);
+    // First and last 1.5 hours of the day it must be on, due to ineficient pumping
+    pump_on.append(comma + to_string(aux));
+    pump_off.append(comma + to_string(aux + 5400));
+    comma = ",";
+    aux += 8400;
 
-    if(id(pump_automation_full_bool)){
-        pump_on.append(comma_on + to_string(aux));
-        pump_off.append(comma_off + to_string(sunset_local));
+    while (aux + mins * 60 < sunset_local - 5400) { // To prevent overlapping (max time stopped: 50 mins)
+        pump_on.append(comma + to_string(aux));
+        pump_off.append(comma + to_string(aux + mins * 60));
+        aux += mins * 60 + 3000; // Turn ON every 50 mins to clean the surface
     }
+    pump_on.append(comma + to_string(sunset_local - 5400));
+    pump_off.append(comma + to_string(sunset_local));
+}
 
-    else {
-        // First and last 1.5 hours of the day it must be on, due to ineficient pumping
-        pump_on.append(comma_on + to_string(aux));
-        pump_off.append(comma_off + to_string(aux + 5400));
-        aux += 8400;
-        comma_on = ", ";
-        comma_off = ", ";
+pair<string,string> get_automatic_full_pumping_time() {
+    time_t now_timestamp = id(time_sntp).now().timestamp;
+    time_t tomorrow_timestamp = now_timestamp + (3600 * 24);
+    time_t sunrise = get_sunrise(), sunset = get_sunset();
+    struct tm sunrise_st = *localtime(&sunrise), sunset_st = *localtime(&sunset);
+    string pump_on = "", pump_off = "";
 
-        while (aux + mins * 60 < sunset_local - 5400) { // To prevent overlapping (max time stopped: 50 mins)
-            pump_on.append(comma_on + to_string(aux));
-            pump_off.append(comma_off + to_string(aux + mins * 60));
-            aux += mins * 60 + 3000; // Turn ON every 50 mins to clean the surface
-        }
-        pump_on.append(comma_on + to_string(sunset_local - 5400));
-        pump_off.append(comma_off + to_string(sunset_local));
-    }
+    set_automatic_full_day_pumping(pump_on, pump_off, now_timestamp, sunrise_st, sunset_st);
+    set_automatic_full_day_pumping(pump_on, pump_off, tomorrow_timestamp, sunrise_st, sunset_st);
 
     pump_on = update_list(pump_on);
     pump_off = update_list(pump_off);
-    id(pump_timestamps_on).publish_state(pump_on);
-    id(pump_timestamps_off).publish_state(pump_off);
+
+    return make_pair(pump_on, pump_off);
 }
 
-pair<string,string> get_pumping_time() {
-    return null;
+void set_automatic_full_day_pumping(string &pump_on, string &pump_off, time_t timestamp, struct tm sunrise_st, struct tm sunset_st) {
+    struct tm new_time = *localtime(&timestamp);
+    string comma = (pump_on.empty()? "" : ",");
+
+    new_time.tm_hour = sunrise_st.tm_hour;
+    new_time.tm_min = sunrise_st.tm_min;
+    new_time.tm_sec = 0;
+    time_t sunrise_local = mktime(&new_time);
+    new_time.tm_hour = sunset_st.tm_hour;
+    new_time.tm_min = sunset_st.tm_min;
+    time_t sunset_local = mktime(&new_time);
+
+    pump_on.append(comma + to_string(sunrise_local));
+    pump_off.append(comma + to_string(sunset_local));
+}
+
+pair<string,string> get_winter_pumping_time(int mins) {
+    time_t now_timestamp = id(time_sntp).now().timestamp;
+    time_t tomorrow_timestamp = now_timestamp + (3600 * 24);
+    string pump_on = "", pump_off = "";
+
+    set_winter_day_pumping(pump_on, pump_off, now_timestamp, mins);
+    set_winter_day_pumping(pump_on, pump_off, tomorrow_timestamp, mins);
+
+    pump_on = update_list(pump_on);
+    pump_off = update_list(pump_off);
+
+    return make_pair(pump_on, pump_off);
+}
+
+void set_winter_day_pumping(string &pump_on, string &pump_off, time_t timestamp, int mins) {
+    struct tm new_time = *localtime(&timestamp);
+    string comma = (pump_on.empty()? "" : ",");
+
+    new_time.tm_hour = 13;
+    new_time.tm_min = 0;
+    new_time.tm_sec = 0;
+    time_t aux = mktime(&new_time);
+
+    pump_on.append(comma + to_string(aux));
+    pump_off.append(comma + to_string(aux + mins * 60));
 }
 
 time_t get_sunrise() {

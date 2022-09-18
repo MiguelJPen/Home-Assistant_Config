@@ -5,10 +5,7 @@ esphome:
       - delay: 20s
       - lambda: |-
           id(secure_pumping) = id(${pool_id}_low_level).state;
-          set_new_pumping_time();
-          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-          id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn) && id(pump_automation_bool))
-            id(${pump_id}).turn_on();
+      - script.execute: ${pump_id}_update_time
 
 packages:
   pump_text_sensor: !include
@@ -23,6 +20,44 @@ packages:
     vars:
       id: ${pump_id}
       upper_id: ${pump_upper_id}
+
+# ============================================================================ #
+script:
+  - id: ${pump_id}_update_time
+    then:
+      - lambda: |-
+          if(id(pump_winter_mode_bool)) {
+            pair<string,string> winter_time = get_winter_pumping_time(30);
+
+            id(${pump_id}_timestamps_on).publish_state(winter_time.first);
+            id(${pump_id}_timestamps_off).publish_state(winter_time.second); 
+          }
+          else if (id(pump_automation_bool)) {
+            pair<string,string> automatic_time = get_automatic_pumping_time(id(mean_temp));
+
+            id(${pump_id}_timestamps_on).publish_state(automatic_time.first);
+            id(${pump_id}_timestamps_off).publish_state(automatic_time.second); 
+          }
+          else if (id(pump_automation_full_bool)) {
+            pair<string,string> automatic_full_time = get_automatic_full_pumping_time();
+
+            id(${pump_id}_timestamps_on).publish_state(automatic_full_time.first);
+            id(${pump_id}_timestamps_off).publish_state(automatic_full_time.second);
+          }
+          else {
+            id(${pump_id}_timestamps_on).publish_state("");
+            id(${pump_id}_timestamps_off).publish_state("");
+          }
+      - script.execute: ${pump_id}_check_if_on
+  - id: ${pump_id}_check_if_on
+    then:
+      - delay: 300ms
+      - lambda: |-
+          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
+            id(pump_next_on).state > id(pump_next_off).state && !id(filling_rn) && 
+            ((id(secure_pumping) && (id(pump_automation_bool) || id(pump_automation_full_bool))) || id(pump_winter_mode_bool)))
+              id(${pump_id}).turn_on();
+          else id(${pump_id}).turn_off();
 
 # ============================================================================ #
 globals:
@@ -48,7 +83,7 @@ sensor:
     unit_of_measurement: min
     icon: mdi:timer-outline
     lambda: |-
-      if (id(${pump_id}).state && (id(pump_automation_bool) || id(pump_winter_mode_bool))) {
+      if (id(${pump_id}).state && (id(pump_automation_bool) || id(pump_winter_mode_bool) || id(pump_automation_full_bool))) {
         return ((atoi((id(pump_next_off).state).c_str()) - id(time_pump).now().timestamp) / 60) + 1;
       }
       return 0;
@@ -65,11 +100,13 @@ switch:
       - switch.turn_on: ${pump_id}
       - lambda: |-
           id(pump_automation_bool) = false;
+          id(pump_automation_full_bool) = false;
           id(pump_winter_mode_bool) = false;
     turn_off_action:
       - switch.turn_off: ${pump_id}
       - lambda: |-
           id(pump_automation_bool) = false;
+          id(pump_automation_full_bool) = false;
           id(pump_winter_mode_bool) = false;
 
   #### Switch for automation
@@ -80,18 +117,14 @@ switch:
     lambda: return id(pump_automation_bool);
     turn_on_action:
       - lambda: |-
-          id(pump_automation_bool) = true;
           id(pump_winter_mode_bool) = false;
-          set_new_pumping_time();
-      - delay: 100ms
-      - lambda: |-
-          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
-              id(${pump_id}).turn_on();
-          else id(${pump_id}).turn_off();
+          id(pump_automation_full_bool) = false;
+          id(pump_automation_bool) = true;
+      - script.execute: ${pump_id}_update_time
     turn_off_action:
       - lambda: |-
           id(pump_automation_bool) = false;
+      - script.execute: ${pump_id}_update_time
 
   #### Switch for pump running full time, but still turning off with no water
   - platform: template
@@ -101,26 +134,16 @@ switch:
     lambda: return id(pump_automation_full_bool);
     turn_on_action:
       - lambda: |-
+          id(pump_automation_bool) = false;
+          id(pump_winter_mode_bool) = false;
           id(pump_automation_full_bool) = true;
-          set_new_pumping_time();
-      - delay: 100ms
-      - lambda: |-
-          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
-              id(${pump_id}).turn_on();
-          else id(${pump_id}).turn_off();
+      - script.execute: ${pump_id}_update_time
     turn_off_action:
       - lambda: |-
           id(pump_automation_full_bool) = false;
-          set_new_pumping_time();
-      - delay: 100ms
-      - lambda: |-
-          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping) && !id(filling_rn))
-              id(${pump_id}).turn_on();
-          else id(${pump_id}).turn_off();
+      - script.execute: ${pump_id}_update_time
 
-  #### Winter mode switch
+  #### Winter mode switch, do not check pool level
   - platform: template
     name: Winter mode
     id: pump_winter_mode
@@ -129,18 +152,13 @@ switch:
     turn_on_action:
       - lambda: |-
           id(pump_automation_bool) = false;
+          id(pump_automation_full_bool) = false;
           id(pump_winter_mode_bool) = true;
-          set_new_pumping_time();
-      - delay: 100ms
-      - lambda: |-
-          if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state > id(pump_next_off).state)
-              id(${pump_id}).turn_on();
-          else id(${pump_id}).turn_off();
+      - script.execute: ${pump_id}_update_time
     turn_off_action:
       - lambda: |-
           id(pump_winter_mode_bool) = false;
-          set_new_pumping_time();
+      - script.execute: ${pump_id}_update_time
 
 # ============================================================================ #
 # Cron jobs
@@ -153,7 +171,7 @@ time:
         minutes: 30
         hours: 0
         then:
-          - lambda: set_new_pumping_time();
+          - script.execute: ${pump_id}_update_time
       - seconds: ${pump_left_update}
         minutes: /1
         then:
@@ -162,7 +180,7 @@ time:
         minutes: /1
         then:
           - lambda: |-
-              if ((id(pump_winter_mode_bool) || (id(secure_pumping) && id(pump_automation_bool))) && !id(filling_rn) && scheduled_run(id(${pump_id}_next_on).state.c_str()))
+              if ((id(pump_winter_mode_bool) || (id(secure_pumping) && (id(pump_automation_bool) || id(pump_automation_full_bool)))) && !id(filling_rn) && scheduled_run(id(${pump_id}_next_on).state.c_str()))
                 id(${pump_id}).turn_on();
-              if ((id(pump_winter_mode_bool) || id(pump_automation_bool)) && scheduled_run(id(${pump_id}_next_off).state.c_str()))
+              if ((id(pump_winter_mode_bool) || id(pump_automation_bool || id(pump_automation_full_bool))) && scheduled_run(id(${pump_id}_next_off).state.c_str()))
                 id(${pump_id}).turn_off();

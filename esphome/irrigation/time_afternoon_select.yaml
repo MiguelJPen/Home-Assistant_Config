@@ -3,6 +3,7 @@ select:
   - platform: template
     id: ${id}_afternoon_time
     name: ${upper_id} afternoon time
+    icon: mdi:timeline-clock-outline
     optimistic: true
     update_interval: never
     restore_value: True

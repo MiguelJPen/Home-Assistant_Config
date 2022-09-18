@@ -18,12 +18,14 @@ switch:
       - switch.turn_off: ${north_id}_valve
       - switch.turn_off: ${south_id}_valve
       - switch.turn_on: ${id}_valve
+      - delay: 1s
       - component.update: ${id}_left
       - component.update: ${irrigation_id}_state
     turn_off_action:
       - script.execute: turn_off_main_valve
       - delay: 3s
       - switch.turn_off: ${id}_valve
+      - delay: 1s
       - component.update: ${id}_left
       - component.update: ${irrigation_id}_state
       - homeassistant.service:
