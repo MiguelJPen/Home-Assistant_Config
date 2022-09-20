@@ -1,16 +1,20 @@
-sensor:
+text_sensor:
   ## Next cycle duration
   - platform: template
     name: ${upper_id} next duration
     id: ${id}_next_duration
     update_interval: never
-    accuracy_decimals: 0
-    unit_of_measurement: min
     icon: mdi:timer-outline
     lambda: |-
       if (id(${id}_next_on).state == "Sin programaciones" || id(${id}_next_off).state == "Sin programaciones") 
-        return 0;
+        return {"0 min"};
       if (atoi((id(${id}_next_off).state).c_str()) > atoi((id(${id}_next_on).state).c_str())) {
-        return ((atoi((id(${id}_next_off).state).c_str()) - atoi((id(${id}_next_on).state).c_str())) / 60);
+        int mins = ((atoi((id(${id}_next_off).state).c_str()) - atoi((id(${id}_next_on).state).c_str())) / 60);
+        int hours = mins/60;
+        mins %= 60;
+        string ret = to_string(mins) + " min";
+
+        if(hours != 0) ret.insert(0, to_string(hours) + " h ");
+        return {ret};
       }
-      return id(${id}_next_duration).state;
+      return {};

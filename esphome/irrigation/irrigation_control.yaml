@@ -32,6 +32,7 @@ packages:
     vars:
       id: ${north_id}
       upper_id: ${north_upper_id}
+      update_next_day: ${north_update_next_day}
   ${north_id}_mode: !include 
     file: irrigation_mode_select.yaml
     vars:
@@ -74,6 +75,7 @@ packages:
     vars:
       id: ${south_id}
       upper_id: ${south_upper_id}
+      update_next_day: ${south_update_next_day}
   ${south_id}_mode: !include 
     file: irrigation_mode_select.yaml
     vars:

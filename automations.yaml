@@ -1637,3 +1637,50 @@
             message: Error en los argumentos, ¡vuelve a intentarlo!
     default: []
   mode: single
+- id: '1663501480893'
+  alias: Wireless switch automations
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.wireless_switch_action
+    to: single
+    id: single
+  - platform: state
+    entity_id:
+    - sensor.wireless_switch_action
+    to: release
+    id: release
+  - platform: state
+    entity_id:
+    - sensor.wireless_switch_action
+    to: double
+    id: double
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: single
+      sequence:
+      - service: input_boolean.toggle
+        data: {}
+        target:
+          entity_id: input_boolean.dining_mode
+    - conditions:
+      - condition: trigger
+        id: release
+      sequence:
+      - service: button.press
+        data: {}
+        target:
+          entity_id: button.wicket_door
+    - conditions:
+      - condition: trigger
+        id: double
+      sequence:
+      - service: switch.toggle
+        data: {}
+        target:
+          entity_id: switch.exterior_plug
+  mode: single

@@ -1,22 +1,56 @@
+esphome:
+  on_boot:
+    priority: 104.0
+    then:
+      - delay: 9s
+      - component.update: ${id}_next_irrigation_day_ha
+      - lambda: |-
+          // If this variable has been deleted for any reason, reset it
+          if (id(${id}_next_irrigation_day) == 0)
+            id(update_next_irrigation_day_${id}).execute();
+
 api:
   services:
+    - service: update_${id}_next_irrigation_day
+      then:
+        - script.execute: update_next_irrigation_day_${id}
     - service: reset_${id}_next_irrigation_day
       then:
-        - component.update: ${id}_next_irrigation_day
+        - lambda: id(${id}_next_irrigation_day) = (id(time_sntp).now().timestamp);
+        - delay: 50ms
+        - component.update: ${id}_next_irrigation_day_ha
+
+# ============================================================================ #
+globals:
+  - id: ${id}_next_irrigation_day
+    type: long int
+    restore_value: True
+
+# ============================================================================ #
+script:
+  - id: update_next_irrigation_day_${id}
+    then:
+      - lambda: id(${id}_next_irrigation_day) = get_next_irrigation_day(id(${id}_next_irrigation_day), id(${id}_last_automatic_execution), id(precip_yesterday), id(mean_temp), id(${id}_irrigation_mode).state);
+      - delay: 100ms
+      - component.update: ${id}_next_irrigation_day_ha
 
 # ============================================================================ #
 text_sensor:
   #### Next day of irrigation, based in temperature, rain...
   - platform: template
-    id: ${id}_next_irrigation_day
-    internal: True
-    lambda: return to_string(id(time_sntp).now().timestamp);
-    update_interval: never
-    on_value: 
-      then:
-        - component.update: ${id}_next_irrigation_ha_day
-  - platform: template
     name: ${upper_id} next irrigation day
-    id: ${id}_next_irrigation_ha_day
-    lambda: return get_time_formated(id(${id}_next_irrigation_day).state);
+    id: ${id}_next_irrigation_day_ha
+    lambda: return get_time_formated(to_string(id(${id}_next_irrigation_day)));
     update_interval: never
+
+# ============================================================================ #
+time:
+  - platform: homeassistant
+    id: time_next_day_sensor_${id}
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: ${update_next_day}
+        minutes: 15
+        hours: 0
+        then:
+          - script.execute: update_next_irrigation_day_${id}

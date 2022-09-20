@@ -9,13 +9,87 @@
 
 using namespace std;
 
-time_t add_day(time_t, int);
 void set_new_irrigation_time();
 void set_irrigation(time_t, int, int);
+
+pair<string, string> get_irrigation_time(time_t, time_t, string);
+time_t get_next_irrigation_day(time_t, time_t, float, float, string);
 time_t get_next_time_at(int, int, int, int);
 string add_three_minutes_from_now();
 string manual_set(int, string);
 string delete_first_timestamp(string);
+time_t add_n_days(time_t, int); // Internal
+
+pair<string, string> get_irrigation_time(time_t next_irrigation, time_t last_auto_irrigation, string irrigation_mode) {
+    time_t today_timestamp = id(time_sntp).now().timestamp;
+    int days_since_last_irrigation = max(0, (int) floor(difftime(today_timestamp, last_auto_irrigation) / (60 * 60 * 24)));
+
+    return {"", ""};
+}
+
+time_t get_next_irrigation_day(time_t old_next_irrigation, time_t last_auto_irrigation, float precipitation, float mean_tmp, string irrigation_mode) {
+    /* This function is executed every day to check if there has been a massive rainfall to 
+    adjust the irrigation days and prevent water waste and flooding the roots. */
+    time_t today_timestamp = id(time_sntp).now().timestamp;
+    struct tm now_time = *localtime(&today_timestamp);
+    int no_water_days = max(0, (int) floor(difftime(old_next_irrigation, today_timestamp) / (60 * 60 * 24)));
+
+    // Set a fixed hour, we want to set the day
+    now_time.tm_hour = 12;
+    now_time.tm_min = 0;
+    now_time.tm_sec = 0;
+    today_timestamp = mktime(&now_time);
+
+    if(irrigation_mode.compare("Hoja caduca")) {
+        // No irrigation during winter
+        if (now_time.tm_mon > 10) {
+            now_time.tm_year++;
+            now_time.tm_mon = 2;
+            now_time.tm_mday = 1;
+
+            time_t aux = mktime(&now_time);
+            return aux;
+        }
+        else if (now_time.tm_mon < 2) {
+            now_time.tm_mon = 2;
+            now_time.tm_mday = 1;
+
+            time_t aux = mktime(&now_time);
+            return aux;
+        }
+        // Rest of the year
+        else {
+            if (precipitation > 5) {
+                if (mean_tmp < 15) no_water_days = max(no_water_days, max(5, int(precipitation / 5)));
+                else if (mean_tmp < 20) no_water_days = max(no_water_days, max(4, int(precipitation / 7)));
+                else if (mean_tmp < 25) no_water_days = max(no_water_days, max(3, int(precipitation / 10)));
+                else no_water_days = max(no_water_days, max(2, int(precipitation / 15)));
+            }
+        }
+    }
+    else if(irrigation_mode.compare("Hoja perenne")) {
+        if (now_time.tm_mon < 2 || now_time.tm_mon > 10) {
+            if (precipitation > 5) no_water_days = max(no_water_days, max(5, int(precipitation / 5)));
+        }
+        else {
+            if (precipitation > 5) {
+                if (mean_tmp < 15) no_water_days = max(no_water_days, max(5, int(precipitation / 5)));
+                else if (mean_tmp < 20) no_water_days = max(no_water_days, max(4, int(precipitation / 7)));
+                else if (mean_tmp < 25) no_water_days = max(no_water_days, max(3, int(precipitation / 10)));
+                else no_water_days = max(no_water_days, max(2, int(precipitation / 15)));
+            }
+        }
+    }
+    else if(irrigation_mode.compare("Frutales")) {
+        if (precipitation >= 10) {
+            if (mean_tmp < 18) no_water_days = max(no_water_days, max(3, int(((precipitation + 10) / 10))));
+            else if (mean_tmp < 25) no_water_days = max(no_water_days, max(2, int((precipitation / 15))));
+            else no_water_days = max(no_water_days, 1);
+        }
+    }
+    
+    return add_n_days(today_timestamp, no_water_days);
+}
 
 void set_new_irrigation_time() {
     int time_per_day = 15, no_water_days = 0, freq_day = 1, next_from_today = 0, last_day = 0;
@@ -23,12 +97,12 @@ void set_new_irrigation_time() {
     float mean_hum = id(mean_humid);
     float min_hum = id(min_humid);
     float precip = id(precip_yesterday);
-    time_t old_next_irrigation = atoi((id(north_next_irrigation_day).state).c_str());
+//    time_t old_next_irrigation = atoi((id(north_next_irrigation_day).state).c_str());
     time_t last_irrigation = id(north_last_automatic_execution);
 
     time_t now_timestamp = id(time_sntp).now().timestamp;
-    double diff_secs = difftime(old_next_irrigation, now_timestamp);
-    if (diff_secs > 0) no_water_days = (int) floor(diff_secs / (3600 * 24));
+//    double diff_secs = difftime(old_next_irrigation, now_timestamp);
+//    if (diff_secs > 0) no_water_days = (int) floor(diff_secs / (3600 * 24));
 
     //ESP_LOGD("set_new_irrigation_time", "DIFF SECS: %f, NO WATER DAYS: %i", diff_secs, no_water_days);
 
@@ -52,7 +126,7 @@ void set_new_irrigation_time() {
             no_water_days = max(2, no_water_days);
         else no_water_days = max(1, no_water_days);
     }
-    id(north_next_irrigation_day).publish_state(to_string(add_day(now_timestamp, no_water_days)));
+    //id(north_next_irrigation_day).publish_state(to_string(add_n_days(now_timestamp, no_water_days)));
 
     // Set the time per day
     time_per_day += (int) (pow(2, 3.2 + max((float)0, (mean_tmp - 10)/5)));
@@ -123,52 +197,11 @@ void set_irrigation(time_t today, int days_ahead, int mins) {
     id(south_timestamps_off).publish_state(south_off);
 }
 
-time_t add_day(time_t time, int days) {
-    struct tm strtime = *localtime(&time);
-    strtime.tm_hour = 12;
-    strtime.tm_min = 0;
-    strtime.tm_sec = 0;
-    strtime.tm_mday += days;
-
-    return mktime(&strtime);
-}
-
-/*void set_pool_filling() {
-    time_t now_timestamp = id(time_sntp).now().timestamp;
-    struct tm new_time = *localtime(&now_timestamp);
-
-    if (new_time.tm_mon % 2 == 0 && new_time.tm_hour < 15) new_time.tm_hour = 15;
-    else if (new_time.tm_mon % 2 == 0) {
-        new_time.tm_mday++;
-        time_t aux = mktime(&new_time);
-        new_time = *localtime(&aux);
-
-        if (new_time.tm_mon % 2 == 0) new_time.tm_hour = 15;
-        else new_time.tm_hour = 23;
-    }
-    else if (new_time.tm_hour < 23) new_time.tm_hour = 23;
-    else {
-        new_time.tm_mday++;
-        time_t aux = mktime(&new_time);
-        new_time = *localtime(&aux);
-
-        if (new_time.tm_mon % 2 != 0) new_time.tm_hour = 23;
-        else new_time.tm_hour = 15;
-    }
-    new_time.tm_min = 0;
-    new_time.tm_sec = 0;
-
-    time_t aux = mktime(&new_time);
-    id(pool_timestamps_on).publish_state(to_string(aux));
-    id(pool_timestamps_off).publish_state(to_string(aux + 3 * 60));
-}*/
-
 time_t get_next_time_at(int h_morn, int m_morn, int h_afte, int m_afte) {
     time_t now_timestamp = id(time_sntp).now().timestamp;
     struct tm new_time = *localtime(&now_timestamp);
 
     //ESP_LOGD("get_next_time_at", "HM: %i, MM: %i, HA %i, MA %i", h_morn, m_morn, h_afte, m_afte);
-
 
     if (new_time.tm_mon % 2 == 0 && new_time.tm_hour < h_morn) {
         new_time.tm_hour = h_morn;
@@ -248,4 +281,11 @@ string delete_first_timestamp(string time_list) {
     //ESP_LOGD("delete_first_timestamp", "TIMELIST: %s", time_list.c_str());
 
     return time_list;
+}
+
+time_t add_n_days(time_t time, int days) {
+    struct tm strtime = *localtime(&time);
+    strtime.tm_mday += days;
+
+    return mktime(&strtime);
 }

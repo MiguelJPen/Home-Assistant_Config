@@ -32,18 +32,6 @@ packages:
       upper_id: ${pool_upper_id}
       initial_option: ${pool_afternoon_initial_option}
 
-globals:
-  ## Bool to save automation mode
-  - id: ${pool_id}_automation_bool
-    type: bool
-    restore_value: True
-
-  ## Bool to save if pool filling requested when the device is restarted
-  - id: ${pool_id}_filling_requested
-    type: bool
-    restore_value: True
-
-# ============================================================================ #
 api:
   services:
     - service: filling_start
@@ -61,6 +49,18 @@ api:
         - lambda: |-
             id(${pool_id}_timestamps_off).publish_state(add_three_minutes_from_now());
 
+# ============================================================================ #
+globals:
+  ## Bool to save automation mode
+  - id: ${pool_id}_automation_bool
+    type: bool
+    restore_value: True
+
+  ## Bool to save if pool filling requested when the device is restarted
+  - id: ${pool_id}_filling_requested
+    type: bool
+    restore_value: True
+    
 # ============================================================================ #
 script:
   # Script to execute when pool starts to fill
