@@ -1,0 +1,16 @@
+substitutions:
+  name: madrid-proxy
+  upper_name: Madrid proxy
+
+packages:
+  device_base: !include common/device_base.madrid-proxy.yaml
+  basic_control: !include common/basic_control.yaml
+  wifi: !include common/madrid_wifi.yaml
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 5500ms
+    window: 5500ms
+    active: true
+
+bluetooth_proxy:

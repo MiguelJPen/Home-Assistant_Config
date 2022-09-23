@@ -1,0 +1,18 @@
+esphome:
+  name: ${name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_madrid_proxy
+
+ota:
+  password: !secret ota_madrid_proxy

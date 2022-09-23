@@ -1,0 +1,11 @@
+wifi:
+  networks:
+  - ssid: !secret madrid_wifi_ssid
+    password: !secret madrid_wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: ${upper_name} Fallback Hotspot
+    password: !secret fallback_password
+
+captive_portal:
