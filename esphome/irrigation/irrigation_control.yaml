@@ -133,10 +133,20 @@ script:
             - delay: 45 min
   - id: ${north_id}_update_time
     then:
-      - lambda: set_new_irrigation_time();
+      - lambda: 
+          if (id(${north_id}_automation_bool)) {
+            set_new_irrigation_time(); }
+          else {
+            id(${north_id}_timestamps_on).publish_state("");
+            id(${north_id}_timestamps_off).publish_state(""); }
   - id: ${south_id}_update_time
     then:
-      - lambda: set_new_irrigation_time();
+      - lambda: 
+          if (id(${south_id}_automation_bool)) {
+            set_new_irrigation_time(); }
+          else {
+            id(${south_id}_timestamps_on).publish_state("");
+            id(${south_id}_timestamps_off).publish_state(""); }
 
 # ============================================================================ #
 binary_sensor:

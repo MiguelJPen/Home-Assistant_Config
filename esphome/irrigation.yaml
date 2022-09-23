@@ -13,7 +13,7 @@ substitutions:
   south_sensor_id: south_virtual
   pool_id: pool
   pool_upper_id: Pool
-  
+
   ### GPIO Pins
   ac_adapter_relay_pin: "33" #"3" # Gris 33
   main_valve_relay_pin: "15" #"14" # Morado 15

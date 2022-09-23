@@ -71,7 +71,7 @@ script:
   - id: ${pool_id}_update_time
     then:
       - lambda:
-          if(id(${pool_id}_filling_requested)) {
+          if(id(${pool_id}_filling_requested) && id(${pool_id}_automation_bool)) {
             int hour_morning = atoi(((id(${pool_id}_morning_time).state).substr(0,2)).c_str());
             int minute_morning = atoi(((id(${pool_id}_morning_time).state).substr(3,2)).c_str());
             int hour_afternoon = atoi(((id(${pool_id}_afternoon_time).state).substr(0,2)).c_str());
@@ -80,6 +80,9 @@ script:
             time_t aux = get_next_time_at(hour_morning, minute_morning, hour_afternoon, minute_afternoon);
             id(${pool_id}_timestamps_on).publish_state(to_string(aux));
             id(${pool_id}_timestamps_off).publish_state(to_string(aux + 3 * 60)); }
+          else {
+            id(${pool_id}_timestamps_on).publish_state("");
+            id(${pool_id}_timestamps_off).publish_state(""); }
 
 # ============================================================================ #
 switch:
@@ -96,8 +99,7 @@ switch:
       - lambda: |-
           id(${pool_id}_automation_bool) = false;
           id(${pool_id}_filling_requested) = false;
-          id(${pool_id}_timestamps_on).publish_state("");
-          id(${pool_id}_timestamps_off).publish_state("");
+      - script.execute: ${pool_id}_update_time
   - platform: template
     name: Pool filling manual
     id: ${pool_id}_manual

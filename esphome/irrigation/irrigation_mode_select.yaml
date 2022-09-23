@@ -11,3 +11,6 @@ select:
       - Hoja perenne
       - Frutales
     initial_option: ${initial_option}
+    on_value:
+      then:
+        - script.execute: ${id}_update_time
