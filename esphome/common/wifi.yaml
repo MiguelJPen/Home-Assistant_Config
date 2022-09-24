@@ -9,3 +9,8 @@ wifi:
     password: !secret fallback_password
 
 captive_portal:
+
+sensor:
+  - platform: wifi_signal
+    name: "${upper_name} WiFi Signal"
+    disabled_by_default: true 
