@@ -1,0 +1,37 @@
+esphome:
+  on_boot:
+    priority: 106.0
+    then:
+      - delay: 10s
+      - script.execute: ${id}_update_time
+
+# ============================================================================ #
+script:
+  - id: ${id}_update_time
+    then:
+      - lambda: 
+          if (id(${id}_automation_bool)) {
+            int h_mor = atoi(((id(${id}_morning_time).state).substr(0,2)).c_str());
+            int m_mor = atoi(((id(${id}_morning_time).state).substr(3,2)).c_str());
+            int h_aft = atoi(((id(${id}_afternoon_time).state).substr(0,2)).c_str());
+            int m_aft = atoi(((id(${id}_afternoon_time).state).substr(3,2)).c_str());
+
+            pair<string, string> aux = get_irrigation_time(id(${id}_next_irrigation_day), id(${id}_last_automatic_execution), 
+              id(mean_temp), id(mean_humid), id(min_humid), id(${id}_irrigation_mode).state, h_mor, m_mor, h_aft, m_aft);
+            id(${id}_timestamps_on).publish_state(aux.first);
+            id(${id}_timestamps_off).publish_state(aux.second); }
+          else {
+            id(${id}_timestamps_on).publish_state("");
+            id(${id}_timestamps_off).publish_state(""); }
+
+# ============================================================================ #
+time:
+  - platform: homeassistant
+    id: time_irrigation_${id}
+    timezone: Europe/Madrid
+    on_time:
+      - seconds: ${update_irrigation_time}
+        minutes: 30
+        hours: 0
+        then:
+          - script.execute: ${id}_update_time

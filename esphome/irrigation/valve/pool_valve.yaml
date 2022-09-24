@@ -11,14 +11,22 @@ packages:
     file: ../../common/time_controlled_entity/text_sensor.yaml
   valve_automation: !include
     file: pool_valve_automation.yaml
+  valve_logic: !include
+    file: pool_valve_logic.yaml
+  morning_time: !include
+    file: time_morning_select.yaml
+    vars:
+      initial_option: ${morning_initial_option}
+  afternoon_time: !include
+    file: time_afternoon_select.yaml
+    vars:
+      initial_option: ${afternoon_initial_option}
 
 esphome:
   on_boot:
     priority: 101.0
     then:
       - delay: 14s
-      - lambda: |-
-          id(${id}_timestamps_on).publish_state("");
-          id(${id}_timestamps_off).publish_state("");
-          if(id(${id}_filling_requested)) 
-            id(${pool_id}_update_time).execute();
+      - script.execute: ${pool_id}_update_time
+      - homeassistant.service:
+          service: esphome.pool_filling_completed

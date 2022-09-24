@@ -17,3 +17,21 @@ packages:
     file: ../../common/time_controlled_entity/last_execution_sensor.yaml
   valve_automation: !include 
     file: irrigation_valve_automation.yaml
+  valve_logic: !include 
+    file: irrigation_valve_logic.yaml
+  valve_time: !include 
+    file: irrigation_valve_time.yaml
+  next_irrigation_day: !include
+    file: irrigation_next_day_sensor.yaml
+  morning_time: !include
+    file: time_morning_select.yaml
+    vars:
+      initial_option: ${morning_initial_option}
+  afternoon_time: !include
+    file: time_afternoon_select.yaml
+    vars:
+      initial_option: ${afternoon_initial_option}
+  mode: !include 
+    file: irrigation_mode_select.yaml
+    vars:
+      initial_option: ${mode_initial_option}

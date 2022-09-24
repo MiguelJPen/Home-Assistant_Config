@@ -14,23 +14,8 @@ packages:
       text_off_update: ${pool_text_off_update}
       automation_check: ${pool_automation_check}
       left_update: ${pool_left_update}
-  ${pool_id}_valve_logic: !include
-    file: valve/pool_valve_logic.yaml
-    vars:
-      id: ${pool_id}
-      upper_id: ${pool_upper_id}
-  ${pool_id}_morning_time: !include
-    file: time_morning_select.yaml
-    vars:
-      id: ${pool_id}
-      upper_id: ${pool_upper_id}
-      initial_option: ${pool_morning_initial_option}
-  ${pool_id}_afternoon_time: !include
-    file: time_afternoon_select.yaml
-    vars:
-      id: ${pool_id}
-      upper_id: ${pool_upper_id}
-      initial_option: ${pool_afternoon_initial_option}
+      morning_initial_option: ${pool_morning_initial_option}
+      afternoon_initial_option: ${pool_afternoon_initial_option}
 
 api:
   services:

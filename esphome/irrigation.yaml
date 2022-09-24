@@ -53,7 +53,8 @@ substitutions:
   pool_text_off_update: "37"
   north_update_next_day: "40"
   south_update_next_day: "42"
-  update_irrigation_times: "50"
+  north_update_irrigation_time: "45"
+  south_update_irrigation_time: "50"
   update_irrigation_period: "56"
   update_irrigation_available: "57"
 

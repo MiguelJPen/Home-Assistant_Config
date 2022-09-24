@@ -13,6 +13,8 @@ switch:
     turn_on_action:
       - lambda: |-
           id(${id}_automation_bool) = true;
+      - script.execute: ${id}_update_time
     turn_off_action:
       - lambda: |-
           id(${id}_automation_bool) = false;
+      - script.execute: ${id}_update_time

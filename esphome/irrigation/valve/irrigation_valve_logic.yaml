@@ -5,7 +5,6 @@ switch:
     id: ${id}_virtual
     internal: True
     lambda: return (id(${id}_valve).state && id(${main_id}_valve).state);
-    optimistic: true
     turn_on_action:
       - if:
           condition:

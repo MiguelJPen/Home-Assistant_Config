@@ -22,36 +22,12 @@ packages:
       text_off_update: ${north_text_off_update}
       automation_check: ${north_automation_check}
       left_update: ${north_left_update}
-  ${north_id}_valve_logic: !include
-    file: valve/irrigation_valve_logic.yaml
-    vars:
-      id: ${north_id}
-      upper_id: ${north_upper_id}
-  ${north_id}_next_irrigation_day: !include
-    file: irrigation_next_day_sensor.yaml
-    vars:
-      id: ${north_id}
-      upper_id: ${north_upper_id}
       update_next_day: ${north_update_next_day}
-  ${north_id}_mode: !include 
-    file: irrigation_mode_select.yaml
-    vars:
-      id: ${north_id}
-      upper_id: ${north_upper_id}
-      initial_option: ${north_initial_option}
-  ${north_id}_morning_time: !include
-    file: time_morning_select.yaml
-    vars:
-      id: ${north_id}
-      upper_id: ${north_upper_id}
-      initial_option: ${north_morning_initial_option}
-  ${north_id}_afternoon_time: !include
-    file: time_afternoon_select.yaml
-    vars:
-      id: ${north_id}
-      upper_id: ${north_upper_id}
-      initial_option: ${north_afternoon_initial_option}
-  
+      morning_initial_option: ${north_morning_initial_option}
+      afternoon_initial_option: ${north_afternoon_initial_option}
+      mode_initial_option: ${north_initial_option}
+      update_irrigation_time: ${north_update_irrigation_time}
+
   #### South valve
   ${south_id}_valve: !include
     file: valve/irrigation_valve.yaml
@@ -65,35 +41,11 @@ packages:
       text_off_update: ${south_text_off_update}
       automation_check: ${south_automation_check}
       left_update: ${south_left_update}
-  ${south_id}_valve_logic: !include
-    file: valve/irrigation_valve_logic.yaml
-    vars:
-      id: ${south_id}
-      upper_id: ${south_upper_id}
-  ${south_id}_next_irrigation_day: !include
-    file: irrigation_next_day_sensor.yaml
-    vars:
-      id: ${south_id}
-      upper_id: ${south_upper_id}
       update_next_day: ${south_update_next_day}
-  ${south_id}_mode: !include 
-    file: irrigation_mode_select.yaml
-    vars:
-      id: ${south_id}
-      upper_id: ${south_upper_id}
-      initial_option: ${south_initial_option}
-  ${south_id}_morning_time: !include
-    file: time_morning_select.yaml
-    vars:
-      id: ${south_id}
-      upper_id: ${south_upper_id}
-      initial_option: ${south_morning_initial_option}
-  ${south_id}_afternoon_time: !include
-    file: time_afternoon_select.yaml
-    vars:
-      id: ${south_id}
-      upper_id: ${south_upper_id}
-      initial_option: ${south_afternoon_initial_option}
+      morning_initial_option: ${south_morning_initial_option}
+      afternoon_initial_option: ${south_afternoon_initial_option}
+      mode_initial_option: ${south_initial_option}
+      update_irrigation_time: ${south_update_irrigation_time}
 
 esphome:
   on_boot:
@@ -102,16 +54,7 @@ esphome:
       - delay: 10s
       - component.update: irrigation_period
       - lambda: |-
-          set_new_irrigation_time();
           id(${irrigation_id}_available).publish_state(water_available());
-
-# ============================================================================ #
-api:
-  services:
-    - service: set_irrigation_times
-      then:
-        - lambda: |-
-            set_new_irrigation_time();
 
 # ============================================================================ #
 script:
@@ -131,22 +74,6 @@ script:
             - delay: 5s
             - switch.turn_off: ${south_id}_virtual
             - delay: 45 min
-  - id: ${north_id}_update_time
-    then:
-      - lambda: 
-          if (id(${north_id}_automation_bool)) {
-            set_new_irrigation_time(); }
-          else {
-            id(${north_id}_timestamps_on).publish_state("");
-            id(${north_id}_timestamps_off).publish_state(""); }
-  - id: ${south_id}_update_time
-    then:
-      - lambda: 
-          if (id(${south_id}_automation_bool)) {
-            set_new_irrigation_time(); }
-          else {
-            id(${south_id}_timestamps_on).publish_state("");
-            id(${south_id}_timestamps_off).publish_state(""); }
 
 # ============================================================================ #
 binary_sensor:
@@ -193,12 +120,6 @@ time:
     id: time_irrigation
     timezone: Europe/Madrid
     on_time:
-      - seconds: ${update_irrigation_times}
-        minutes: 30
-        hours: 0
-        then:
-          - lambda: |-
-              set_new_irrigation_time();
       - seconds: ${update_irrigation_period}
         minutes: 0
         hours: 0
