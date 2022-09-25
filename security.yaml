@@ -35,7 +35,7 @@ folder_watcher:
 template:
   - trigger:
       - platform: time
-        at: '12:00:00'
+        at: '14:00:00' # UTC time
       - platform: event
         event_type: event_template_reloaded
       - platform: homeassistant
