@@ -1310,29 +1310,85 @@
       title: '*¡AVISO IMPORTANTE!*'
   mode: single
 - id: '1650113623089'
-  alias: Security - Set random times for lights
+  alias: Security - Control for random guest room lights
   description: ''
   trigger:
   - platform: time
-    at: '13:30:00'
-  condition: []
+    at: sensor.guest_room_security_start
+    id: start_time
+  - platform: homeassistant
+    event: start
+    id: ha_start
+  - platform: time
+    at: sensor.guest_room_security_end
+    id: end_time
+  - platform: time
+    at: sensor.guest_room_bathroom_event
+    id: bathroom_event
+  - platform: time
+    at: 02:00:00
+    id: two_am
+  - platform: state
+    entity_id:
+    - input_boolean.guest_room_occupied
+    to: 'off'
+    id: not_occupied
+  condition:
+  - condition: state
+    entity_id: input_boolean.guest_room_occupied
+    state: 'off'
   action:
-  - service: scheduler.edit
-    data:
-      entity_id: switch.schedule_habitacion_de_invitados_encendido
-      timeslots:
-        start: sunset+00:{{ "{:02}".format(range(0, 20)|random|int) }}
-        actions:
-        - service: light.turn_on
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: start_time
+      sequence:
+      - service: light.turn_on
+        data: {}
+        target:
           entity_id: light.guest_dresser
-  - service: scheduler.edit
-    data:
-      entity_id: switch.schedule_habitacion_de_invitados_apagar
-      timeslots:
-        start: 01:{{ "{:02}".format(range(0, 59)|random|int) }}
-        actions:
-        - service: light.turn_off
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: ha_start
+        - condition: trigger
+          id: not_occupied
+      sequence:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.guest_room_lights
+      - condition: template
+        value_template: '{{ (states(''sensor.guest_room_security_start'') | as_timestamp)
+          < utcnow().timestamp() < (states(''sensor.guest_room_security_end'') | as_timestamp)
+          }}
+
+          '
+      - service: light.turn_on
+        data: {}
+        target:
           entity_id: light.guest_dresser
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: trigger
+          id: end_time
+        - condition: trigger
+          id: two_am
+      sequence:
+      - service: light.turn_off
+        data: {}
+        target:
+          entity_id: light.guest_room_lights
+    - conditions:
+      - condition: trigger
+        id: bathroom_event
+      sequence:
+      - service: script.turn_on
+        data: {}
+        target:
+          entity_id: script.guest_room_security_ligths_bathroom_event
   variables:
     first_event_on: '{{ (state_attr(''sun.sun'', ''next_setting'') | as_datetime |
       as_timestamp) + ((range(-10, 20)|random|int) * 60) }}'
@@ -1346,7 +1402,7 @@
       as_timestamp) + ((range(-20, 10)|random|int) * 60) }}'
   mode: single
 - id: '1650498048252'
-  alias: Security - Controls for random lights
+  alias: Security - Control for random security lights
   description: ''
   trigger:
   - platform: time

@@ -13,12 +13,12 @@ security_lights_dining_room:
   - service: script.turn_on
     data: {}
     target:
-      entity_id: "{% set data = namespace(scripts=[]) %} \n{% set data.scripts = data.scripts\
-        \ + [\"script.security_lights_living_room_window\"] %}\n\n{% if is_state('input_boolean.modo_tv',\
-        \ 'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_living_room_sofa\"\
-        ] %}\n{% endif %}\n\n{% if is_state('binary_sensor.end_random_lights', 'off')\
-        \ %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_corridor\"\
-        ] %}\n{% endif %}\n{{ data.scripts | random }}\n"
+      entity_id: "{% set data = namespace(scripts=[]) %} \n{% set data.scripts = data.scripts
+        + [\"script.security_lights_living_room_window\"] %}\n\n{% if is_state('input_boolean.modo_tv',
+        'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_living_room_sofa\"]
+        %}\n{% endif %}\n\n{% if is_state('binary_sensor.end_random_lights', 'off')
+        %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_corridor\"]
+        %}\n{% endif %}\n{{ data.scripts | random }}\n"
   - delay:
       seconds: '{{ range(20, 200) | random | int }}'
   - service: light.turn_off
@@ -39,11 +39,11 @@ security_lights_corridor:
   - service: script.turn_on
     data: {}
     target:
-      entity_id: "{% set data = namespace(scripts=[]) %} \n{% set data.scripts = data.scripts\
-        \ + [\"script.security_lights_living_room_window\"] %}\n{% set data.scripts\
-        \ = data.scripts + [\"script.security_lights_dining_room\"] %}\n{% if is_state('input_boolean.modo_tv',\
-        \ 'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_living_room_sofa\"\
-        ] %}\n{% endif %}\n{{ data.scripts | random }}\n"
+      entity_id: "{% set data = namespace(scripts=[]) %} \n{% set data.scripts = data.scripts
+        + [\"script.security_lights_living_room_window\"] %}\n{% set data.scripts
+        = data.scripts + [\"script.security_lights_dining_room\"] %}\n{% if is_state('input_boolean.modo_tv',
+        'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_living_room_sofa\"]
+        %}\n{% endif %}\n{{ data.scripts | random }}\n"
   - delay:
       seconds: '{{ range(20, 200) | random | int }}'
   - service: light.turn_off
@@ -79,12 +79,12 @@ security_lights_living_room_window:
     - service: script.turn_on
       data: {}
       target:
-        entity_id: "{% set data = namespace(scripts=[]) %} \n{% set data.scripts =\
-          \ data.scripts + [\"script.security_lights_dining_room\"] %}\n\n{% if is_state('input_boolean.modo_tv',\
-          \ 'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_living_room_sofa\"\
-          ] %}\n{% endif %}\n\n{% if is_state('binary_sensor.end_random_lights', 'off')\
-          \ %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_corridor\"\
-          ] %}\n{% endif %}\n{{ data.scripts | random }}\n"
+        entity_id: "{% set data = namespace(scripts=[]) %} \n{% set data.scripts =
+          data.scripts + [\"script.security_lights_dining_room\"] %}\n\n{% if is_state('input_boolean.modo_tv',
+          'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_living_room_sofa\"]
+          %}\n{% endif %}\n\n{% if is_state('binary_sensor.end_random_lights', 'off')
+          %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_corridor\"]
+          %}\n{% endif %}\n{{ data.scripts | random }}\n"
     - delay:
         seconds: '{{ range(20, 200) | random | int }}'
     - service: light.turn_off
@@ -108,11 +108,11 @@ security_lights_living_room_sofa:
   - service: script.turn_on
     data: {}
     target:
-      entity_id: "{% set data = namespace(scripts=[]) %} \n{% set data.scripts = data.scripts\
-        \ + [\"script.security_lights_living_room_window\"] %}\n{% set data.scripts\
-        \ = data.scripts + [\"script.security_lights_dining_room\"] %}\n{% if is_state('binary_sensor.end_random_lights',\
-        \ 'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_corridor\"\
-        ] %}\n{% endif %}\n{{ data.scripts | random }}\n"
+      entity_id: "{% set data = namespace(scripts=[]) %} \n{% set data.scripts = data.scripts
+        + [\"script.security_lights_living_room_window\"] %}\n{% set data.scripts
+        = data.scripts + [\"script.security_lights_dining_room\"] %}\n{% if is_state('binary_sensor.end_random_lights',
+        'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_corridor\"]
+        %}\n{% endif %}\n{{ data.scripts | random }}\n"
   - delay:
       seconds: '{{ range(20, 200) | random | int }}'
   - condition: state
@@ -130,11 +130,27 @@ security_lights_turn_on_lights:
   - service: script.turn_on
     data: {}
     target:
-      entity_id: "{% set data = namespace(scripts=[]) %} {% set data.scripts = data.scripts\
-        \ + [\"script.security_lights_dining_room\"] %} {% set data.scripts = data.scripts\
-        \ + [\"script.security_lights_living_room_window\"] %}\n{% if is_state('input_boolean.modo_tv',\
-        \ 'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_living_room_sofa\"\
-        ] %}\n{% endif %}\n{% if is_state('binary_sensor.end_random_lights', 'off')\
-        \ %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_corridor\"\
-        ] %}\n{% endif %}\n{{ (data.scripts | random) }}\n"
+      entity_id: "{% set data = namespace(scripts=[]) %} {% set data.scripts = data.scripts
+        + [\"script.security_lights_dining_room\"] %} {% set data.scripts = data.scripts
+        + [\"script.security_lights_living_room_window\"] %}\n{% if is_state('input_boolean.modo_tv',
+        'off') %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_living_room_sofa\"]
+        %}\n{% endif %}\n{% if is_state('binary_sensor.end_random_lights', 'off')
+        %}\n  {% set data.scripts = data.scripts + [\"script.security_lights_corridor\"]
+        %}\n{% endif %}\n{{ (data.scripts | random) }}\n"
   mode: single
+guest_room_security_ligths_bathroom_event:
+  alias: Security lights - Guest room bathroom event
+  sequence:
+  - service: light.turn_on
+    data: {}
+    target:
+      entity_id: light.guest_bathroom
+  - delay:
+      minutes: '{{ range(7, 25) | random | int }}'
+      seconds: '{{ range(0, 60) | random | int }}'
+  - service: light.turn_off
+    data: {}
+    target:
+      entity_id: light.guest_bathroom
+  mode: single
+  icon: mdi:robber

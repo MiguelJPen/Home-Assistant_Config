@@ -47,3 +47,12 @@ template:
       - name: 'Sunset Offset'
         state: "{{ state_attr('sun.sun', 'next_setting') | as_datetime + timedelta(minutes=range(-25, 10) | random) }}"
         device_class: timestamp
+      - name: 'Guest Room Security Start'
+        state: "{{ state_attr('sun.sun', 'next_setting') | as_datetime + timedelta(minutes=range(-5, 30) | random) }}"
+        device_class: timestamp
+      - name: 'Guest Room Security End'
+        state: "{{ today_at('00:00') + timedelta(days = 1, seconds = range(1800, 6000) | random) }}"
+        device_class: timestamp
+      - name: 'Guest Room Bathroom Event'
+        state: "{{ today_at('21:30') + timedelta(seconds = range(0, 7200) | random) }}"
+        device_class: timestamp
