@@ -16,3 +16,6 @@ api:
 
 ota:
   password: !secret ota_madrid_proxy
+
+wifi:
+  use_address: !secret madrid_proxy_address
