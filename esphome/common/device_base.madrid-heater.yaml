@@ -1,0 +1,21 @@
+esphome:
+  name: ${name}
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_madrid_heater
+
+ota:
+  password: !secret ota_madrid_heater
+
+wifi:
+  use_address: !secret madrid_heater_address
