@@ -1,5 +1,3 @@
-device_tracker.google_maps_100547873302931257193:
-  friendly_name: Miguel
 sensor.average_pressure:
   friendly_name: Presión atmosférica
 sensor.hourly_energy:
