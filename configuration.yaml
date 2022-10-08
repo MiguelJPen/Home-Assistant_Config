@@ -39,7 +39,6 @@ frontend:
 
 # SENSORS
 sensor:
-  - platform: moon
   - platform: systemmonitor
     resources:
       - type: disk_use_percent
