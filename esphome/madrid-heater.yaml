@@ -49,6 +49,8 @@ climate:
       - switch.turn_on: heater
     idle_action:
       - switch.turn_off: heater
+    startup_delay: true
+    #default_preset: away
     preset:
       - name: sleep
         default_target_temperature_low: 17
