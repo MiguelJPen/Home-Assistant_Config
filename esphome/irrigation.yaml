@@ -36,7 +36,7 @@ substitutions:
 
   ### Irrigation mode initial options
   north_initial_option: Frutales
-  south_initial_option: Hoja perenne
+  south_initial_option: Hoja caduca
 
   ### Update seconds to avoid overlapping in code
   north_left_update: "1"

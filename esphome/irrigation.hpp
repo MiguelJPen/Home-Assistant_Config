@@ -32,7 +32,7 @@ int h_morn, int m_morn, int h_afte, int m_afte) {
     string turn_on = "", turn_off = "", comma = ",";
 
     if (irrigation_mode.compare(CADUCA) == 0 || irrigation_mode.compare(PERENNE) == 0) {
-        mins = max(mins, (int) ((51.932 * pow(mean_tmp, 0.524782)) - 133));
+        mins = max(mins, (int) (5.5 * mean_tmp - 15));
 
         if (mean_tmp <= 10) irrigation_frequency = 5;
         else if (mean_tmp <= 13) irrigation_frequency = 4;
@@ -40,9 +40,10 @@ int h_morn, int m_morn, int h_afte, int m_afte) {
         else if (mean_tmp <= 19) irrigation_frequency = 2;
     }
     else if (irrigation_mode.compare(FRUTALES) == 0) {
-        mins = max(mins, (int) ((1.39268 * pow(mean_tmp, 1.44504)) + 45));
+        mins = max(mins, (int) (7 * mean_tmp - 10));
 
-        // Everyday irrigation, except when it rains a lot
+        if (mean_tmp <= 10) irrigation_frequency = 3;
+        else if(mean_tmp <= 14) irrigation_frequency = 2;
     }
 
     if (min_hum < 25 || mean_hum < 45) mins += 25;
