@@ -39,10 +39,9 @@ climate:
   - platform: thermostat
     name: "Termostato de Madrid"
     sensor: ${temperature_id}
-    min_heating_off_time: 300s
-    min_heating_run_time: 300s
-    min_idle_time: 60s
-    default_target_temperature_low: 15
+    min_heating_off_time: 240s
+    min_heating_run_time: 240s
+    min_idle_time: 180s
     heat_deadband: 0.2
     heat_overrun: 0.3
     heat_action:
