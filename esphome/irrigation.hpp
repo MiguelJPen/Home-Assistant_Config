@@ -27,7 +27,7 @@ pair<string, string> get_irrigation_time(time_t next_irrigation, time_t last_aut
 int h_morn, int m_morn, int h_afte, int m_afte) {
     time_t today_timestamp = id(time_sntp).now().timestamp;
     int irrigation_frequency = 1, mins = 20;
-    int days_to_next_irrigation = max(0, (int) floor(difftime(today_timestamp, next_irrigation) / DAY_SECS));
+    int days_to_next_irrigation = max(0, (int) floor(difftime(next_irrigation, today_timestamp) / DAY_SECS));
     int days_since_last_irrigation = max(0, (int) floor(difftime(today_timestamp, last_auto_irrigation) / DAY_SECS) - 1);
     string turn_on = "", turn_off = "", comma = ",";
 
