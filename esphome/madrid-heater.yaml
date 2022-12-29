@@ -41,15 +41,14 @@ climate:
     sensor: ${temperature_id}
     min_heating_off_time: 240s
     min_heating_run_time: 240s
-    min_idle_time: 180s
+    min_idle_time: 60s
     heat_deadband: 0.2
     heat_overrun: 0.3
     heat_action:
-      - switch.turn_on: heater
+      - switch.turn_on: ${heater_id}
     idle_action:
-      - switch.turn_off: heater
+      - switch.turn_off: ${heater_id}
     startup_delay: true
-    #default_preset: away
     preset:
       - name: sleep
         default_target_temperature_low: 17
