@@ -1,0 +1,18 @@
+ios:
+  actions:
+    - name: open_wicket_door
+      background_color: "#777777"
+      label:
+        text: "Puerta peatonal"
+        color: "#ffffff"
+      icon:
+        icon: mdi:door
+        color: "#ffffff"
+    - name: open_main_gate
+      background_color: "#777777"
+      label:
+        text: "Puerta para coches"
+        color: "#ffffff"
+      icon:
+        icon: mdi:gate
+        color: "#ffffff"
