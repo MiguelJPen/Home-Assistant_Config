@@ -19,6 +19,7 @@ homeassistant:
     google_assistant: !include google_assistant.yaml
     external_access: !include external_access.yaml
     security: !include security.yaml
+    ios: !include ios.yaml
 
 logger:
   default: warn
