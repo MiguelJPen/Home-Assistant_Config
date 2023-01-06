@@ -1,0 +1,11 @@
+light:
+  - platform: binary
+    name: ${upper_id}
+    output: ${id}
+  
+output:
+  - id: ${id}
+    platform: gpio
+    pin: 
+      number: ${pin}
+      inverted: True
