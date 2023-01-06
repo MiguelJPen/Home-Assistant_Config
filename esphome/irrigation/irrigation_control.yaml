@@ -5,7 +5,7 @@ packages:
     vars:
       id: ${main_id}
       upper_id: ${main_upper_id}
-      relay_pin: ${main_valve_relay_pin}
+      relay_pin: ${main_valve_pin}
   turn_off_main_valve: !include 
     file: valve/irrigation_turn_off_main.yaml
 
@@ -17,7 +17,7 @@ packages:
       upper_id: ${north_upper_id}
       sensor_id: ${north_sensor_id}
       manual_max_duration: ${north_manual_max_duration}
-      relay_pin: ${north_valve_relay_pin}
+      relay_pin: ${north_valve_pin}
       text_on_update: ${north_text_on_update}
       text_off_update: ${north_text_off_update}
       automation_check: ${north_automation_check}
@@ -36,7 +36,7 @@ packages:
       upper_id: ${south_upper_id}
       sensor_id: ${south_sensor_id}
       manual_max_duration: ${south_manual_max_duration}
-      relay_pin: ${south_valve_relay_pin}
+      relay_pin: ${south_valve_pin}
       text_on_update: ${south_text_on_update}
       text_off_update: ${south_text_off_update}
       automation_check: ${south_automation_check}

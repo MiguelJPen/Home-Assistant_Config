@@ -4,6 +4,7 @@ switch:
     id: $ac_adapter_id
     icon: mdi:connection
     pin:
-      number: $ac_adapter_relay_pin
+      number: $ac_adapter_pin
+      inverted: true
     name: "Adaptador AC"
     restore_mode: ALWAYS_OFF

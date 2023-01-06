@@ -9,7 +9,7 @@ packages:
       upper_id: ${pool_upper_id}
       sensor_id: ${pool_sensor_id}
       manual_max_duration: ${pool_manual_max_duration}
-      relay_pin: ${pool_valve_relay_pin}
+      relay_pin: ${pool_valve_pin}
       text_on_update: ${pool_text_on_update}
       text_off_update: ${pool_text_off_update}
       automation_check: ${pool_automation_check}

@@ -1,6 +1,8 @@
 substitutions:
   name: irrigation
   upper_name: Irrigation
+  garage_light_id: garage_light
+  garage_light_upper_id: Luz del garaje
   ac_adapter_id: ac_adapter
   irrigation_id: irrigation
   main_id: main
@@ -15,11 +17,12 @@ substitutions:
   pool_upper_id: Pool
 
   ### GPIO Pins
-  ac_adapter_relay_pin: "33" #"3" # Gris 33
-  main_valve_relay_pin: "15" #"14" # Morado 15
-  pool_valve_relay_pin: "14" #"32" # Amarillo 14
-  north_valve_relay_pin: "17" #"17" # Azul 17
-  south_valve_relay_pin: "5" #"33" # Verde 5
+  garage_light_pin: "14"
+  ac_adapter_pin: "5"
+  main_valve_pin: "4"
+  pool_valve_pin: "32"
+  north_valve_pin: "33"
+  south_valve_pin: "17"
 
   ### Maximum manual durations
   north_manual_max_duration: "240"
@@ -67,6 +70,12 @@ packages:
   ac_adapter: !include irrigation/ac_adapter_switch.yaml
   irrigation_control: !include irrigation/irrigation_control.yaml
   pool_filling: !include irrigation/pool_filling.yaml
+  garage_light: !include 
+    file: common/binary_light.yaml
+    vars: 
+      id: ${garage_light_id}
+      upper_id: ${garage_light_upper_id}
+      pin: ${garage_light_pin}
 
 esphome:
   includes: 
