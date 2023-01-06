@@ -1,0 +1,18 @@
+# static_ip: 10.133.100.
+
+esp32:
+  board: nodemcu-32s
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+  level: VERBOSE
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_bluetooth_proxy
+
+ota:
+  password: !secret ota_bluetooth_proxy
