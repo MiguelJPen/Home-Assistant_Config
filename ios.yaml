@@ -16,3 +16,11 @@ ios:
       icon:
         icon: mdi:gate
         color: "#ffffff"
+    - name: toggle_garage_light
+      background_color: "#777777"
+      label:
+        text: "Luz del garaje"
+        color: "#ffffff"
+      icon:
+        icon: mdi:wall-sconce-flat
+        color: "#ffffff"
