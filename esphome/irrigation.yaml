@@ -3,6 +3,7 @@ substitutions:
   upper_name: Irrigation
   garage_light_id: garage_light
   garage_light_upper_id: Luz del garaje
+  garage_icon: mdi:wall-sconce-flat
   ac_adapter_id: ac_adapter
   irrigation_id: irrigation
   main_id: main
@@ -76,6 +77,7 @@ packages:
       id: ${garage_light_id}
       upper_id: ${garage_light_upper_id}
       pin: ${garage_light_pin}
+      icon: ${garage_icon}
 
 esphome:
   includes: 

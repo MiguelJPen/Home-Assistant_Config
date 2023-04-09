@@ -1,6 +1,7 @@
 light:
   - platform: binary
     name: ${upper_id}
+    icon: ${icon}
     output: ${id}
   
 output:
