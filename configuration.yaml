@@ -27,8 +27,6 @@ logger:
     edata.connectors: critical
     custom_components.esios.sensor: fatal
     homeassistant.components.onvif: error
-    reolink.camera_api: error
-    reolink.subscription_manager: error
   filters:
     homeassistant.components.sensor:
       - ".*is taking over 10 seconds.*"
