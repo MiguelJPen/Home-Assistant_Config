@@ -16,7 +16,6 @@ homeassistant:
     zigbee: !include zigbee.yaml
     energy: !include energy.yaml
     recorder: !include recorder.yaml
-    google_assistant: !include google_assistant.yaml
     external_access: !include external_access.yaml
     security: !include security.yaml
     ios: !include ios.yaml
