@@ -1,0 +1,23 @@
+# Example configuration entry
+debug:
+    update_interval: 10s
+
+text_sensor:
+    - platform: debug
+      device:
+        name: ${upper_name} device info
+      reset_reason:
+        name: ${upper_name} reset reason
+
+#sensor:
+#    - platform: debug
+#      free: # Reports the free heap size in bytes
+#        name: ${upper_name} heap free
+#      fragmentation: # Heap fragmentation. Only in ESP8266 with Arduino 2.5.2+
+#        name: ${upper_name} heap fragmentation
+#      block: # Largest contiguous free RAM block on the heap in bytes
+#        name: ${upper_name} heap max block
+#      loop_time: # Longest time between successive iterations of the main loop
+#        name: ${upper_name} loop time
+
+# Logger must be at least debug (default)
