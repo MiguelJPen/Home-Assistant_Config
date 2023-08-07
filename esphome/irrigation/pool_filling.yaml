@@ -32,7 +32,7 @@ api:
     - service: request_more_pool_water
       then:
         - lambda: |-
-            id(${pool_id}_timestamps_off).publish_state(add_three_minutes_from_now());
+            id(${pool_id}_timestamps_off).publish_state(add_two_minutes_from_now());
 
 # ============================================================================ #
 globals:
@@ -64,7 +64,7 @@ script:
 
             time_t aux = get_next_time_at(hour_morning, minute_morning, hour_afternoon, minute_afternoon);
             id(${pool_id}_timestamps_on).publish_state(to_string(aux));
-            id(${pool_id}_timestamps_off).publish_state(to_string(aux + 3 * 60)); }
+            id(${pool_id}_timestamps_off).publish_state(to_string(aux + 2 * 60)); }
           else {
             id(${pool_id}_timestamps_on).publish_state("");
             id(${pool_id}_timestamps_off).publish_state(""); }

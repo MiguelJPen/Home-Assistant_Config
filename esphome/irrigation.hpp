@@ -18,7 +18,7 @@ pair<string, string> get_irrigation_time(time_t, time_t, float, float, string, i
 void set_time_at(time_t &, int, int, int, int); // Internal
 time_t get_next_irrigation_day(time_t, time_t, float, float, string);
 time_t get_next_time_at(int, int, int, int);
-string add_three_minutes_from_now();
+string add_two_minutes_from_now();
 string manual_set(int, string);
 string delete_first_timestamp(string);
 time_t add_n_days(time_t, int); // Internal
@@ -199,13 +199,13 @@ time_t get_next_time_at(int h_morn, int m_morn, int h_afte, int m_afte) {
     return aux;
 }
 
-string add_three_minutes_from_now() {
+string add_two_minutes_from_now() {
     time_t now_timestamp = id(time_sntp).now().timestamp;
     struct tm new_time = *localtime(&now_timestamp);
 
     new_time.tm_sec = 0;
     time_t aux = mktime(&new_time);
-    return to_string(aux + 3 * 60);
+    return to_string(aux + 2 * 60);
 }
 
 string manual_set(int duration, string time_list) {
