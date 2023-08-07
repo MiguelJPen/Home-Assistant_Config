@@ -26,6 +26,8 @@ recorder:
       - sensor.bridge_state
       - sensor.hourly_energy
       - sensor.fridge_plug_energy_consumption
+      - sensor.ac_salon_total_energy_consumption
+      - sensor.ac_despacho_total_energy_consumption
       - sensor.home_energy_monitor_power
       - binary_sensor.entrada
       - binary_sensor.cocina
