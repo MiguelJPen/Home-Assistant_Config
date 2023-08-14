@@ -52,6 +52,22 @@ api:
         - delay: 150ms
         - script.execute: alarm_siren_beep
 
+# ============================================================================ #
+button:
+  - platform: output
+    name: "Path gate"
+    output: path_gate_output
+    duration: 1000ms
+
+# ============================================================================ #
+output:
+  #### Output gpio to open the path gate
+  - platform: gpio
+    id: path_gate_output
+    pin: 
+      number: 17
+
+# ============================================================================ #
 binary_sensor:
   - platform: gpio
     pin:
