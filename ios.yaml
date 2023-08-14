@@ -11,10 +11,18 @@ ios:
     - name: open_main_gate
       background_color: "#777777"
       label:
-        text: "Puerta para coches"
+        text: "Puerta corredera"
         color: "#ffffff"
       icon:
         icon: mdi:gate
+        color: "#ffffff"
+    - name: open_path_gate
+      background_color: "#777777"
+      label:
+        text: "Puerta principal"
+        color: "#ffffff"
+      icon:
+        icon: mdi:boom-gate-outline
         color: "#ffffff"
     - name: toggle_garage_light
       background_color: "#777777"
@@ -23,4 +31,12 @@ ios:
         color: "#ffffff"
       icon:
         icon: mdi:wall-sconce-flat
+        color: "#ffffff"
+    - name: toggle_porch_light
+      background_color: "#777777"
+      label:
+        text: "Luz del porche"
+        color: "#ffffff"
+      icon:
+        icon: mdi:coach-lamp
         color: "#ffffff"

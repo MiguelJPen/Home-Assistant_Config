@@ -677,7 +677,7 @@
         default: []
     default: []
   mode: parallel
-  max: 4
+  max: 5
 - id: '1631442755979'
   alias: Alarm - Trigger when sensors go on - First (Home)
   description: ''
@@ -1786,6 +1786,16 @@
     event_data:
       actionID: toggle_garage_light
     id: toggle_garage_light
+  - platform: event
+    event_type: ios.action_fired
+    event_data:
+      actionID: open_path_gate
+    id: open_path_gate
+  - platform: event
+    event_type: ios.action_fired
+    event_data:
+      actionID: toggle_porch_light
+    id: toggle_porch_light
   condition:
   - condition: or
     conditions:
@@ -1813,10 +1823,26 @@
           entity_id: cover.main_gate
     - conditions:
       - condition: trigger
+        id: open_path_gate
+      sequence:
+      - service: button.press
+        data: {}
+        target:
+          entity_id: button.path_gate
+    - conditions:
+      - condition: trigger
         id: toggle_garage_light
       sequence:
       - service: light.toggle
         data: {}
         target:
           entity_id: light.luz_del_garaje
+    - conditions:
+      - condition: trigger
+        id: toggle_porch_light
+      sequence:
+      - service: light.toggle
+        data: {}
+        target:
+          entity_id: light.front_porch
   mode: single
