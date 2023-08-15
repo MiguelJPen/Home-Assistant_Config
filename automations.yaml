@@ -289,154 +289,132 @@
         {{ states('sensor.date_time') }}
   mode: single
 - id: '1623189802627'
-  alias: Security - Power off the host system during a long power cut
-  description: Four hours after a power cut, disarm the alarm and power off the host.
+  alias: Security - Notify the status of the UPS
+  description: Notifies the UPS change of state and turns off the system if the battery
+    is low.
   trigger:
-  - platform: state
-    entity_id: binary_sensor.irrigation_status
-    to: 'off'
-    for:
-      hours: 0
-      minutes: 3
-      seconds: 0
-  - platform: state
-    entity_id: switch.enchufe_4
-    to: unavailable
-    for:
-      hours: 0
-      minutes: 3
-      seconds: 0
-  - platform: state
-    entity_id: switch.living_room_plug_switch
-    to: unavailable
-    for:
-      hours: 0
-      minutes: 3
-      seconds: 0
-  condition:
-  - condition: state
-    entity_id: switch.living_room_plug_switch
-    state: unavailable
-  - condition: state
-    entity_id: switch.enchufe_4
-    state: unavailable
-  - condition: state
-    entity_id: binary_sensor.irrigation_status
-    state: 'off'
+  - platform: event
+    event_type: nut.ups_event
+    event_data:
+      notify_type: ONBATT
+    id: on_battery
+  - platform: event
+    event_type: nut.ups_event
+    event_data:
+      notify_type: ONLINE
+    id: online
+  - platform: event
+    event_type: nut.ups_event
+    event_data:
+      notify_type: LOWBATT
+    id: low_battery
+  - platform: event
+    event_type: nut.ups_event
+    event_data:
+      notify_type: REPLBATT
+    id: replace_battery
+  - platform: event
+    event_type: nut.ups_event
+    event_data:
+      notify_type: COMMBAD
+    id: bad_comm
+  - platform: event
+    event_type: nut.ups_event
+    event_data:
+      notify_type: NOCOMM
+    id: no_comm
+  condition: []
   action:
-  - service: notify.group
-    data:
-      message: Parece que ha habido un corte de luz a las {{ states('sensor.time')
-        }}.      Por favor, revísalo antes de que las baterías no puedan aguantar
-        la carga del sistema. El sistema se apagará automáticamente en cuatro horas.
-  - delay:
-      hours: 1
-      minutes: 0
-      seconds: 0
-      milliseconds: 0
-  - condition: and
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.irrigation_status
-      state: 'off'
-      for:
-        hours: 1
-        minutes: 0
-        seconds: 0
-    - condition: state
-      entity_id: switch.enchufe_4
-      state: unavailable
-    - condition: state
-      entity_id: switch.living_room_plug_switch
-      state: unavailable
-  - service: notify.group
-    data:
-      message: Por seguridad, el sistema se apagará automáticamente en tres horas.
-  - delay:
-      hours: 1
-      minutes: 0
-      seconds: 0
-      milliseconds: 0
-  - condition: and
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.irrigation_status
-      state: 'off'
-      for:
-        hours: 2
-        minutes: 0
-        seconds: 0
-    - condition: state
-      entity_id: switch.enchufe_4
-      state: unavailable
-    - condition: state
-      entity_id: switch.living_room_plug_switch
-      state: unavailable
-  - service: notify.group
-    data:
-      message: Por seguridad, el sistema se apagará automáticamente en dos horas.
-  - delay:
-      hours: 1
-      minutes: 0
-      seconds: 0
-      milliseconds: 0
-  - condition: and
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.irrigation_status
-      state: 'off'
-      for:
-        hours: 3
-        minutes: 0
-        seconds: 0
-    - condition: state
-      entity_id: switch.enchufe_4
-      state: unavailable
-    - condition: state
-      entity_id: switch.living_room_plug_switch
-      state: unavailable
-  - service: notify.group
-    data:
-      message: Por seguridad, el sistema se apagará automáticamente en una hora.
-  - delay:
-      hours: 1
-      minutes: 0
-      seconds: 0
-      milliseconds: 0
-  - condition: and
-    conditions:
-    - condition: state
-      entity_id: binary_sensor.irrigation_status
-      state: 'off'
-      for:
-        hours: 4
-        minutes: 0
-        seconds: 0
-    - condition: state
-      entity_id: switch.enchufe_4
-      state: unavailable
-    - condition: state
-      entity_id: switch.living_room_plug_switch
-      state: unavailable
-  - service: notify.group
-    data:
-      message: El sistema se apagará para proteger los datos y garantizar la integridad
-        de la información.  En caso de que vuelva la luz, será necesario pulsar el
-        botón situado en el frontal del Home Assistant si no se inicia automáticamente
-        pasados diez minutos. Desarmando la alarma para evitar sorpresas...
-      title: '*AVISO IMPORTANTE*'
-  - service: alarm_control_panel.alarm_disarm
-    data: {}
-  - delay:
-      hours: 0
-      minutes: 0
-      seconds: 15
-      milliseconds: 0
-  - service: notify.group
-    data:
-      message: Apagando el sistema...
-  - service: hassio.host_shutdown
-    data: {}
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - on_battery
+      sequence:
+      - service: notify.group
+        data:
+          message: Parece que ha habido un corte de luz a las {{ states('sensor.time')
+            }}. Por favor, revísalo antes de que las baterías no puedan aguantar la
+            carga del sistema. El sistema se apagará automáticamente si la batería
+            está muy baja.
+          title: '*AVISO*'
+        enabled: true
+      - repeat:
+          count: '30'
+          sequence:
+          - service: notify.miguel
+            data:
+              message: 'Carga: {{ states(''sensor.riello_ups_load'') }} %.
+
+                Voltaje de la batería: {{ states(''sensor.riello_ups_battery_voltage'')
+                }} V.
+
+                Voltaje de salida: {{ states(''sensor.riello_ups_output_voltage'')
+                }} V.'
+              title: '*Información de la batería*'
+          - delay:
+              hours: 0
+              minutes: 20
+              seconds: 0
+              milliseconds: 0
+    - conditions:
+      - condition: trigger
+        id:
+        - online
+      sequence:
+      - service: notify.group
+        data:
+          message: Se ha solventado el corte de energía. Intentando poner todo en
+            orden...
+    - conditions:
+      - condition: trigger
+        id:
+        - low_battery
+      sequence:
+      - service: notify.group
+        data:
+          message: El sistema se apagará para proteger los datos y garantizar la integridad
+            de la información.  En caso de que vuelva la luz, será necesario pulsar
+            el botón situado en el frontal del Home Assistant si no se inicia automáticamente
+            pasados diez minutos. Desarmando la alarma para evitar sorpresas...
+          title: '*AVISO IMPORTANTE*'
+        enabled: true
+      - service: alarm_control_panel.alarm_disarm
+        data: {}
+        enabled: true
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 30
+          milliseconds: 0
+      - service: notify.group
+        data:
+          message: Apagando el sistema...
+        enabled: true
+      - service: hassio.host_shutdown
+        data: {}
+        enabled: true
+    - conditions:
+      - condition: trigger
+        id:
+        - replace_battery
+      sequence:
+      - service: notify.miguel
+        data:
+          message: 'La batería del SAI no está en buen estado y debería ser reemplazada
+            pronto. Sus características son: {{ states(''sensor.riello_ups_nominal_battery_voltage'')
+            }} V y {{ states(''sensor.riello_ups_battery_capacity'') }} Ah.'
+          title: '*AVISO IMPORTANTE*'
+    - conditions:
+      - condition: trigger
+        id:
+        - bad_comm
+        - no_comm
+      sequence:
+      - service: notify.miguel
+        data:
+          title: '*Atención*'
+          message: Se ha perdido la comunicación con el SAI.
   mode: single
 - id: '1626736527137'
   alias: Energy - Change energy tariff
@@ -534,8 +512,7 @@
         0)) }}, {{ ''{:,.3f}''.format(float(states(''sensor.weekly_energy''), 0))
         }}, {{ ''{:,.3f}''.format(float(states(''sensor.energy_production_today''),
         0)) }}, {{ states(''sensor.aemet_condition'') }}, {{ ''{:,.2f}''.format(float(states(''sensor.monthly_energy_cost_imp''),
-        0)) }}
-        '
+        0)) }} '
   mode: single
 - id: '1628698660992'
   alias: Alarm - Send files from security cameras (Home and Away)
