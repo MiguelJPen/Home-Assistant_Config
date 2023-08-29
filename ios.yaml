@@ -40,3 +40,11 @@ ios:
       icon:
         icon: mdi:coach-lamp
         color: "#ffffff"
+    - name: arrive_home
+      background_color: "#777777"
+      label:
+        text: "Llegada a casa"
+        color: "#ffffff"
+      icon:
+        icon: mdi:human-greeting
+        color: "#ffffff"

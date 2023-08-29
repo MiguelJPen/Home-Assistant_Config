@@ -1773,6 +1773,12 @@
     event_data:
       actionID: toggle_porch_light
     id: toggle_porch_light
+  - platform: event
+    event_type: ios.action_fired
+    event_data:
+      actionID: arrive_home
+    id: arrive_home
+    context: {}
   condition:
   - condition: or
     conditions:
@@ -1822,4 +1828,44 @@
         data: {}
         target:
           entity_id: light.front_porch
+    - conditions:
+      - condition: trigger
+        id:
+        - arrive_home
+      sequence:
+      - service: button.press
+        data: {}
+        target:
+          entity_id: button.path_gate
+      - delay:
+          hours: 0
+          minutes: 0
+          seconds: 8
+          milliseconds: 0
+      - service: cover.toggle
+        data: {}
+        target:
+          entity_id: cover.main_gate
+      - if:
+        - condition: sun
+          before: sunrise
+          after: sunset
+          before_offset: -00:20:00
+          after_offset: 00:20:00
+        then:
+        - service: light.turn_on
+          data: {}
+          target:
+            entity_id:
+            - light.front_porch
+            - light.luz_del_garaje
+        - delay:
+            hours: 0
+            minutes: 5
+            seconds: 0
+            milliseconds: 0
+        - service: light.turn_off
+          data: {}
+          target:
+            entity_id: light.luz_del_garaje
   mode: single
