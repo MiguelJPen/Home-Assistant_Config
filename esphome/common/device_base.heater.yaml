@@ -1,4 +1,4 @@
-# static_ip: 10.133.100.65
+# static_ip: 10.133.100.73
 
 esp32:
     board: esp-wrover-kit
