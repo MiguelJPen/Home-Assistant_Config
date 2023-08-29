@@ -166,6 +166,7 @@
       - switch.fachada_este_ftp_upload
       - switch.fachada_sur_ftp_upload
       - switch.fachada_norte_ftp_upload
+      - switch.fachada_oeste_ftp_upload
       - switch.comedor_motion_detection
   - service: automation.turn_off
     data:
@@ -219,6 +220,7 @@
           - switch.fachada_este_ftp_upload
           - switch.fachada_sur_ftp_upload
           - switch.fachada_norte_ftp_upload
+          - switch.fachada_oeste_ftp_upload
           - switch.comedor_motion_detection
         data: {}
       - service: notify.group
@@ -242,6 +244,7 @@
         - switch.fachada_este_ftp_upload
         - switch.fachada_sur_ftp_upload
         - switch.fachada_norte_ftp_upload
+        - switch.fachada_oeste_ftp_upload
       data: {}
     - service: notify.group
       data:
@@ -626,6 +629,31 @@
             timeout: 10
     - conditions:
       - condition: template
+        value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaOeste'')
+          }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
+          sequence:
+          - service: telegram_bot.send_video
+            data:
+              file: '{{ trigger.event.data.path }}'
+              target: -472161375
+              timeout: 80
+        default:
+        - service: notify.group
+          data:
+            message: ¡Se ha detectado un movimiento en la fachada Oeste de la casa!
+              Adjuntando archivos...
+        - service: telegram_bot.send_document
+          data:
+            file: '{{ trigger.event.data.path }}'
+            target: -472161375
+            timeout: 10
+    - conditions:
+      - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/Comedor'')
           }}'
       sequence:
@@ -654,7 +682,7 @@
         default: []
     default: []
   mode: parallel
-  max: 5
+  max: 6
 - id: '1631442755979'
   alias: Alarm - Trigger when sensors go on - First (Home)
   description: ''

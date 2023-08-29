@@ -31,6 +31,7 @@ folder_watcher:
   - folder: /media/securityCameras/fachadaSur
   - folder: /media/securityCameras/fachadaEste
   - folder: /media/securityCameras/fachadaNorte
+  - folder: /media/securityCameras/fachadaOeste
   - folder: /media/securityCameras/Comedor
 
 template:
