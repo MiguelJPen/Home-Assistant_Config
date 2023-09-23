@@ -111,8 +111,8 @@ notify:
 device_tracker:
   - platform: google_maps
     username: miguelpdomotica@gmail.com
-    scan_interval: 120
-    max_gps_accuracy: 500 # meters
+    scan_interval: 60
+    max_gps_accuracy: 400 # meters
 
 # BINARY SENSORS
 binary_sensor:
