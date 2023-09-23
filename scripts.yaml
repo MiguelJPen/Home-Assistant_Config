@@ -185,12 +185,14 @@ arrive_home:
         - light.front_porch
     - delay:
         hours: 0
-        minutes: 3
-        seconds: 0
+        minutes: 1
+        seconds: 30
         milliseconds: 0
     - service: light.turn_off
       data: {}
       target:
-        entity_id: light.luz_del_garaje
+        entity_id:
+        - light.luz_del_garaje
+        - light.front_porch
   mode: single
   icon: mdi:human-greeting-variant
