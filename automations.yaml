@@ -211,6 +211,7 @@
     data:
       message: Se ha desarmado la alarma a las {{ states('sensor.time')}}.
       title: '*Desconexión de la alarma*'
+    enabled: false
   - service: esphome.alarm_alarm_beep_beep
     data: {}
   - delay:
@@ -255,6 +256,7 @@
         data:
           message: La alarma ha sido activada en el modo _Fuera de Casa_ a las {{states('sensor.time')}}.
           title: '*Conexión de la alarma*'
+        enabled: false
       - delay:
           hours: 0
           minutes: 0
@@ -274,6 +276,7 @@
       data:
         message: La alarma ha sido activada en el modo _Dentro de Casa_ a las {{states('sensor.time')}}.
         title: '*Conexión de la alarma*'
+      enabled: false
   mode: single
 - id: '1600697180091'
   alias: Alarm - From triggered to armed (Home and Away)
