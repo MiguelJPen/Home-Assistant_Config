@@ -18,7 +18,7 @@ alarm_control_panel:
       trigger_time: 0
     armed_away:
       arming_time: 10
-      delay_time: 15
+      delay_time: 5
       trigger_time: 180
     armed_home:
       arming_time: 5

@@ -74,19 +74,34 @@
   description: Turns on the corresponding siren
   trigger:
   - platform: state
-    entity_id: alarm_control_panel.el_nino_alarm
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
     to: triggered
+    from: armed_away
+    id: from_armed_away
+  - platform: state
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
+    to: triggered
+    from: armed_home
+    id: from_armed_home
   condition: []
   action:
-  - service: switch.turn_on
+  - service: siren.turn_on
     data: {}
-    entity_id: switch.sirena_exterior
-  - condition: state
-    entity_id: automation.alarm_trigger_when_sensors_go_on_second
-    state: 'on'
-  - service: switch.turn_on
+    target:
+      entity_id: siren.sirena_exterior
+  - service: light.turn_on
     data: {}
-    entity_id: switch.sirena_interior
+    target:
+      entity_id: light.facade_lights
+  - condition: trigger
+    id:
+    - from_armed_away
+  - service: siren.turn_on
+    data: {}
+    target:
+      entity_id: siren.sirena_interior
   mode: single
 - id: '1600612899257'
   alias: Alarm - Trigger when sensors go on - Second (Away)
@@ -156,12 +171,33 @@
     to: disarmed
   condition: []
   action:
+  - service: siren.turn_off
+    data: {}
+    target:
+      entity_id:
+      - siren.sirena_exterior
+      - siren.sirena_interior
+  - if:
+    - condition: state
+      entity_id: script.arrive_home
+      state: 'on'
+    then:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id:
+        - light.house_facade_east
+        - light.house_facade_south_down
+        - light.house_facade_south_up
+    else:
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.facade_lights
   - service: switch.turn_off
     data: {}
     target:
       entity_id:
-      - switch.sirena_exterior
-      - switch.sirena_interior
       - switch.exterior_cameras
       - switch.comedor_motion_detection
   - service: automation.turn_off
@@ -244,40 +280,27 @@
   description: ''
   trigger:
   - platform: state
-    entity_id: alarm_control_panel.el_nino_alarm
-    from: triggered
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
+    from: Triggered
     to: armed_away
   - platform: state
-    entity_id: alarm_control_panel.el_nino_alarm
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
     from: triggered
     to: armed_home
   condition: []
   action:
-  - service: switch.turn_off
+  - service: siren.turn_off
     data: {}
-    entity_id: switch.sirena_exterior
-  - service: switch.turn_off
+    target:
+      entity_id:
+      - siren.sirena_exterior
+      - siren.sirena_interior
+  - service: light.turn_off
     data: {}
-    entity_id: switch.sirena_interior
-  mode: single
-- id: '1600964725022'
-  alias: Alarm - Notify when unavailable (All)
-  description: ''
-  trigger:
-  - platform: state
-    entity_id: switch.interior_sensors_restart
-    to: unavailable
-    for:
-      hours: 0
-      minutes: 0
-      seconds: 20
-      milliseconds: 0
-  condition: []
-  action:
-  - service: notify.miguel
-    data:
-      message: The ESP32 linked to interior sensors has disconnected from WiFi at
-        {{ states('sensor.date_time') }}
+    target:
+      entity_id: light.facade_lights
   mode: single
 - id: '1623189802627'
   alias: Security - Notify the status of the UPS
@@ -406,7 +429,7 @@
         data:
           title: '*Atención*'
           message: Se ha perdido la comunicación con el SAI.
-  mode: single
+  mode: restart
 - id: '1626736527137'
   alias: Energy - Change energy tariff
   description: ''
@@ -1849,39 +1872,6 @@
         id:
         - arrive_home
       sequence:
-      - service: button.press
+      - service: script.arrive_home
         data: {}
-        target:
-          entity_id: button.path_gate
-      - delay:
-          hours: 0
-          minutes: 0
-          seconds: 8
-          milliseconds: 0
-      - service: cover.toggle
-        data: {}
-        target:
-          entity_id: cover.main_gate
-      - if:
-        - condition: sun
-          before: sunrise
-          after: sunset
-          before_offset: -00:20:00
-          after_offset: 00:20:00
-        then:
-        - service: light.turn_on
-          data: {}
-          target:
-            entity_id:
-            - light.front_porch
-            - light.luz_del_garaje
-        - delay:
-            hours: 0
-            minutes: 5
-            seconds: 0
-            milliseconds: 0
-        - service: light.turn_off
-          data: {}
-          target:
-            entity_id: light.luz_del_garaje
   mode: single

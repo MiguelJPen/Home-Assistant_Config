@@ -154,3 +154,43 @@ guest_room_security_ligths_bathroom_event:
       entity_id: light.guest_bathroom
   mode: single
   icon: mdi:robber
+arrive_home:
+  alias: Action - Arrive Home
+  sequence:
+  - service: button.press
+    data: {}
+    target:
+      entity_id: button.path_gate
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 8
+      milliseconds: 0
+  - service: cover.toggle
+    data: {}
+    target:
+      entity_id: cover.main_gate
+  - if:
+    - condition: sun
+      before: sunrise
+      after: sunset
+      before_offset: -00:20:00
+      after_offset: 00:20:00
+    then:
+    - service: light.turn_on
+      data: {}
+      target:
+        entity_id:
+        - light.luz_del_garaje
+        - light.front_porch
+    - delay:
+        hours: 0
+        minutes: 3
+        seconds: 0
+        milliseconds: 0
+    - service: light.turn_off
+      data: {}
+      target:
+        entity_id: light.luz_del_garaje
+  mode: single
+  icon: mdi:human-greeting-variant
