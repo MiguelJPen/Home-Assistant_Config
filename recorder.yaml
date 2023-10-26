@@ -25,6 +25,7 @@ recorder:
       - binary_sensor.rpi_power_status
       - sensor.bridge_state
       - sensor.hourly_energy
+      - sensor.freezer_plug_energy_consumption
       - sensor.fridge_plug_energy_consumption
       - sensor.ac_salon_total_energy_consumption
       - sensor.ac_despacho_total_energy_consumption
