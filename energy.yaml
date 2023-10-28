@@ -71,6 +71,20 @@ sensor:
 
           {{ valle + llana + punta }}
 
+      coste_energia_ahora:
+        friendly_name: "Coste de la energía ahora"
+        unit_of_measurement: "€/kWh"
+        value_template: >
+          {%- if state_attr('sensor.pvpc', 'period') == 'P3' -%}
+            {{ states('input_number.coste_energia_valle') }}
+          {%- elif state_attr('sensor.pvpc', 'period') == 'P2' -%}
+            {{ states('input_number.coste_energia_llana') }}
+          {%- elif state_attr('sensor.pvpc', 'period') == 'P1' -%}
+            {{ states('input_number.coste_energia_punta') }}
+          {%- else -%}
+            {{ states('sensor.coste_energia') }}
+          {%- endif -%}
+
       # To show the value as a sensor
       yesterday_kwh:
         friendly_name: "Consumo de energía ayer"
@@ -93,7 +107,7 @@ sensor:
         unit_of_measurement: "€"
         value_template: >
           {% set energy = states('sensor.hourly_energy') | float(0) %}
-          {% set price = states('sensor.pvpc') | float(0) %}
+          {% set price = states('sensor.coste_energia_ahora') | float(0) %}
 
           {{ (energy * price) | round(5) }}
 
@@ -104,57 +118,18 @@ sensor:
           {% set llana = states('sensor.monthly_energy_cost_llana') | float(0) %}
           {% set punta = states('sensor.monthly_energy_cost_punta') | float(0) %}
 
-          {{ valle + llana + punta }}
+          {{ valle + llana + punta | round(2) }}
 
       monthly_energy_cost_imp:
         unit_of_measurement: "€"
         value_template: >
-          {% set valle = states('sensor.monthly_energy_valle') | float(0) %}
-          {% set llana = states('sensor.monthly_energy_llana') | float(0) %}
-          {% set punta = states('sensor.monthly_energy_punta') | float(0) %}
           {% set cost_valle = states('sensor.monthly_energy_cost_valle') | float(0) %}
           {% set cost_llana = states('sensor.monthly_energy_cost_llana') | float(0) %}
           {% set cost_punta = states('sensor.monthly_energy_cost_punta') | float(0) %}
-          {% set peaje_valle = states('input_text.energia_peaje_valle') | float(0) %}
-          {% set peaje_llana = states('input_text.energia_peaje_llana') | float(0) %}
-          {% set peaje_punta = states('input_text.energia_peaje_punta') | float(0) %}
-          {% set cargos_valle = states('input_text.energia_cargos_valle') | float(0) %}
-          {% set cargos_llana = states('input_text.energia_cargos_llana') | float(0) %}
-          {% set cargos_punta = states('input_text.energia_cargos_punta') | float(0) %}
-          {% set imp_elec = states('input_text.impuesto_electricidad') | float(0) %}
-          {% set iva = states('input_text.impuesto_valor_annadido_energia') | float(0) %}
+          {% set imp_elec = states('input_number.impuesto_electricidad') | float(0) %}
+          {% set iva = states('input_number.impuesto_valor_annadido_energia') | float(0) %}
 
-          {{ ((((cost_valle + cost_llana + cost_punta) + ((valle * peaje_valle) + (llana * peaje_llana) + (punta * peaje_punta)) + ((valle * cargos_valle) + (llana * cargos_llana) + (punta * cargos_punta))) * (1 + (imp_elec / 100))) * (1 + (iva / 100))) | round(2) }}
-
-      valle_with_taxes:
-        unit_of_measurement: "€/kWh"
-        value_template: >
-          {% set cargos_valle = states('input_text.energia_cargos_valle') | float(0) %}
-          {% set peaje_valle = states('input_text.energia_peaje_valle') | float(0) %}
-          {% set imp_elec = states('input_text.impuesto_electricidad') | float(0) %}
-          {% set iva = states('input_text.impuesto_valor_annadido_energia') | float(0) %}
-
-          {{ ((states('sensor.pvpc') | float(0)) + cargos_valle + peaje_valle) * (1 + (imp_elec / 100)) * (1 + (iva / 100))  | round(2) }}
-
-      llana_with_taxes:
-        unit_of_measurement: "€/kWh"
-        value_template: >
-          {% set cargos_llana = states('input_text.energia_cargos_llana') | float(0) %}
-          {% set peaje_llana = states('input_text.energia_peaje_llana') | float(0) %}
-          {% set imp_elec = states('input_text.impuesto_electricidad') | float(0) %}
-          {% set iva = states('input_text.impuesto_valor_annadido_energia') | float(0) %}
-
-          {{ ((states('sensor.pvpc') | float(0)) + cargos_llana + peaje_llana) * (1 + (imp_elec / 100)) * (1 + (iva / 100))  | round(2) }}
-
-      punta_with_taxes:
-        unit_of_measurement: "€/kWh"
-        value_template: >
-          {% set cargos_punta = states('input_text.energia_cargos_punta') | float(0) %}
-          {% set peaje_punta = states('input_text.energia_peaje_punta') | float(0) %}
-          {% set imp_elec = states('input_text.impuesto_electricidad') | float(0) %}
-          {% set iva = states('input_text.impuesto_valor_annadido_energia') | float(0) %}
-
-          {{ ((states('sensor.pvpc') | float(0)) + cargos_punta + peaje_punta) * (1 + (imp_elec / 100)) * (1 + (iva / 100))  | round(2) }}
+          {{ (((cost_valle + cost_llana + cost_punta) * (1 + (imp_elec / 100))) * (1 + (iva / 100))) | round(2) }}
 
 
 # NOTIFY
