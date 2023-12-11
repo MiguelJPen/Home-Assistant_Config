@@ -114,24 +114,6 @@ device_tracker:
     scan_interval: 60
     max_gps_accuracy: 400 # meters
 
-# BINARY SENSORS
-binary_sensor:
-  - platform: ping
-    host: 10.133.100.1
-    name: "Router"
-    count: 2
-    scan_interval: 120
-  - platform: ping
-    host: 10.133.101.1
-    name: "Router Madrid"
-    count: 2
-    scan_interval: 120
-  - platform: ping
-    host: 10.133.102.1
-    name: "Router Murcia"
-    count: 2
-    scan_interval: 120
-
 template:
   - binary_sensor:
       - name: Open windows mode
