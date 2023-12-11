@@ -29,6 +29,8 @@ recorder:
       - sensor.fridge_plug_energy_consumption
       - sensor.ac_salon_total_energy_consumption
       - sensor.ac_despacho_total_energy_consumption
+      - sensor.home_automation_office_plug_energy
+      - sensor.home_automation_toilet_plug_energy
       - sensor.home_energy_monitor_power
       - binary_sensor.entrada
       - binary_sensor.cocina
