@@ -1,44 +1,31 @@
 # WEATHER TEMPLATES
 # Create a custom template for getting the weather from AEMET service and include some local values
 weather:
-  # Template for daily prediction in El Niño
+  # Template prediction in El Niño
   - platform: template
-    name: "AEMET El Niño - Diario"
-    unique_id: "el_nino_diary"
+    name: "AEMET El Niño"
+    unique_id: "b26bebec-8345-11ee-b962-0242ac120002"
     condition_template: "{{ states('sensor.aemet_condition') }}"
     temperature_template: "{{ (states('sensor.exterior_sensor_temperature') | float(0)) | round(1) }}"
     humidity_template: "{{ (states('sensor.exterior_sensor_humidity') | float(0)) | round(1) }}"
     pressure_template: "{{ states('sensor.average_pressure') | int(0) }}"
     wind_speed_template: "{{ states('sensor.aemet_wind_speed') | int(0) }}"
     wind_bearing_template: "{{ (states('sensor.aemet_wind_bearing') | float(0)) | round(0) }}"
-    visibility_template: "{{ 12 }}" # Visibility is constant
-    forecast_template: "{{ states.weather.aemet_daily.attributes.forecast }}"
+    forecast_template : "{{ states.weather.aemet_daily.attributes.forecast }}"
+    # forecast_hourly_template : "{{ states.weather.aemet_hourly.attributes.forecast }}"
 
-    # Template for hourly prediction in El Niño
+    # Template prediction in Madrid
   - platform: template
-    name: "AEMET El Niño - Horas"
-    unique_id: "el_nino_hourly"
-    condition_template: "{{ states('sensor.aemet_condition') }}"
-    temperature_template: "{{ (states('sensor.exterior_sensor_temperature') | float(0)) | round(1) }}"
-    humidity_template: "{{ (states('sensor.exterior_sensor_humidity') | float(0)) | round(1) }}"
-    pressure_template: "{{ states('sensor.average_pressure') | int(0) }}"
-    wind_speed_template: "{{ states('sensor.aemet_wind_speed') | int(0) }}"
-    wind_bearing_template: "{{ (states('sensor.aemet_wind_bearing') | float(0)) | round(0) }}"
-    visibility_template: "{{ 12 }}" # Visibility is constant
-    forecast_template: "{{ states.weather.aemet_hourly.attributes.forecast }}"
-
-    # Template for daily prediction in El Niño
-  - platform: template
-    name: "AEMET Madrid - Diario"
-    unique_id: "madrid_diary"
+    name: "AEMET Madrid"
+    unique_id: "2d32e476-851d-4858-9212-d0029df0b30b"
     condition_template: "{{ states('sensor.aemet_madrid_condition') }}"
     temperature_template: "{{ (states('sensor.madrid_exterior_sensor_temperature') | float(0)) | round(1) }}"
     humidity_template: "{{ (states('sensor.madrid_exterior_sensor_humidity') | float(0)) | round(1) }}"
     pressure_template: "{{ states('sensor.madrid_average_pressure') | int(0) }}"
     wind_speed_template: "{{ states('sensor.aemet_madrid_wind_speed') | int(0) }}"
     wind_bearing_template: "{{ (states('sensor.aemet_madrid_wind_bearing') | float(0)) | round(0) }}"
-    visibility_template: "{{ 12 }}" # Visibility is constant
     forecast_template: "{{ states.weather.aemet_madrid_daily.attributes.forecast }}"
+    # forecast_hourly_template : "{{ states.weather.aemet_madrid_hourly.attributes.forecast }}"
 
 sensor:
   - platform: template
