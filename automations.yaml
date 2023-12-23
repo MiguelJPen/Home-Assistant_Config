@@ -925,7 +925,7 @@
         entity_id:
         - input_boolean.lau_pablo_has_paid
         - input_boolean.lau_patricia_has_paid
-        - input_boolean.lau_ada_has_paid
+        - input_boolean.lau_burgos_48_1_has_paid
         - input_boolean.lau_cristobal_has_paid
       data: {}
   - if:
@@ -950,7 +950,7 @@
       - condition: template
         value_template: '{{ (now().day < 7) and ( is_state(''input_boolean.lau_pablo_has_paid'',
           ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
-          is_state(''input_boolean.lau_ada_has_paid'', ''off'') or is_state(''input_boolean.lau_cristobal_has_paid'',
+          is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'') or is_state(''input_boolean.lau_cristobal_has_paid'',
           ''off'') )  }}'
       - condition: template
         value_template: '{{ (now().day >= 13) and (now().day < 20) and ( is_state(''input_boolean.lau_hector_has_paid'',
@@ -992,15 +992,15 @@
           - Pagado!:/pablo_has_paid, Morosa!:/pablo_has_not_paid
     - if:
       - condition: template
-        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_ada_has_paid'',
+        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_burgos_48_1_has_paid'',
           ''off'') }}'
       then:
       - service: telegram_bot.send_message
         data:
-          message: Ada Massida Burgos 48
+          message: Elena Tattoo Burgos 48
           target: 303515965
           inline_keyboard:
-          - Pagado!:/ada_has_paid, Morosa!:/ada_has_not_paid
+          - Pagado!:/burgos_48_1_has_paid, Morosa!:/burgos_48_1_has_not_paid
     - if:
       - condition: template
         value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_cristobal_has_paid'',
@@ -1046,7 +1046,7 @@
       - condition: template
         value_template: '{{ not(now().day < 7) and ( is_state(''input_boolean.lau_pablo_has_paid'',
           ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
-          is_state(''input_boolean.lau_ada_has_paid'', ''off'') or is_state(''input_boolean.lau_cristobal_has_paid'',
+          is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'') or is_state(''input_boolean.lau_cristobal_has_paid'',
           ''off'') )  }}'
       - condition: template
         value_template: '{{ not((now().day >= 13) and (now().day < 20)) and ( is_state(''input_boolean.lau_hector_has_paid'',
@@ -1089,15 +1089,15 @@
           - Pagado!:/pablo_has_paid, Morosa!:/pablo_has_not_paid
     - if:
       - condition: template
-        value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_ada_has_paid'',
+        value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_burgos_48_1_has_paid'',
           ''off'') }}'
       then:
       - service: telegram_bot.send_message
         data:
-          message: Ada Massida Burgos 48
+          message: Elena Tattoo Burgos 48
           target: 303515965
           inline_keyboard:
-          - Pagado!:/ada_has_paid, Morosa!:/ada_has_not_paid
+          - Pagado!:/burgos_48_1_has_paid, Morosa!:/burgos_48_1_has_not_paid
     - if:
       - condition: template
         value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_cristobal_has_paid'',
@@ -1169,14 +1169,14 @@
       command: /robleda_has_not_paid
   - platform: event
     event_type: telegram_callback
-    id: ada_has_paid
+    id: burgos_48_1_has_paid
     event_data:
-      command: /ada_has_paid
+      command: /burgos_48_1_has_paid
   - platform: event
     event_type: telegram_callback
-    id: ada_has_not_paid
+    id: burgos_48_1_has_not_paid
     event_data:
-      command: /ada_has_not_paid
+      command: /burgos_48_1_has_not_paid
   - platform: event
     event_type: telegram_callback
     id: hector_has_paid
@@ -1271,24 +1271,24 @@
           message: Últimamente no nos aseguramos ni un buen cliente...
     - conditions:
       - condition: trigger
-        id: ada_has_paid
+        id: burgos_48_1_has_paid
       sequence:
       - service: input_boolean.turn_on
         data: {}
         target:
-          entity_id: input_boolean.lau_ada_has_paid
+          entity_id: input_boolean.lau_burgos_48_1_has_paid
       - service: notify.lau
         data:
-          title: "*¡Ada Massida ha pagado!* \U0001F389"
+          title: "*¡Elena Tattoo ha pagado!* \U0001F389"
           message: ¿A dónde estás preparando el viaje tuuu?
     - conditions:
       - condition: trigger
-        id: ada_has_not_paid
+        id: burgos_48_1_has_not_paid
       sequence:
       - service: input_boolean.turn_off
         data: {}
         target:
-          entity_id: input_boolean.lau_ada_has_paid
+          entity_id: input_boolean.lau_burgos_48_1_has_paid
       - service: notify.lau
         data:
           message: Joe, pues nada, vamos al parque Europa entonces ¿no?
