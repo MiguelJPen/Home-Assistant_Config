@@ -19,6 +19,7 @@ homeassistant:
     external_access: !include external_access.yaml
     security: !include security.yaml
     ios: !include ios.yaml
+    thermostat: !include thermostat.yaml
 
 logger:
   default: warn

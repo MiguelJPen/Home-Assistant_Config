@@ -1,0 +1,26 @@
+sensor:
+  - platform: template
+    sensors:
+      miguel_room_sensor_temperature_templated:
+        device_class: temperature
+        unit_of_measurement: "°C"
+        value_template: >
+          {{ states('sensor.miguel_room_sensor_temperature') | float(0) }}
+
+        availability_template: >
+          {% set miguel_sensor = states('sensor.miguel_room_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
+          {% set miguel_present = is_state('input_boolean.miguel_room_occupied', 'on') %}
+
+          {{ miguel_sensor and miguel_present }}
+
+      patri_room_sensor_temperature_templated:
+        device_class: temperature
+        unit_of_measurement: "°C"
+        value_template: >
+          {{ states('sensor.patri_room_sensor_temperature') | float(0) }}
+
+        availability_template: >
+          {% set patri_sensor = states('sensor.patri_room_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
+          {% set patri_present = is_state('input_boolean.patri_room_occupied', 'on') %}
+
+          {{ patri_sensor and patri_present }}
