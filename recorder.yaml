@@ -9,6 +9,7 @@ recorder:
       - switch
       - person
       - climate
+      - cover
     entity_globs:
       - alarm_control_panel.*
       - sensor.*_temperature
