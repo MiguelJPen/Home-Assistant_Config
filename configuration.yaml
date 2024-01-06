@@ -46,25 +46,6 @@ frontend:
 
 # SENSORS
 sensor:
-  - platform: systemmonitor
-    resources:
-      - type: disk_use_percent
-        arg: /
-      - type: disk_free
-        arg: /
-      - type: memory_use_percent
-      - type: memory_free
-      - type: swap_use_percent
-      - type: swap_free
-      - type: processor_use
-      - type: load_5m
-      - type: last_boot
-      - type: network_in
-        arg: eno1
-      - type: network_out
-        arg: eno1
-      - type: ipv4_address
-        arg: eno1
   - platform: time_date
     display_options:
       - "time"
