@@ -1,0 +1,64 @@
+substitutions:
+  name: murcia-heater
+  upper_name: Murcia heater
+  wifi_ssid: !secret murcia_wifi_ssid
+  wifi_password: !secret murcia_wifi_password
+  heater_id: heater
+  heater_upper_id: Heater
+
+  # GPIO pins
+  heater_pin: "21"
+
+  # Temperature get from HA
+  temperature_id: room_temp
+  temperature_entity_id: sensor.min_room_temperature
+
+packages:
+  device_base: !include common/device_base.murcia-heater.yaml
+  basic_control: !include common/basic_control.yaml
+  wifi: !include common/wifi.yaml
+
+switch:
+  - platform: gpio
+    id: ${heater_id}
+    internal: True
+    pin:
+      number: ${heater_pin}
+
+binary_sensor:
+  - platform: template
+    name: ${heater_upper_id}
+    lambda: return id(${heater_id}).state;
+
+sensor:
+  - platform: homeassistant
+    id: ${temperature_id}
+    entity_id: ${temperature_entity_id}
+
+climate:
+  - platform: thermostat
+    name: "Termostato de Murcia"
+    sensor: ${temperature_id}
+    min_heating_off_time: 240s
+    min_heating_run_time: 240s
+    min_idle_time: 60s
+    heat_deadband: 0.2
+    heat_overrun: 0.3
+    heat_action:
+      - switch.turn_on: ${heater_id}
+    idle_action:
+      - switch.turn_off: ${heater_id}
+    startup_delay: true
+    preset:
+      - name: sleep
+        default_target_temperature_low: 17
+        mode: HEAT
+      - name: home
+        default_target_temperature_low: 20.5
+        mode: HEAT
+      - name: eco
+        default_target_temperature_low: 19
+        mode: HEAT
+      - name: away
+        default_target_temperature_low: 10
+        mode: HEAT
