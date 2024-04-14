@@ -923,10 +923,10 @@
     - service: input_boolean.turn_off
       target:
         entity_id:
-        - input_boolean.lau_pablo_has_paid
+        - input_boolean.lau_burgos_144_has_paid
         - input_boolean.lau_patricia_has_paid
         - input_boolean.lau_burgos_48_1_has_paid
-        - input_boolean.lau_cristobal_has_paid
+        - input_boolean.lau_santiago_has_paid
       data: {}
   - if:
     - condition: template
@@ -948,9 +948,9 @@
     - condition: or
       conditions:
       - condition: template
-        value_template: '{{ (now().day < 7) and ( is_state(''input_boolean.lau_pablo_has_paid'',
+        value_template: '{{ (now().day < 7) and ( is_state(''input_boolean.lau_burgos_144_has_paid'',
           ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
-          is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'') or is_state(''input_boolean.lau_cristobal_has_paid'',
+          is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'') or is_state(''input_boolean.lau_santiago_has_paid'',
           ''off'') )  }}'
       - condition: template
         value_template: '{{ (now().day >= 13) and (now().day < 20) and ( is_state(''input_boolean.lau_hector_has_paid'',
@@ -981,15 +981,15 @@
           - Pagado!:/patri_has_paid, Morosa!:/patri_has_not_paid
     - if:
       - condition: template
-        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_pablo_has_paid'',
+        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_burgos_144_has_paid'',
           ''off'') }}'
       then:
       - service: telegram_bot.send_message
         data:
-          message: Pablo Mahamud Burgos 144
+          message: David Mahamud Burgos 144
           target: 303515965
           inline_keyboard:
-          - Pagado!:/pablo_has_paid, Morosa!:/pablo_has_not_paid
+          - Pagado!:/burgos_144_has_paid, Moroso!:/burgos_144_has_not_paid
     - if:
       - condition: template
         value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_burgos_48_1_has_paid'',
@@ -1003,15 +1003,15 @@
           - Pagado!:/burgos_48_1_has_paid, Morosa!:/burgos_48_1_has_not_paid
     - if:
       - condition: template
-        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_cristobal_has_paid'',
+        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_santiago_has_paid'',
           ''off'') }}'
       then:
       - service: telegram_bot.send_message
         data:
-          message: Cristóbal y Karmen Santiago
+          message: Matheus Santiago
           target: 303515965
           inline_keyboard:
-          - Pagado!:/cristobal_has_paid, Morosos!:/cristobal_has_not_paid
+          - Pagado!:/santiago_has_paid, Moroso!:/santiago_has_not_paid
     - if:
       - condition: template
         value_template: '{{ (now().day >= 13) and (now().day < 20) and ( is_state(''input_boolean.lau_hector_has_paid'',
@@ -1044,9 +1044,9 @@
     - condition: or
       conditions:
       - condition: template
-        value_template: '{{ not(now().day < 7) and ( is_state(''input_boolean.lau_pablo_has_paid'',
+        value_template: '{{ not(now().day < 7) and ( is_state(''input_boolean.lau_burgos_144_has_paid'',
           ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
-          is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'') or is_state(''input_boolean.lau_cristobal_has_paid'',
+          is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'') or is_state(''input_boolean.lau_santiago_has_paid'',
           ''off'') )  }}'
       - condition: template
         value_template: '{{ not((now().day >= 13) and (now().day < 20)) and ( is_state(''input_boolean.lau_hector_has_paid'',
@@ -1078,15 +1078,15 @@
           - Pagado!:/patri_has_paid, Morosa!:/patri_has_not_paid
     - if:
       - condition: template
-        value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_pablo_has_paid'',
+        value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_burgos_144_has_paid'',
           ''off'') }}'
       then:
       - service: telegram_bot.send_message
         data:
-          message: Pablo Mahamud Burgos 144
+          message: David Mahamud Burgos 144
           target: 303515965
           inline_keyboard:
-          - Pagado!:/pablo_has_paid, Morosa!:/pablo_has_not_paid
+          - Pagado!:/burgos_144_has_paid, Moroso!:/burgos_144_has_not_paid
     - if:
       - condition: template
         value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_burgos_48_1_has_paid'',
@@ -1100,15 +1100,15 @@
           - Pagado!:/burgos_48_1_has_paid, Morosa!:/burgos_48_1_has_not_paid
     - if:
       - condition: template
-        value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_cristobal_has_paid'',
+        value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_santiago_has_paid'',
           ''off'') }}'
       then:
       - service: telegram_bot.send_message
         data:
-          message: Cristóbal y Karmen Santiago
+          message: Matheus Santiago
           target: 303515965
           inline_keyboard:
-          - Pagado!:/cristobal_has_paid, Morosos!:/cristobal_has_not_paid
+          - Pagado!:/santiago_has_paid, Morosos!:/santiago_has_not_paid
     - if:
       - condition: template
         value_template: '{{ not((now().day >= 13) and (now().day < 20)) and ( is_state(''input_boolean.lau_hector_has_paid'',
@@ -1150,13 +1150,13 @@
   - platform: event
     event_type: telegram_callback
     event_data:
-      command: /pablo_has_paid
-    id: pablo_has_paid
+      command: /burgos_144_has_paid
+    id: burgos_144_has_paid
   - platform: event
     event_type: telegram_callback
     event_data:
-      command: /pablo_has_not_paid
-    id: pablo_has_not_paid
+      command: /burgos_144_has_not_paid
+    id: burgos_144_has_not_paid
   - platform: event
     event_type: telegram_callback
     id: robleda_has_paid
@@ -1189,14 +1189,14 @@
       command: /hector_has_not_paid
   - platform: event
     event_type: telegram_callback
-    id: cristobal_has_paid
+    id: santiago_has_paid
     event_data:
-      command: /cristobal_has_paid
+      command: /santiago_has_paid
   - platform: event
     event_type: telegram_callback
-    id: cristobal_has_not_paid
+    id: santiago_has_not_paid
     event_data:
-      command: /cristobal_has_not_paid
+      command: /santiago_has_not_paid
   condition: []
   action:
   - choose:
@@ -1225,27 +1225,27 @@
           message: Pues no eh, resulta que Patri no ha pagado :(
     - conditions:
       - condition: trigger
-        id: pablo_has_paid
+        id: burgos_144_has_paid
       sequence:
       - service: input_boolean.turn_on
         data: {}
         target:
-          entity_id: input_boolean.lau_pablo_has_paid
+          entity_id: input_boolean.lau_burgos_144_has_paid
       - service: notify.lau
         data:
           message: Se viene viajesito!!!
-          title: "*¡Pablo ha pagado!* \U0001F389"
+          title: "*¡David ha pagado!* \U0001F389"
     - conditions:
       - condition: trigger
-        id: pablo_has_not_paid
+        id: burgos_144_has_not_paid
       sequence:
       - service: input_boolean.turn_off
         data: {}
         target:
-          entity_id: input_boolean.lau_pablo_has_paid
+          entity_id: input_boolean.lau_burgos_144_has_paid
       - service: notify.lau
         data:
-          message: Pues na', no hay viajesito por culpa de Pablo :(
+          message: Pues na', no hay viajesito por culpa de David :(
     - conditions:
       - condition: trigger
         id: robleda_has_paid
@@ -1317,27 +1317,27 @@
           message: Son todos un poquito agarraos, ¿no?
     - conditions:
       - condition: trigger
-        id: cristobal_has_paid
+        id: santiago_has_paid
       sequence:
       - service: input_boolean.turn_on
         data: {}
         target:
-          entity_id: input_boolean.lau_cristobal_has_paid
+          entity_id: input_boolean.lau_santiago_has_paid
       - service: notify.lau
         data:
-          title: "*¡Cristóbal y Karmen han pagado!* \U0001F389"
-          message: ¡Vaya par de cracks!
+          title: "*¡Matheus ha pagado!* \U0001F389"
+          message: ¡Vaya crack!
     - conditions:
       - condition: trigger
-        id: cristobal_has_not_paid
+        id: santiago_has_not_paid
       sequence:
       - service: input_boolean.turn_off
         data: {}
         target:
-          entity_id: input_boolean.lau_cristobal_has_paid
+          entity_id: input_boolean.lau_santiago_has_paid
       - service: notify.lau
         data:
-          message: No se merecen esa llave de garaje...
+          message: No se merece esa llave de garaje...
     default: []
   mode: single
 - id: '1649799780278'
@@ -1878,3 +1878,17 @@
       - service: script.arrive_home
         data: {}
   mode: single
+- id: '1672344447244'
+  description: ""
+  mode: single
+  trigger:
+    - platform: time
+      at: "07:00:00"
+  condition: []
+  action:
+    - service: climate.set_hvac_mode
+      target:
+        entity_id: climate.termostato
+      data:
+        hvac_mode: heat
+  alias: Heater automation
