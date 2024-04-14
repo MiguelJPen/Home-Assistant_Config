@@ -17,5 +17,5 @@ api:
 ota:
   password: !secret ota_murcia_heater
 
-# wifi:
-#   use_address: !secret murcia_heater_address
+wifi:
+  use_address: !secret murcia_heater_address
