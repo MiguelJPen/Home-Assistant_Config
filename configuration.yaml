@@ -40,7 +40,6 @@ tts:
 # EXTERNAL FILES
 automation: !include automations.yaml
 script: !include scripts.yaml
-panel_iframe: !include panels.yaml
 frontend:
   themes: !include_dir_merge_named themes/
 

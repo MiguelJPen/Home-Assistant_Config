@@ -1,5 +1,0 @@
-#router:
-#  title: "Router TP-Link"
-#  icon: mdi:router-wireless
-#  url: "https://192.168.0.1:8443"
-#  require_admin: true
