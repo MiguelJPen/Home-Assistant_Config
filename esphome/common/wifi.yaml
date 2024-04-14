@@ -14,3 +14,9 @@ sensor:
   - platform: wifi_signal
     name: "${upper_name} WiFi Signal"
     disabled_by_default: true 
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: ${upper_name} IP Address
+      icon: mdi:ip-outline
