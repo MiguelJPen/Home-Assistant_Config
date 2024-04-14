@@ -11,21 +11,22 @@ weather:
     pressure_template: "{{ states('sensor.average_pressure') | int(0) }}"
     wind_speed_template: "{{ states('sensor.aemet_wind_speed') | int(0) }}"
     wind_bearing_template: "{{ (states('sensor.aemet_wind_bearing') | float(0)) | round(0) }}"
-    forecast_template : "{{ states.weather.aemet_daily.attributes.forecast }}"
-    # forecast_hourly_template : "{{ states.weather.aemet_hourly.attributes.forecast }}"
+    forecast_hourly_template: "{{ state_attr('sensor.weather_forecast_hourly_el_nino', 'forecast') }}"
+    forecast_daily_template: "{{ state_attr('sensor.weather_forecast_daily_el_nino', 'forecast') }}"
 
     # Template prediction in Madrid
   - platform: template
     name: "AEMET Madrid"
     unique_id: "2d32e476-851d-4858-9212-d0029df0b30b"
     condition_template: "{{ states('sensor.aemet_madrid_condition') }}"
-    temperature_template: "{{ (states('sensor.madrid_exterior_sensor_temperature') | float(0)) | round(1) }}"
+    # temperature_template: "{{ (states('sensor.madrid_exterior_sensor_temperature') | float(0)) | round(1) }}"
+    temperature_template: "{{ state_attr('weather.aemet_madrid', 'temperature') }}"
     humidity_template: "{{ (states('sensor.madrid_exterior_sensor_humidity') | float(0)) | round(1) }}"
     pressure_template: "{{ states('sensor.madrid_average_pressure') | int(0) }}"
     wind_speed_template: "{{ states('sensor.aemet_madrid_wind_speed') | int(0) }}"
     wind_bearing_template: "{{ (states('sensor.aemet_madrid_wind_bearing') | float(0)) | round(0) }}"
-    forecast_template: "{{ states.weather.aemet_madrid_daily.attributes.forecast }}"
-    # forecast_hourly_template : "{{ states.weather.aemet_madrid_hourly.attributes.forecast }}"
+    forecast_hourly_template: "{{ state_attr('sensor.weather_forecast_hourly_madrid', 'forecast') }}"
+    forecast_daily_template: "{{ state_attr('sensor.weather_forecast_daily_madrid', 'forecast') }}"
 
 sensor:
   - platform: template
@@ -75,3 +76,56 @@ sensor:
           {% set living_room = states('sensor.madrid_living_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
 
           {{ exterior or living_room }}
+
+template:
+  - trigger:
+      - platform: state
+        entity_id: weather.aemet 
+      - platform: time_pattern
+        hours: /3
+    action:
+      - service: weather.get_forecasts
+        target:
+          entity_id:
+            - weather.aemet
+            - weather.aemet_madrid
+        data:
+          type: daily
+        response_variable: daily_weather
+    sensor:
+      - name: El Niño Weather Forecast Daily
+        unique_id: '7733a029-1b2f-4c63-b321-53790a52db10'
+        state: "{{ now() }}"
+        attributes:
+          forecast: "{{ daily_weather['weather.aemet'].forecast }}"
+      - name: Madrid Weather Forecast Daily
+        unique_id: '78b0d94b-47d3-4eb0-a32f-8586f1cb19e8'
+        state: "{{ now() }}"
+        attributes:
+          forecast: "{{ daily_weather['weather.aemet_madrid'].forecast }}"
+  - trigger:
+      - platform: state
+        entity_id: weather.aemet 
+      - platform: time_pattern
+        hours: /1
+        minutes: 0
+    action:
+      - service: weather.get_forecasts
+        target:
+          entity_id:
+            - weather.aemet
+            - weather.aemet_madrid
+        data:
+          type: hourly
+        response_variable: hourly_weather
+    sensor:
+      - name: El Niño Weather Forecast Hourly
+        unique_id: '64c34471-3037-4638-883e-507b1ccef55b'
+        state: "{{ now() }}"
+        attributes:
+          forecast: "{{ hourly_weather['weather.aemet'].forecast }}"
+      - name: Madrid Weather Forecast Hourly
+        unique_id: '2d2864a5-c5ae-497e-9979-48db501482a5'
+        state: "{{ now() }}"
+        attributes:
+          forecast: "{{ hourly_weather['weather.aemet_madrid'].forecast }}"
