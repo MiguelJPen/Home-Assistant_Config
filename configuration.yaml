@@ -13,7 +13,6 @@ homeassistant:
     irrigation: !include irrigation.yaml
     pool: !include pool.yaml
     climate: !include climate.yaml
-    zigbee: !include zigbee.yaml
     energy: !include energy.yaml
     recorder: !include recorder.yaml
     external_access: !include external_access.yaml

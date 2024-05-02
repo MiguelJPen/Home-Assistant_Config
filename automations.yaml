@@ -1,5 +1,5 @@
 - id: '1600602907087'
-  alias: Alarm - Trigger when sensors go on - First (Away)
+  alias: Check all sensors for alarm - First catch
   description: ''
   trigger:
   - platform: state
@@ -70,7 +70,7 @@
           entity_id: automation.alarm_trigger_when_sensors_go_on_second
   mode: single
 - id: '1600610773486'
-  alias: Alarm - To triggered (Home and Away)
+  alias: When alarm is triggered
   description: Turns on the corresponding siren
   trigger:
   - platform: state
@@ -104,7 +104,7 @@
       entity_id: siren.sirena_interior
   mode: single
 - id: '1600612899257'
-  alias: Alarm - Trigger when sensors go on - Second (Away)
+  alias: Check all sensors for alarm - Second catch
   description: ''
   trigger:
   - platform: state
@@ -161,7 +161,7 @@
       title: "\U0001F6A8\U0001F6A8\U0001F6A8 *¡SE HA DISPARADO LA ALARMA!* \U0001F6A8\U0001F6A8\U0001F6A8"
   mode: single
 - id: '1600622835627'
-  alias: Alarm - When disarmed (Home and Away)
+  alias: When disarmed
   description: Turn OFF sirens and second alarm automation, notify by telegram and
     turn OFF security cameras.
   trigger:
@@ -207,11 +207,6 @@
       entity_id:
       - automation.alarm_trigger_when_sensors_go_on_second
       - automation.alarm_trigger_when_sensors_go_on_second_home
-  - service: notify.group
-    data:
-      message: Se ha desarmado la alarma a las {{ states('sensor.time')}}.
-      title: '*Desconexión de la alarma*'
-    enabled: false
   - service: esphome.alarm_alarm_beep_beep
     data: {}
   - delay:
@@ -225,7 +220,7 @@
       entity_id: switch.comedor_video_streaming
   mode: single
 - id: '1600642629084'
-  alias: Alarm - When armed (Home and Away)
+  alias: When armed
   description: Notify by telegram that the alarm is armed and turn on security cameras.
   trigger:
   - platform: state
@@ -252,11 +247,6 @@
           - switch.exterior_cameras
           - switch.comedor_motion_detection
         data: {}
-      - service: notify.group
-        data:
-          message: La alarma ha sido activada en el modo _Fuera de Casa_ a las {{states('sensor.time')}}.
-          title: '*Conexión de la alarma*'
-        enabled: false
       - delay:
           hours: 0
           minutes: 0
@@ -272,14 +262,9 @@
         entity_id:
         - switch.exterior_cameras
       data: {}
-    - service: notify.group
-      data:
-        message: La alarma ha sido activada en el modo _Dentro de Casa_ a las {{states('sensor.time')}}.
-        title: '*Conexión de la alarma*'
-      enabled: false
   mode: single
 - id: '1600697180091'
-  alias: Alarm - From triggered to armed (Home and Away)
+  alias: From triggered to armed
   description: ''
   trigger:
   - platform: state
@@ -306,7 +291,7 @@
       entity_id: light.facade_lights
   mode: single
 - id: '1623189802627'
-  alias: Security - Notify the status of the UPS
+  alias: Notify the status of the UPS
   description: Notifies the UPS change of state and turns off the system if the battery
     is low.
   trigger:
@@ -434,7 +419,7 @@
           message: Se ha perdido la comunicación con el SAI.
   mode: restart
 - id: '1626736527137'
-  alias: Energy - Change energy tariff
+  alias: Change energy tariff
   description: ''
   trigger:
   - platform: state
@@ -491,7 +476,7 @@
     default: []
   mode: single
 - id: '1626868061580'
-  alias: Energy - Set yesterday energy consumption
+  alias: Save daily energy consumption at the end of the day
   description: ''
   trigger:
   - platform: time
@@ -510,7 +495,7 @@
         {{ (valle + llana + punta ) }}'
   mode: single
 - id: '1626948288438'
-  alias: Energy - Send data to a file hourly
+  alias: Send energy data to a local file hourly
   description: ''
   trigger:
   - platform: time_pattern
@@ -532,7 +517,7 @@
         0)) }} '
   mode: single
 - id: '1628698660992'
-  alias: Alarm - Send files from security cameras (Home and Away)
+  alias: Send files from security cameras
   description: ''
   trigger:
   - platform: event
@@ -698,7 +683,7 @@
   mode: parallel
   max: 6
 - id: '1631442755979'
-  alias: Alarm - Trigger when sensors go on - First (Home)
+  alias: Check exterior sensors for alarm - First catch
   description: ''
   trigger:
   - platform: state
@@ -764,7 +749,7 @@
           entity_id: automation.alarm_trigger_when_sensors_go_on_second_home
   mode: single
 - id: '1631444535103'
-  alias: Alarm - Trigger when sensors go on - Second (Home)
+  alias: Check exterior sensors for alarm - Second catch
   description: ''
   trigger:
   - platform: state
@@ -812,7 +797,7 @@
       title: "\U0001F6A8\U0001F6A8\U0001F6A8 *¡SE HA DISPARADO LA ALARMA!* \U0001F6A8\U0001F6A8\U0001F6A8"
   mode: single
 - id: '1632435586236'
-  alias: Security - Reboot Home Assistant if router reboots
+  alias: Reboot Home Assistant if router reboots
   description: Reboots Home Assistant due to some DHCP problems.
   trigger:
   - platform: state
@@ -848,7 +833,7 @@
     data: {}
   mode: single
 - id: '1639942219645'
-  alias: Wireguard - Reset connection when down
+  alias: Reset Wireguard connection when no outside router is reachable
   description: If the connection with any wireguard server is lost (for example, due
     to an IP change), restart the wireguard addon to establish the connection again.
   trigger:
@@ -909,7 +894,7 @@
           milliseconds: 0
   mode: single
 - id: '1643745839320'
-  alias: Lau - Send payment reminders
+  alias: Send payment reminders
   description: ''
   trigger:
   - platform: time
@@ -1134,7 +1119,7 @@
           - Pagado!:/robleda_has_paid, Moroso!:/robleda_has_not_paid
   mode: single
 - id: '1643907231416'
-  alias: Lau - Changes input boolean values
+  alias: Change variable values with telegram events
   description: ''
   trigger:
   - platform: event
@@ -1341,7 +1326,7 @@
     default: []
   mode: single
 - id: '1649799780278'
-  alias: Notify - Flood sensor
+  alias: Notify flood sensor state
   description: ''
   trigger:
   - platform: state
@@ -1356,7 +1341,7 @@
       title: '*¡AVISO IMPORTANTE!*'
   mode: single
 - id: '1650113623089'
-  alias: Security - Control for random guest room lights
+  alias: Randomise guest room lights behaviour
   description: ''
   trigger:
   - platform: time
@@ -1448,7 +1433,7 @@
       as_timestamp) + ((range(-20, 10)|random|int) * 60) }}'
   mode: single
 - id: '1650498048252'
-  alias: Security - Control for random security lights
+  alias: Randomise lights to simulate presence
   description: ''
   trigger:
   - platform: time
@@ -1657,7 +1642,7 @@
   mode: queued
   max: 2
 - id: '1662239356385'
-  alias: Lau - Money control
+  alias: Money control
   description: ''
   trigger:
   - platform: event
@@ -1740,7 +1725,7 @@
     default: []
   mode: single
 - id: '1663501480893'
-  alias: Wireless switch automations
+  alias: Zigbee wireless switch actions
   description: ''
   trigger:
   - platform: state
@@ -1787,7 +1772,7 @@
           entity_id: switch.exterior_plug
   mode: single
 - id: '1672357197244'
-  alias: iOS - Perform iOS actions
+  alias: iOS actions
   description: ''
   trigger:
   - platform: event
@@ -1878,17 +1863,92 @@
       - service: script.arrive_home
         data: {}
   mode: single
-- id: '1672344447244'
-  description: ""
-  mode: single
+- id: '1714653421263'
+  alias: Notify if other networks or instances are unreachable
+  description: ''
   trigger:
-    - platform: time
-      at: "07:00:00"
+  - platform: state
+    entity_id:
+    - binary_sensor.router_murcia
+    - binary_sensor.router_madrid
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    from:
+    to:
+  - platform: state
+    entity_id:
+    - binary_sensor.interior_alarm_status
+    - binary_sensor.exterior_alarm_status
+    - binary_sensor.energy_monitor_status
+    - binary_sensor.heater_status
+    - binary_sensor.irrigation_status
+    - binary_sensor.swimming_pool_status
+    - binary_sensor.fence_gate_status
+    - binary_sensor.murcia_murcia_heater_status
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
   condition: []
   action:
-    - service: climate.set_hvac_mode
-      target:
-        entity_id: climate.termostato
-      data:
-        hvac_mode: heat
-  alias: Heater automation
+  - service: telegram_bot.send_message
+    metadata: {}
+    data:
+      message: "{{ trigger.to_state.name }} is now {{\n state_translated(trigger.entity_id)
+        }}"
+  mode: single
+- id: '1714671696522'
+  alias: Control Zigbee joining time
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.zigbee2mqtt_bridge_permit_join
+    to: 'on'
+    id: allow_joining
+  - platform: state
+    entity_id:
+    - switch.zigbee2mqtt_bridge_permit_join
+    to: 'off'
+    id: not_allow_joining
+  - platform: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.zigbee_permit_join
+    id: timer_finished
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - allow_joining
+      sequence:
+      - service: timer.start
+        metadata: {}
+        data: {}
+        target:
+          entity_id: timer.zigbee_permit_join
+    - conditions:
+      - condition: trigger
+        id:
+        - not_allow_joining
+      sequence:
+      - service: timer.cancel
+        metadata: {}
+        data: {}
+        target:
+          entity_id: timer.zigbee_permit_join
+    - conditions:
+      - condition: trigger
+        id:
+        - timer_finished
+      sequence:
+      - service: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.zigbee2mqtt_bridge_permit_join
+  mode: single
