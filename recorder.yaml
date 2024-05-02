@@ -22,6 +22,7 @@ recorder:
     entities:
       - binary_sensor.router
       - binary_sensor.router_madrid
+      - binary_sensor.router_murcia
       - sensor.average_pressure
       - sensor.madrid_average_pressure
       - binary_sensor.rpi_power_status
