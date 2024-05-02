@@ -25,15 +25,6 @@ alarm_control_panel:
       delay_time: 0
       trigger_time: 180
 
-# For checking when a new file is uploaded from the camera by FTP
-folder_watcher:
-  - folder: /media/securityCameras/entrada
-  - folder: /media/securityCameras/fachadaSur
-  - folder: /media/securityCameras/fachadaEste
-  - folder: /media/securityCameras/fachadaNorte
-  - folder: /media/securityCameras/fachadaOeste
-  - folder: /media/securityCameras/Comedor
-
 template:
   - trigger:
       - platform: time
