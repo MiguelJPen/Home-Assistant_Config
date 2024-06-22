@@ -130,11 +130,3 @@ sensor:
           {% set iva = states('input_number.impuesto_valor_annadido_energia') | float(0) %}
 
           {{ (((cost_valle + cost_llana + cost_punta) * (1 + (imp_elec / 100))) * (1 + (iva / 100))) | round(2) }}
-
-
-# NOTIFY
-notify:
-  # For storing data to file
-  - platform: file
-    name: energy_study_file
-    filename: /config/collected_data/energy_study.csv
