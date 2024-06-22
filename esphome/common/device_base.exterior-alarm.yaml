@@ -9,6 +9,7 @@ esp32:
 logger:
 
 ota:
+  platform: esphome
   password: !secret ota_exterior_alarm
 
 # Enable Home Assistant API

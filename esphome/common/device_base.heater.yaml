@@ -6,6 +6,7 @@ esp32:
         type: arduino
 
 ota:
+    platform: esphome
     password: !secret ota_heater
 
 # Enable logging

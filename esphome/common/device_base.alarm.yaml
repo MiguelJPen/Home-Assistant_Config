@@ -9,4 +9,5 @@ esp32:
 logger:
 
 ota:
+  platform: esphome
   password: !secret ota_alarm

@@ -9,6 +9,7 @@ esphome:
   name: $name
 
 ota:
+  platform: esphome
   password: !secret ota_pool
 
 # Enable logging

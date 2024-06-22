@@ -15,6 +15,7 @@ api:
     key: !secret api_madrid_heater
 
 ota:
+  platform: esphome
   password: !secret ota_madrid_heater
 
 wifi:

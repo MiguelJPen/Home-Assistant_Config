@@ -12,6 +12,7 @@ esphome:
 api:
 
 ota:
+  platform: esphome
   password: !secret ota_irrigation
 
 # Enable logging
