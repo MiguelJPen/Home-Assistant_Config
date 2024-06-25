@@ -18,6 +18,7 @@ homeassistant:
     external_access: !include external_access.yaml
     security: !include security.yaml
     ios: !include ios.yaml
+    secret_automations: !include secret_automations.yaml
     thermostat: !include thermostat.yaml
 
 logger:
