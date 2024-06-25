@@ -504,7 +504,9 @@
     seconds: '50'
   condition: []
   action:
-  - service: notify.energy_study_file
+  - service: notify.send_message
+    target:
+      entity_id: notify.energy_study_file
     data:
       message: '{{ states(''sensor.date_time'') }},  {{ ''{:,.3f}''.format(float(states(''sensor.hourly_energy''),
         0)) }}, {{ ''{:,.3f}''.format(float(states(''sensor.energy_current_hour''),
@@ -1807,12 +1809,12 @@
     id: arrive_home
     context: {}
   condition:
-  - condition: or
-    conditions:
-    - condition: template
-      value_template: !secret iphone_papa_check
-    - condition: template
-      value_template: !secret iphone_mama_check
+    - condition: or
+      conditions:
+      - condition: template
+        value_template: !secret iphone_papa_check
+      - condition: template
+        value_template: !secret iphone_mama_check
   action:
   - choose:
     - conditions:
@@ -1864,7 +1866,7 @@
         data: {}
   mode: single
 - id: '1714653421263'
-  alias: Notify if other networks or instances are unreachable
+  alias: Notify if other networks or devices are unreachable
   description: ''
   trigger:
   - platform: state
@@ -1873,7 +1875,7 @@
     - binary_sensor.router_madrid
     for:
       hours: 0
-      minutes: 2
+      minutes: 0
       seconds: 0
     from:
     to:
@@ -1889,16 +1891,42 @@
     - binary_sensor.murcia_murcia_heater_status
     for:
       hours: 0
-      minutes: 2
+      minutes: 0
       seconds: 0
-  condition: []
+    from:
+    to:
+  - platform: state
+    entity_id:
+    - binary_sensor.murcia_zigbee2mqtt_bridge_connection_state
+    - binary_sensor.madrid_zigbee2mqtt_bridge_connection_state
+    from:
+    to:
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  - platform: state
+    entity_id:
+    - sensor.remote_connection_to_murcia_instance
+    - sensor.remote_connection_to_madrid_instance
+    from:
+    to:
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 0
+  condition:
+  - condition: template
+    value_template: '{{ trigger.to_state.name != '''' and state_translated(trigger.entity_id)
+      != unknown }}'
   action:
   - service: telegram_bot.send_message
     metadata: {}
     data:
       message: "{{ trigger.to_state.name }} is now {{\n state_translated(trigger.entity_id)
         }}"
-  mode: single
+  mode: queued
+  max: 10
 - id: '1714671696522'
   alias: Control Zigbee joining time
   description: ''
@@ -1951,4 +1979,24 @@
         data: {}
         target:
           entity_id: switch.zigbee2mqtt_bridge_permit_join
+  mode: single
+- id: '1716763355559'
+  alias: Notify if the pool has been filling for too long
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - switch.pool_filling_manual
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 40
+      seconds: 0
+  condition: []
+  action:
+  - service: notify.miguel
+    metadata: {}
+    data:
+      message: The pool has been filling for more than 30 minutes, please check for
+        errors or leaks!
   mode: single
