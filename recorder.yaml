@@ -5,11 +5,12 @@ recorder:
   include:
     domains:
       - automation
-      - light
-      - switch
-      - person
       - climate
       - cover
+      - fan
+      - light
+      - person
+      - switch
     entity_globs:
       - alarm_control_panel.*
       - sensor.*_temperature
