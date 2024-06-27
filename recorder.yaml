@@ -11,6 +11,7 @@ recorder:
       - light
       - person
       - switch
+      - zone
     entity_globs:
       - alarm_control_panel.*
       - sensor.*_temperature
