@@ -14,52 +14,62 @@ recorder:
       - zone
     entity_globs:
       - alarm_control_panel.*
-      - sensor.*_temperature
-      - sensor.*_humidity
       - sensor.*_battery
+      - sensor.*_humidity
+      - sensor.*_temperature
       - sensor.daily_energy_*
-      - binary_sensor.*_status
       - binary_sensor.*_contact
+      - binary_sensor.*_status
       - binary_sensor.*_tamper
     entities:
+      - binary_sensor.cocina
+      - binary_sensor.caja_de_alarma
+      - binary_sensor.despacho
+      - binary_sensor.despensa
+      - binary_sensor.entrada
+      - binary_sensor.high_level_pool_sensor
+      - binary_sensor.low_level_pool_sensor
+      - binary_sensor.pantry_flood_sensor_water_leak
+      - binary_sensor.pasillo
+      - binary_sensor.pool_pump_running
+      - binary_sensor.rpi_power_status
       - binary_sensor.router
       - binary_sensor.router_madrid
       - binary_sensor.router_murcia
-      - binary_sensor.rpi_power_status
-      - binary_sensor.entrada
-      - binary_sensor.cocina
       - binary_sensor.salon
-      - binary_sensor.despacho
-      - binary_sensor.pasillo
-      - binary_sensor.despensa
       - binary_sensor.terraza
       - binary_sensor.ventana_del_salon
-      - binary_sensor.caja_de_alarma
-      - binary_sensor.pantry_flood_sensor_water_leak
-      - binary_sensor.low_level_pool_sensor
-      - binary_sensor.high_level_pool_sensor
-      - binary_sensor.pool_pump_running
-      - sensor.average_pressure
-      - sensor.madrid_average_pressure
-      - sensor.bridge_state
-      - sensor.hourly_energy
-      - sensor.freezer_plug_energy_consumption
-      - sensor.fridge_plug_energy_consumption
-      - sensor.ac_salon_total_energy_consumption
       - sensor.ac_despacho_total_energy_consumption
-      - sensor.home_automation_office_plug_energy
-      - sensor.home_automation_toilet_plug_energy
-      - sensor.home_energy_monitor_power
+      - sensor.ac_despacho_tampered_energy_consumption
+      - sensor.ac_salon_total_energy_consumption
+      - sensor.ac_salon_tampered_energy_consumption
+      - sensor.average_pressure
+      - sensor.bridge_state
       - sensor.db_size
+      - sensor.distance_to_pool_water
       - sensor.edata_68ta
       - sensor.edata_cv1p
+      - sensor.freezer_plug_energy_consumption
+      - sensor.freezer_plug_tampered_energy_consumption
+      - sensor.fridge_plug_energy_consumption
+      - sensor.fridge_plug_tampered_energy_consumption
+      - sensor.home_automation_office_plug_energy
+      - sensor.home_automation_office_plug_tampered_energy
+      - sensor.home_automation_toilet_plug_energy
+      - sensor.home_automation_toilet_tampered_energy
+      - sensor.home_energy_monitor_power
+      - sensor.home_energy_monitor_power_factor
+      - sensor.home_energy_monitor_voltage
+      - sensor.hourly_energy
+      - sensor.madrid_average_pressure
+      - sensor.north_irrigation_statistics
+      - sensor.pool_filling_statistics
       - sensor.precipitation
       - sensor.pump_running_statistics
-      - sensor.pool_filling_statistics
-      - sensor.north_irrigation_statistics
-      - sensor.south_irrigation_statistics
       - sensor.remote_connection_to_madrid_instance
       - sensor.remote_connection_to_murcia_instance
+      - sensor.riello_ups_status
+      - sensor.south_irrigation_statistics
 
   exclude:
     entity_globs:
@@ -67,8 +77,8 @@ recorder:
       - sensor.aemet_*
     entities:
       - sensor.aemet_humidity
-      - sensor.aemet_temperature
       - sensor.aemet_madrid_humidity
       - sensor.aemet_madrid_temperature
       - sensor.aemet_murcia_humidity
       - sensor.aemet_murcia_temperature
+      - sensor.aemet_temperature
