@@ -1,0 +1,10 @@
+script:
+  - id: close_master_valve
+    then:
+      - if:
+          condition:
+            lambda: return (id(${north_id}).position + id(${south_id}).position + id(${pool_id}).position <= 1);
+          then:
+            - valve.close: ${master_id}
+            - delay: 2s
+            - switch.turn_off: ${ac_adapter_id}

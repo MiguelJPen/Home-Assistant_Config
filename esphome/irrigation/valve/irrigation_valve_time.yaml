@@ -10,7 +10,7 @@ script:
   - id: ${id}_update_time
     then:
       - lambda: 
-          if (id(${id}_automation_bool)) {
+          if (id(${id}_automatic_mode).state) {
             int h_mor = atoi(((id(${id}_morning_time).state).substr(0,2)).c_str());
             int m_mor = atoi(((id(${id}_morning_time).state).substr(3,2)).c_str());
             int h_aft = atoi(((id(${id}_afternoon_time).state).substr(0,2)).c_str());

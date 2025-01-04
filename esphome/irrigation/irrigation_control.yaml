@@ -1,13 +1,13 @@
 packages:
-  #### Main valve
-  ${main_id}_valve: !include
-    file: valve/valve_gpio.yaml
+  #### Master valve
+  ${master_id}_valve: !include
+    file: valve/valve.yaml
     vars:
-      id: ${main_id}
-      upper_id: ${main_upper_id}
-      relay_pin: ${main_valve_pin}
-  turn_off_main_valve: !include 
-    file: valve/irrigation_turn_off_main.yaml
+      id: ${master_id}
+      upper_id: ${master_upper_id}
+      relay_pin: ${master_valve_pin}
+  close_master_valve: !include 
+    file: valve/irrigation_close_master.yaml
 
   #### North valve
   ${north_id}_valve: !include

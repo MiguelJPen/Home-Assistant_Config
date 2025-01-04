@@ -1,6 +1,6 @@
 packages:
-  gpio_control: !include
-    file: valve_gpio.yaml
+  valve_control: !include
+    file: valve.yaml
   time_left_sensor: !include
     file: ../../common/time_controlled_entity/left_sensor.yaml
   next_duration_sensor: !include

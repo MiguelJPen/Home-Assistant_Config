@@ -6,8 +6,8 @@ substitutions:
   garage_icon: mdi:wall-sconce-flat
   ac_adapter_id: ac_adapter
   irrigation_id: irrigation
-  main_id: main
-  main_upper_id: Main
+  master_id: master
+  master_upper_id: Master
   north_id: north
   north_upper_id: North
   north_sensor_id: north_virtual
@@ -20,7 +20,7 @@ substitutions:
   ### GPIO Pins
   garage_light_pin: "14"
   ac_adapter_pin: "5"
-  main_valve_pin: "4"
+  master_valve_pin: "4"
   pool_valve_pin: "32"
   north_valve_pin: "33"
   south_valve_pin: "17"

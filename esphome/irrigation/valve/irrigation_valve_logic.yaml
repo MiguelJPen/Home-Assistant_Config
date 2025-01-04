@@ -4,26 +4,26 @@ switch:
     name: ${upper_id} zone
     id: ${id}_virtual
     internal: True
-    lambda: return (id(${id}_valve).state && id(${main_id}_valve).state);
+    lambda: return (id(${id}).position == VALVE_OPEN && id(${master_id}).position == VALVE_OPEN);
     turn_on_action:
       - if:
           condition:
             - or:
               - switch.is_off: ${ac_adapter_id}
-              - switch.is_off: ${main_id}_valve
+              - lambda: return (id(${master_id}).position == VALVE_CLOSED);
           then:
             - switch.turn_on: ${ac_adapter_id}
-            - switch.turn_on: ${main_id}_valve
+            - valve.open: ${master_id}
             - delay: 2s
-      - switch.turn_off: ${pool_id}_valve
-      - switch.turn_on: ${id}_valve
+      - valve.close: ${pool_id}
+      - valve.open: ${id}
       - delay: 1s
       - component.update: ${id}_left
       - component.update: ${irrigation_id}_state
     turn_off_action:
-      - script.execute: turn_off_main_valve
+      - script.execute: close_master_valve
       - delay: 3s
-      - switch.turn_off: ${id}_valve
+      - valve.close: ${id}
       - delay: 1s
       - component.update: ${id}_left
       - component.update: ${irrigation_id}_state

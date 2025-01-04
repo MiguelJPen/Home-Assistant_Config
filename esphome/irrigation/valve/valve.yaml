@@ -1,0 +1,27 @@
+valve:
+  ## Relay which trigger the solenoid
+  - platform: template
+    id: ${id}
+    icon: mdi:pipe-valve
+    name: ${upper_id} valve
+    device_class: water
+    lambda: |-
+      if (id(${id}_valve_gpio).state) {
+        return VALVE_OPEN;
+      } else {
+        return VALVE_CLOSED;
+      }
+    open_action:
+      - switch.turn_on: ${id}_valve_gpio
+    close_action:
+      - switch.turn_off: ${id}_valve_gpio
+
+switch:
+  ## Relay which trigger the solenoid
+  - platform: gpio
+    id: ${id}_valve_gpio
+    pin: 
+      number: ${relay_pin}
+      inverted: True
+    internal: True
+    restore_mode: ALWAYS_OFF
