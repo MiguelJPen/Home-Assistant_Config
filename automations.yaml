@@ -1,24 +1,24 @@
 - id: '1600602907087'
   alias: Check all sensors for alarm - First catch
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.entry_door_contact
     - binary_sensor.kitchen_fence_contact
     - binary_sensor.dining_room_fence_contact
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.entrada
     - binary_sensor.cocina
     - binary_sensor.salon
     - binary_sensor.despacho
     - binary_sensor.pasillo
     - binary_sensor.despensa
+    - binary_sensor.ventana_del_salon
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.terraza
     - binary_sensor.pir_exterior_entrada_contact
     - binary_sensor.pir_exterior_oeste_contact
@@ -27,10 +27,9 @@
     - binary_sensor.pir_exterior_este_contact
     - binary_sensor.pir_exterior_sureste_contact
     - binary_sensor.pir_exterior_sur_contact
-    - binary_sensor.ventana_del_salon
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.entrada_tamper
     - binary_sensor.cocina_tamper
     - binary_sensor.salon_tamper
@@ -41,19 +40,20 @@
     - binary_sensor.ventana_del_salon_tamper
     - binary_sensor.terraza_tamper
     to: open
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: alarm_control_panel.el_nino_alarm
     state: armed_away
-  action:
-  - service: notify.group
-    data:
+  actions:
+  - data:
       message: La alarma ha detectado algo en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}.
       title: "\U0001F6A8 *¡AVISO DE DETECCIÓN!* \U0001F6A8"
-  - service: automation.turn_on
-    data: {}
+    action: notify.group
+  - data: {}
     entity_id: automation.alarm_trigger_when_sensors_go_on_second
+    action: automation.turn_on
   - delay: 00:05
   - repeat:
       until:
@@ -63,11 +63,11 @@
           entity_id: alarm_control_panel.el_nino_alarm
           state: triggered
       sequence:
-      - service: automation.turn_off
-        data:
+      - data:
           stop_actions: true
         target:
           entity_id: automation.alarm_trigger_when_sensors_go_on_second
+        action: automation.turn_off
   mode: single
 - id: '1600610773486'
   alias: When alarm is triggered
@@ -106,24 +106,24 @@
 - id: '1600612899257'
   alias: Check all sensors for alarm - Second catch
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.entry_door_contact
     - binary_sensor.kitchen_fence_contact
     - binary_sensor.dining_room_fence_contact
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.entrada
     - binary_sensor.cocina
     - binary_sensor.salon
     - binary_sensor.despacho
     - binary_sensor.pasillo
     - binary_sensor.despensa
+    - binary_sensor.ventana_del_salon
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.terraza
     - binary_sensor.pir_exterior_entrada_contact
     - binary_sensor.pir_exterior_oeste_contact
@@ -134,8 +134,8 @@
     - binary_sensor.pir_exterior_sur_contact
     - binary_sensor.ventana_del_salon_tamper
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.entrada_tamper
     - binary_sensor.cocina_tamper
     - binary_sensor.salon_tamper
@@ -146,19 +146,20 @@
     - binary_sensor.ventana_del_salon_tamper
     - binary_sensor.terraza_tamper
     to: open
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: alarm_control_panel.el_nino_alarm
     state: armed_away
-  action:
-  - service: alarm_control_panel.alarm_trigger
-    data: {}
+  actions:
+  - data: {}
     entity_id: alarm_control_panel.el_nino_alarm
-  - service: notify.group
-    data:
+    action: alarm_control_panel.alarm_trigger
+  - data:
       message: "Se ha detectado un movimiento en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}. \U0001F693"
       title: "\U0001F6A8\U0001F6A8\U0001F6A8 *¡SE HA DISPARADO LA ALARMA!* \U0001F6A8\U0001F6A8\U0001F6A8"
+    action: notify.group
   mode: single
 - id: '1600622835627'
   alias: When disarmed
@@ -995,7 +996,7 @@
       then:
       - service: telegram_bot.send_message
         data:
-          message: Matheus Santiago
+          message: José Luis Iglesias Castelo Santiago
           target: 303515965
           inline_keyboard:
           - Pagado!:/santiago_has_paid, Moroso!:/santiago_has_not_paid
@@ -1092,7 +1093,7 @@
       then:
       - service: telegram_bot.send_message
         data:
-          message: Matheus Santiago
+          message: José Luis Iglesias Castelo Santiago
           target: 303515965
           inline_keyboard:
           - Pagado!:/santiago_has_paid, Morosos!:/santiago_has_not_paid
@@ -1312,7 +1313,7 @@
           entity_id: input_boolean.lau_santiago_has_paid
       - service: notify.lau
         data:
-          title: "*¡Matheus ha pagado!* \U0001F389"
+          title: "*¡Pepelu ha pagado!* \U0001F389"
           message: ¡Vaya crack!
     - conditions:
       - condition: trigger
@@ -1435,47 +1436,46 @@
       as_timestamp) + ((range(-20, 10)|random|int) * 60) }}'
   mode: single
 - id: '1650498048252'
-  alias: Randomise lights to simulate presence
+  alias: House modes
   description: ''
-  trigger:
-  - platform: time
-    at: sensor.sunset_offset
+  triggers:
+  - at: sensor.sunset_offset
     id: sunset
-  - platform: time
-    at: sensor.sunrise_offset
+    trigger: time
+  - at: sensor.sunrise_offset
     id: sunrise
-  - platform: homeassistant
-    event: start
+    trigger: time
+  - event: start
     id: ha_start
-  - platform: state
-    entity_id: input_boolean.dining_mode
+    trigger: homeassistant
+  - entity_id: input_boolean.dining_mode
     to: 'on'
     id: dining_mode_on
-  - platform: state
-    entity_id: input_boolean.dining_mode
+    trigger: state
+  - entity_id: input_boolean.dining_mode
     to: 'off'
     id: dining_mode_off
-  - platform: state
-    entity_id: input_boolean.modo_tv
+    trigger: state
+  - entity_id: input_boolean.modo_tv
     to: 'on'
     id: modo_tv_on
-  - platform: state
-    entity_id: input_boolean.modo_tv
+    trigger: state
+  - entity_id: input_boolean.modo_tv
     to: 'off'
     id: modo_tv_off
-  - platform: state
-    entity_id: binary_sensor.open_windows_mode
+    trigger: state
+  - entity_id: binary_sensor.open_windows_mode
     to: 'on'
     id: windows_open
-  - platform: state
-    entity_id: binary_sensor.open_windows_mode
+    trigger: state
+  - entity_id: binary_sensor.open_windows_mode
     to: 'off'
     id: windows_closed
-  - platform: time
-    at: 02:00:00
+    trigger: state
+  - at: 02:00:00
     id: two_am
-  - platform: state
-    entity_id:
+    trigger: time
+  - entity_id:
     - media_player.lg_webos_tv_um7000pla
     to: 'off'
     for:
@@ -1483,8 +1483,9 @@
       minutes: 5
       seconds: 0
     id: lg_tv_off
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
@@ -1498,18 +1499,18 @@
         - condition: state
           entity_id: binary_sensor.open_windows_mode
           state: 'off'
-      - service: script.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: script.security_lights_turn_on_lights
+        action: script.turn_on
     - conditions:
       - condition: trigger
         id: sunrise
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: light.security_lights
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id: ha_start
@@ -1520,52 +1521,103 @@
           | as_datetime).strftime(''%T'') }}
 
           '
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: light.security_lights
-      - service: script.turn_off
-        data: {}
+        action: light.turn_off
+      - data: {}
         target:
           entity_id:
           - script.security_lights_corridor
           - script.security_lights_dining_room
           - script.security_lights_living_room_sofa
           - script.security_lights_living_room_window
+        action: script.turn_off
       - condition: state
         entity_id: input_boolean.dining_mode
         state: 'off'
-      - service: script.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: script.security_lights_turn_on_lights
+        action: script.turn_on
     - conditions:
-      - condition: or
-        conditions:
-        - condition: trigger
-          id: dining_mode_on
-        - condition: trigger
-          id: windows_open
+      - condition: trigger
+        id:
+        - dining_mode_on
       sequence:
-      - service: light.turn_off
+      - action: light.turn_on
+        metadata: {}
         data: {}
         target:
-          entity_id: light.security_lights
-      - service: script.turn_off
+          entity_id: light.yard_lights
+      - action: switch.turn_on
+        metadata: {}
         data: {}
+        target:
+          entity_id: switch.exterior_plug
+      - data: {}
+        target:
+          entity_id: light.security_lights
+        action: light.turn_off
+      - data: {}
         target:
           entity_id:
           - script.security_lights_living_room_window
           - script.security_lights_living_room_sofa
           - script.security_lights_dining_room
           - script.security_lights_corridor
+        action: script.turn_off
     - conditions:
-      - condition: or
+      - condition: trigger
+        id: dining_mode_off
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.yard_lights
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: switch.exterior_plug
+      - condition: and
         conditions:
-        - condition: trigger
-          id: dining_mode_off
-        - condition: trigger
-          id: windows_closed
+        - condition: template
+          value_template: '{{  (utcnow().strftime(''%T'')) > (states(''sensor.sunset_offset'')
+            | as_datetime).strftime(''%T'') or (utcnow().strftime(''%T'')) < (states(''sensor.sunrise_offset'')
+            | as_datetime).strftime(''%T'') }}
+
+            '
+        - condition: state
+          entity_id: input_boolean.dining_mode
+          state: 'off'
+        - condition: state
+          entity_id: binary_sensor.open_windows_mode
+          state: 'off'
+      - data: {}
+        target:
+          entity_id: script.security_lights_turn_on_lights
+        action: script.turn_on
+    - conditions:
+      - condition: trigger
+        id: windows_open
+      sequence:
+      - data: {}
+        target:
+          entity_id: light.security_lights
+        action: light.turn_off
+      - data: {}
+        target:
+          entity_id:
+          - script.security_lights_living_room_window
+          - script.security_lights_living_room_sofa
+          - script.security_lights_dining_room
+          - script.security_lights_corridor
+        action: script.turn_off
+    - conditions:
+      - condition: trigger
+        id: windows_closed
       sequence:
       - condition: and
         conditions:
@@ -1581,65 +1633,66 @@
         - condition: state
           entity_id: binary_sensor.open_windows_mode
           state: 'off'
-      - service: script.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: script.security_lights_turn_on_lights
+        action: script.turn_on
     - conditions:
       - condition: trigger
         id: modo_tv_on
       sequence:
-      - service: light.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: light.living_room_sofa_plug
+        action: light.turn_on
       - if:
         - condition: state
           entity_id: script.security_lights_living_room_sofa
           state: 'on'
         then:
-        - service: script.turn_off
-          data: {}
+        - data: {}
           target:
             entity_id: script.security_lights_living_room_sofa
-        - service: script.turn_on
-          data: {}
+          action: script.turn_off
+        - data: {}
           target:
             entity_id: script.security_lights_turn_on_lights
+          action: script.turn_on
     - conditions:
       - condition: trigger
         id: modo_tv_off
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: light.living_room_sofa_plug
+        action: light.turn_off
     - conditions:
-      - condition: and
-        conditions:
-        - condition: trigger
-          id: two_am
-        - condition: state
-          entity_id: input_boolean.dining_mode
-          state: 'on'
+      - condition: trigger
+        id: lg_tv_off
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.dining_mode
-    - conditions:
-      - condition: and
-        conditions:
-        - condition: trigger
-          id: lg_tv_off
+      - if:
         - condition: state
           entity_id: input_boolean.modo_tv
           state: 'on'
+        then:
+        - data: {}
+          target:
+            entity_id: input_boolean.modo_tv
+          action: input_boolean.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - two_am
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.modo_tv
+      - if:
+        - condition: state
+          entity_id: input_boolean.dining_mode
+          state: 'on'
+        then:
+        - data: {}
+          target:
+            entity_id: input_boolean.dining_mode
+          action: input_boolean.turn_off
     default: []
   mode: queued
   max: 2
@@ -1907,4 +1960,259 @@
     data:
       message: The pool has been filling for more than 30 minutes, please check for
         errors or leaks!
+  mode: single
+- id: '1720887537733'
+  alias: Madrid actions when nobody is home
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - zone.casa_de_madrid
+    to: '0'
+    for:
+      hours: 0
+      minutes: 5
+      seconds: 10
+  condition: []
+  action:
+  - service: alarm_control_panel.alarm_arm_away
+    metadata: {}
+    data:
+      code: '3133'
+    target:
+      entity_id: alarm_control_panel.madrid_house_alarm
+  - service: climate.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - climate.madrid_aire_miguel
+      - climate.madrid_aire_patri
+  mode: single
+- id: '1721218951290'
+  alias: Automatic light control
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - light.luz_del_garaje
+    to: 'on'
+    for:
+      hours: 0
+      minutes: 30
+      seconds: 0
+    id: garage_light
+  - platform: state
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
+    to: armed_away
+    id: alarm_to_armed_away
+  condition: []
+  action:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - garage_light
+      sequence:
+      - service: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: light.luz_del_garaje
+    - conditions:
+      - condition: trigger
+        id:
+        - alarm_to_armed_away
+      sequence:
+      - service: light.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - light.luz_del_garaje
+          - light.facade_lights
+  mode: single
+- id: '1722272210170'
+  alias: Automatic blind control
+  description: ''
+  triggers:
+  - platform: numeric_state
+    entity_id:
+    - sun.sun
+    attribute: azimuth
+    above: 249
+    id: sun_start_hitting_north_facade
+  - platform: numeric_state
+    entity_id:
+    - sun.sun
+    attribute: azimuth
+    above: 159
+    id: sun_stop_hitting_east_facade
+  - platform: numeric_state
+    entity_id:
+    - sun.sun
+    attribute: elevation
+    above: 20
+    id: sun_over_horizon
+  - platform: state
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
+    to: armed_away
+    id: alarm_armed_away
+  - platform: state
+    entity_id:
+    - input_button.set_miguel_room_blind_to_semi_open
+    id: button_miguel_room_semi_open
+  - platform: state
+    entity_id:
+    - input_button.set_living_room_blind_to_semi_open
+    id: button_living_room_semi_open
+  - platform: state
+    entity_id:
+    - input_button.set_kitchen_blind_to_semi_open
+    id: button_kitchen_semi_open
+  - platform: state
+    entity_id:
+    - input_button.set_main_bathroom_blind_to_semi_open
+    id: button_main_bathroom_semi_open
+  - platform: state
+    entity_id:
+    - input_button.set_main_dresser_blind_to_semi_open
+    id: button_main_dresser_semi_open
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - sun_start_hitting_north_facade
+      - condition: state
+        entity_id: alarm_control_panel.el_nino_alarm
+        state: disarmed
+      - condition: template
+        value_template: '{{ now().month >= 5 and now().month <= 8 }}'
+      sequence:
+      - metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - cover.main_dresser_blind
+          - cover.miguel_room_blind
+        action: cover.close_cover
+    - conditions:
+      - condition: trigger
+        id:
+        - sun_stop_hitting_east_facade
+      - condition: state
+        entity_id: alarm_control_panel.el_nino_alarm
+        state: disarmed
+      sequence:
+      - metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - cover.main_bathroom_blind
+          - cover.living_room_blind
+        action: cover.open_cover
+    - conditions:
+      - condition: trigger
+        id:
+        - sun_over_horizon
+      - condition: state
+        entity_id: alarm_control_panel.el_nino_alarm
+        state: disarmed
+      sequence:
+      - action: input_button.press
+        target:
+          entity_id:
+          - input_button.set_living_room_blind_to_semi_open
+          - input_button.set_main_bathroom_blind_to_semi_open
+        data: {}
+    - conditions:
+      - condition: trigger
+        id:
+        - alarm_armed_away
+      sequence:
+      - action: cover.close_cover
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - cover.kitchen_blind
+          - cover.living_room_blind
+          - cover.main_bathroom_blind
+          - cover.main_dresser_blind
+          - cover.main_room_left_blind
+          - cover.main_room_right_blind
+    - conditions:
+      - condition: trigger
+        id:
+        - button_miguel_room_semi_open
+      - condition: state
+        entity_id: alarm_control_panel.el_nino_alarm
+        state: disarmed
+      sequence:
+      - action: cover.set_cover_position
+        metadata: {}
+        data:
+          position: 13
+        target:
+          entity_id: cover.miguel_room_blind
+    - conditions:
+      - condition: trigger
+        id:
+        - button_living_room_semi_open
+      - condition: state
+        entity_id: alarm_control_panel.el_nino_alarm
+        state: disarmed
+      sequence:
+      - action: cover.set_cover_position
+        metadata: {}
+        data:
+          position: 27
+        target:
+          entity_id: cover.living_room_blind
+    - conditions:
+      - condition: trigger
+        id:
+        - button_kitchen_semi_open
+      - condition: state
+        entity_id: alarm_control_panel.el_nino_alarm
+        state: disarmed
+      sequence:
+      - action: cover.set_cover_position
+        metadata: {}
+        data:
+          position: 25
+        target:
+          entity_id: cover.kitchen_blind
+    - conditions:
+      - condition: trigger
+        id:
+        - button_main_bathroom_semi_open
+      - condition: state
+        entity_id: alarm_control_panel.el_nino_alarm
+        state: disarmed
+      sequence:
+      - action: cover.set_cover_position
+        metadata: {}
+        data:
+          position: 20
+        target:
+          entity_id: cover.main_bathroom_blind
+    - conditions:
+      - condition: trigger
+        id:
+        - button_main_dresser_semi_open
+      - condition: state
+        entity_id: alarm_control_panel.el_nino_alarm
+        state: disarmed
+      sequence:
+      - action: cover.set_cover_position
+        metadata: {}
+        data:
+          position: 8
+        target:
+          entity_id: cover.main_dresser_blind
   mode: single
