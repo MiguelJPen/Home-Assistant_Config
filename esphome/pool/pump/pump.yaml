@@ -1,5 +1,5 @@
 switch:
-  #### ${pump_upper_id} relay switch
+  #### Pump relay switch
   - platform: gpio
     name: ${pump_upper_id}
     id: ${pump_id}
@@ -59,7 +59,11 @@ binary_sensor:
     on_state:
       then:
         - lambda: |-
-            if (id(pump_automation_physical_switch).state) id(pump_automation).turn_on();
+            if (id(pump_automation_physical_switch).state){
+              auto call = id(${pump_id}_mode).make_call();
+              call.set_option("Automatic");
+              call.perform();
+            }
             else if (!id(pump_automation_physical_switch).state) {
               id(${pump_id}_manual).turn_off();
             }

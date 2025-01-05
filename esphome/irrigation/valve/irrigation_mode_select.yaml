@@ -5,7 +5,7 @@ select:
     name: ${upper_id} irrigation mode
     optimistic: true
     update_interval: never
-    restore_value: True
+    restore_value: true
     options:
       - Hoja caduca
       - Hoja perenne

@@ -16,7 +16,7 @@ binary_sensor:
         - lambda: |-
             if(!id(${pool_id}_low_level).state) {
               id(secure_pumping) = false;
-              if(id(pump_automation_bool))
+              if(id(${pump_id}_mode).state == "Automatic")
                 id(${pump_id}).turn_off();
             }
 

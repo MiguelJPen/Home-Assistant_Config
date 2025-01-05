@@ -1,19 +1,10 @@
-globals:
-  #### Weather metrics
-  - id: mean_temp
-    type: float
-    restore_value: yes
-
 # ============================================================================ #
 sensor:
   ## Home Assistant get sensors
   ### To retrieve weather metrics from home assistant
   - platform: homeassistant
-    id: ui_mean_temp
+    id: mean_temp
     entity_id: sensor.exterior_temperature_mean_over_last_48_hours
-    on_value:
-      then:
-        - lambda: id(mean_temp) = id(ui_mean_temp).state;
 
 # ============================================================================ #
 binary_sensor:

@@ -17,7 +17,7 @@ script:
             int m_aft = atoi(((id(${id}_afternoon_time).state).substr(3,2)).c_str());
 
             pair<string, string> aux = get_irrigation_time(id(${id}_next_irrigation_day), id(${id}_last_automatic_execution), 
-              id(mean_temp), id(mean_humid), id(min_humid), id(${id}_irrigation_mode).state, h_mor, m_mor, h_aft, m_aft);
+              id(mean_temp).state, id(mean_humid).state, id(min_humid).state, id(${id}_irrigation_mode).state, h_mor, m_mor, h_aft, m_aft);
             id(${id}_timestamps_on).publish_state(aux.first);
             id(${id}_timestamps_off).publish_state(aux.second); }
           else {

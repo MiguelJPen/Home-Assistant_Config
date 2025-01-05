@@ -16,6 +16,11 @@ packages:
       left_update: ${pool_left_update}
       morning_initial_option: ${pool_morning_initial_option}
       afternoon_initial_option: ${pool_afternoon_initial_option}
+  automatic_mode_switch: !include
+    file: ../common/time_controlled_entity/automatic_mode_switch.yaml
+    vars:
+      id: ${pool_id}
+      upper_id: ${pool_upper_id}
 
 api:
   services:
@@ -36,11 +41,6 @@ api:
 
 # ============================================================================ #
 globals:
-  ## Bool to save automation mode
-  - id: ${pool_id}_automation_bool
-    type: bool
-    restore_value: True
-
   ## Bool to save if pool filling requested when the device is restarted
   - id: ${pool_id}_filling_requested
     type: bool
@@ -56,7 +56,9 @@ script:
   - id: ${pool_id}_update_time
     then:
       - lambda:
-          if(id(${pool_id}_filling_requested) && id(${pool_id}_automation_bool)) {
+          if (!id(${pool_id}_automatic_mode).state) {
+            id(${pool_id}_filling_requested) = false; }
+          if (id(${pool_id}_filling_requested) && id(${pool_id}_automatic_mode).state) {
             int hour_morning = atoi(((id(${pool_id}_morning_time).state).substr(0,2)).c_str());
             int minute_morning = atoi(((id(${pool_id}_morning_time).state).substr(3,2)).c_str());
             int hour_afternoon = atoi(((id(${pool_id}_afternoon_time).state).substr(0,2)).c_str());
@@ -71,22 +73,8 @@ script:
 
 # ============================================================================ #
 switch:
-  #### A variation of the common switches
   - platform: template
-    name: Pool filling automation
-    icon: mdi:refresh-auto
-    id: ${pool_id}_automation
-    lambda: return id(${pool_id}_automation_bool);
-    turn_on_action:
-      - lambda: |-
-          id(${pool_id}_automation_bool) = true;
-    turn_off_action:
-      - lambda: |-
-          id(${pool_id}_automation_bool) = false;
-          id(${pool_id}_filling_requested) = false;
-      - script.execute: ${pool_id}_update_time
-  - platform: template
-    name: Pool filling manual
+    name: ${pool_upper_id} filling manual
     id: ${pool_id}_manual
     lambda: return (id(${pool_id}_virtual).state);
     optimistic: True
