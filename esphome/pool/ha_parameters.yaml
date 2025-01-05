@@ -10,16 +10,15 @@ sensor:
 binary_sensor:
   #### For saving filling state
   - platform: homeassistant
-    id: ui_pool_filling
+    id: pool_filling_automatic_mode
     internal: True
-    entity_id: switch.pool_filling_automation
+    entity_id: switch.pool_automatic_mode
     on_state:
       then:
         - lambda: |-
-            id(${pool_id}_filling_bool) = id(ui_pool_filling).state;
-            if (id(${pool_id}_filling_bool) && !id(${pool_id}_high_level).state && !id(pool_filling_requested)) {
+            if (id(pool_filling_automatic_mode).state && !id(${pool_id}_high_level).state && !id(pool_filling_requested)) {
               id(pool_filling_request_today).execute();
             }
-            else if(!id(${pool_id}_filling_bool)) {
+            else if(!id(pool_filling_automatic_mode).state) {
               id(pool_filling_requested) = false;
             }

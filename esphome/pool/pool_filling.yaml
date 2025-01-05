@@ -5,10 +5,6 @@ esphome:
       - delay: 30s
 
 globals:
-  #### Bool to save filling state
-  - id: ${pool_id}_filling_bool
-    type: bool
-    restore_value: yes
   - id: pool_filling_requested
     type: bool
     restore_value: yes
@@ -77,6 +73,6 @@ time:
         minutes: /1
         then:
           - lambda: |-
-              if (id(${pool_id}_filling_bool) && !id(${pool_id}_high_level).state && !id(pool_filling_requested)) {
+              if (id(pool_filling_automatic_mode).state && !id(${pool_id}_high_level).state && !id(pool_filling_requested)) {
                 id(pool_filling_request_today).execute();
               }
