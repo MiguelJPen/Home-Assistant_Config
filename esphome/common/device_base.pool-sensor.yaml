@@ -1,0 +1,19 @@
+esp32:
+  board: esp32-poe
+  framework:
+    type: arduino
+
+esphome:
+  name: $name
+
+ota:
+  platform: esphome
+  password: !secret ota_pool_sensor
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_pool_sensor

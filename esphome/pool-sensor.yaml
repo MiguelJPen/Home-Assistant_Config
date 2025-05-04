@@ -1,0 +1,47 @@
+substitutions:
+  name: pool-sensor
+  upper_name: Pool sensor
+
+  ### GPIO Pins
+  temp_sensor_pin: "2"
+  ultrasonic_sensor_tx_pin: "4"
+  ultrasonic_sensor_rx_pin: "36"
+  #### Do not use pin 14, as it caused some errors restarting the device when pulled down
+
+packages:
+  device_base: !include common/device_base.pool-sensor.yaml
+  ethernet: !include common/olimex-esp32-poe.config.yaml
+  basic_control: !include common/basic_control.yaml
+
+## Configuration for the pool temperature sensor
+one_wire:
+  - platform: gpio
+    pin: 
+      number: ${temp_sensor_pin}
+
+## Configuration for the pool ultrasonic level sensor
+uart:
+  tx_pin: 
+    number: ${ultrasonic_sensor_tx_pin}
+    inverted: false
+  rx_pin: 
+    number: ${ultrasonic_sensor_rx_pin}
+    inverted: false
+  baud_rate: 9600
+
+sensor:
+  - platform: dallas_temp
+    name: Pool temperature
+    update_interval: 60s
+  - platform: "a02yyuw"
+    name: "Distance to pool water"
+    filters:
+    - quantile:
+        window_size: 50
+        send_every: 15
+        send_first_at: 15
+        quantile: .8
+    - median:
+        window_size: 50
+        send_every: 15
+        send_first_at: 15
