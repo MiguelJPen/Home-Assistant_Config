@@ -2216,3 +2216,31 @@
         target:
           entity_id: cover.main_dresser_blind
   mode: single
+- id: '1739008125474'
+  alias: Reset room occupation switches
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
+    to: armed_away
+    for:
+      hours: 24
+      minutes: 0
+      seconds: 0
+  conditions: []
+  actions:
+  - action: input_boolean.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - input_boolean.miguel_room_occupied
+      - input_boolean.guest_room_occupied
+      - input_boolean.patri_room_occupied
+  - action: input_boolean.turn_on
+    metadata: {}
+    data: {}
+    target:
+      entity_id: input_boolean.corridor_occupied
+  mode: single
