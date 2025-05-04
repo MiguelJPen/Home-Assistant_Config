@@ -36,3 +36,15 @@ sensor:
           {% set guest_present = is_state('input_boolean.guest_room_occupied', 'on') %}
 
           {{ guest_sensor and guest_present }}
+
+      corridor_sensor_temperature_templated:
+        device_class: temperature
+        unit_of_measurement: "°C"
+        value_template: >
+          {{ states('sensor.corridor_sensor_temperature') | float(0) }}
+
+        availability_template: >
+          {% set corridor_sensor = states('sensor.corridor_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
+          {% set corridor_present = is_state('input_boolean.corridor_occupied', 'on') %}
+
+          {{ corridor_sensor and corridor_present }}
