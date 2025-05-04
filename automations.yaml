@@ -165,60 +165,72 @@
   alias: When disarmed
   description: Turn OFF sirens and second alarm automation, notify by telegram and
     turn OFF security cameras.
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - alarm_control_panel.el_nino_alarm
     to: disarmed
-  condition: []
-  action:
-  - service: siren.turn_off
-    data: {}
+    trigger: state
+  conditions: []
+  actions:
+  - data: {}
     target:
       entity_id:
       - siren.sirena_exterior
       - siren.sirena_interior
+    action: siren.turn_off
   - if:
     - condition: state
       entity_id: script.arrive_home
       state: 'on'
     then:
-    - service: light.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id:
         - light.house_facade_east
         - light.house_facade_south_down
         - light.house_facade_south_up
+      action: light.turn_off
     else:
-    - service: light.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id: light.facade_lights
-  - service: switch.turn_off
-    data: {}
+      action: light.turn_off
+  - data: {}
     target:
       entity_id:
       - switch.exterior_cameras
       - switch.comedor_motion_detection
-  - service: automation.turn_off
-    data:
+    action: switch.turn_off
+    enabled: true
+  - data:
       stop_actions: true
     target:
       entity_id:
       - automation.alarm_trigger_when_sensors_go_on_second
       - automation.alarm_trigger_when_sensors_go_on_second_home
-  - service: esphome.alarm_alarm_beep_beep
-    data: {}
+    action: automation.turn_off
+  - data: {}
+    action: esphome.alarm_alarm_beep_beep
   - delay:
       hours: 0
       minutes: 0
       seconds: 5
       milliseconds: 0
-  - service: switch.turn_off
-    data: {}
+  - data: {}
     target:
       entity_id: switch.comedor_video_streaming
+    action: switch.turn_off
+  - action: switch.turn_off
+    metadata: {}
+    data: {}
+    target:
+      entity_id:
+      - switch.entrada_ftp_upload
+      - switch.fachada_sur_ftp_upload
+      - switch.fachada_este_ftp_upload
+      - switch.fachada_norte_ftp_upload
+      - switch.fachada_oeste_ftp_upload
+    enabled: true
   mode: single
 - id: '1600642629084'
   alias: When armed
@@ -1782,49 +1794,46 @@
 - id: '1663501480893'
   alias: Zigbee wireless switch actions
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
-    - sensor.wireless_switch_action
-    to: single
+  triggers:
+  - trigger: mqtt
+    topic: zigbee2mqtt/Dining Room Wireless Switch/action
+    payload: single
     id: single
-  - platform: state
-    entity_id:
-    - sensor.wireless_switch_action
-    to: release
-    id: release
-  - platform: state
-    entity_id:
-    - sensor.wireless_switch_action
-    to: double
+  - trigger: mqtt
+    topic: zigbee2mqtt/Dining Room Wireless Switch/action
+    payload: double
     id: double
-  condition: []
-  action:
+  - trigger: mqtt
+    topic: zigbee2mqtt/Dining Room Wireless Switch/action
+    payload: release
+    id: release
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
         id: single
       sequence:
-      - service: input_boolean.toggle
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.dining_mode
-    - conditions:
-      - condition: trigger
-        id: release
-      sequence:
-      - service: button.press
-        data: {}
-        target:
-          entity_id: button.wicket_door
+        action: input_boolean.toggle
     - conditions:
       - condition: trigger
         id: double
       sequence:
-      - service: switch.toggle
-        data: {}
+      - data: {}
         target:
           entity_id: switch.exterior_plug
+        action: switch.toggle
+    - conditions:
+      - condition: trigger
+        id: release
+      sequence:
+      - data: {}
+        target:
+          entity_id: button.wicket_door
+        action: button.press
   mode: single
 - id: '1714653421263'
   alias: Notify if other networks or devices are unreachable
