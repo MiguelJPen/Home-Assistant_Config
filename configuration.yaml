@@ -32,13 +32,14 @@ logger:
       - ".*is taking over 10 seconds.*"
     homeassistant.setup:
       - ".*is taking over 10 seconds.*"
-    
+
 # Text to speech
 tts:
   - platform: google_translate
 
 # EXTERNAL FILES
 automation: !include automations.yaml
+scene: !include scenes.yaml
 script: !include scripts.yaml
 frontend:
   themes: !include_dir_merge_named themes/
@@ -61,21 +62,6 @@ sensor:
 #      - Minimo
 #      - Media
 #      - BajoMedia
-
-# TELEGRAM NOTIFICATIONS
-telegram_bot:
-  - platform: broadcast
-    api_key: !secret telegram_api_key
-    allowed_chat_ids:
-      - !secret miguel_chat_id
-      - !secret group_chat_id
-      - !secret lau_chat_id
-  - platform: polling
-    api_key: !secret telegram_api_key
-    allowed_chat_ids:
-      - !secret miguel_chat_id
-      - !secret group_chat_id
-      - !secret lau_chat_id
 
 notify:
   - name: miguel
