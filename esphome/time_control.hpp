@@ -52,7 +52,7 @@ string update_list(string time_list){
         int next_hour = next_run.tm_hour, next_minute = next_run.tm_min;
 
         if (year < next_year || (year == next_year && (month < next_month || (month == next_month && (day < next_day || (day == next_day && (hour < next_hour || (hour == next_hour && (minute < next_minute))))))))) {
-            ret.append(comma + to_string(timestamp));
+            ret.append(comma + timestamp);
             comma = ",";
         }
     }
@@ -70,7 +70,7 @@ string get_time_formated(string time) {
     setlocale(LC_TIME, "es_ES-UTF_8");
     strftime(date, 100, "%a %b %d %R", localtime(&t));
 
-    return to_string(date);
+    return string(date);
 }
 
 bool scheduled_run(string time){

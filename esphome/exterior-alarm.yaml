@@ -24,62 +24,62 @@ binary_sensor:
 
     binary_sensors:
       - name: "Barrera Norte"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Ventana del Salón"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Sur"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Este"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Noroeste"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Oeste"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Norte Tamper"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Ventana del Salón Tamper"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Sur Tamper"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Este Tamper"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Noroeste Tamper"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Oeste Tamper"
-        publish_initial_state: True
+        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
