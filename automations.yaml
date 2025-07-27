@@ -986,7 +986,7 @@
       then:
       - service: telegram_bot.send_message
         data:
-          message: David Mahamud Burgos 144
+          message: Santos Herrero Burgos 144
           target: 303515965
           inline_keyboard:
           - Pagado!:/burgos_144_has_paid, Moroso!:/burgos_144_has_not_paid
@@ -1083,7 +1083,7 @@
       then:
       - service: telegram_bot.send_message
         data:
-          message: David Mahamud Burgos 144
+          message: Santos Herrero Burgos 144
           target: 303515965
           inline_keyboard:
           - Pagado!:/burgos_144_has_paid, Moroso!:/burgos_144_has_not_paid
@@ -1233,8 +1233,8 @@
           entity_id: input_boolean.lau_burgos_144_has_paid
       - service: notify.lau
         data:
-          message: Se viene viajesito!!!
-          title: "*¡David ha pagado!* \U0001F389"
+          message: Al boteee!!!
+          title: "*¡Santos ha pagado!* \U0001F389"
     - conditions:
       - condition: trigger
         id: burgos_144_has_not_paid
@@ -1245,7 +1245,7 @@
           entity_id: input_boolean.lau_burgos_144_has_paid
       - service: notify.lau
         data:
-          message: Pues na', no hay viajesito por culpa de David :(
+          message: Pues na', no hay viajesito por culpa de Santitos :(
     - conditions:
       - condition: trigger
         id: robleda_has_paid
