@@ -1358,41 +1358,42 @@
 - id: '1650113623089'
   alias: Randomise guest room lights behaviour
   description: ''
-  trigger:
-  - platform: time
-    at: sensor.guest_room_security_start
+  triggers:
+  - at: sensor.guest_room_security_start
     id: start_time
-  - platform: homeassistant
-    event: start
+    trigger: time
+  - event: start
     id: ha_start
-  - platform: time
-    at: sensor.guest_room_security_end
+    trigger: homeassistant
+  - at: sensor.guest_room_security_end
     id: end_time
-  - platform: time
-    at: sensor.guest_room_bathroom_event
+    trigger: time
+  - at: sensor.guest_room_bathroom_event
     id: bathroom_event
-  - platform: time
-    at: 02:00:00
+    trigger: time
+  - at: 02:00:00
     id: two_am
-  - platform: state
-    entity_id:
+    trigger: time
+  - entity_id:
     - input_boolean.guest_room_occupied
     to: 'off'
     id: not_occupied
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: input_boolean.guest_room_occupied
     state: 'off'
-  action:
+  actions:
   - choose:
     - conditions:
       - condition: trigger
         id: start_time
       sequence:
-      - service: light.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: light.guest_dresser
+        action: light.turn_on
+        enabled: true
     - conditions:
       - condition: or
         conditions:
@@ -1401,20 +1402,21 @@
         - condition: trigger
           id: not_occupied
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: light.guest_room_lights
+        action: light.turn_off
       - condition: template
         value_template: '{{ (states(''sensor.guest_room_security_start'') | as_timestamp)
           < utcnow().timestamp() < (states(''sensor.guest_room_security_end'') | as_timestamp)
           }}
 
           '
-      - service: light.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: light.guest_dresser
+        action: light.turn_on
+        enabled: true
     - conditions:
       - condition: or
         conditions:
@@ -1423,18 +1425,18 @@
         - condition: trigger
           id: two_am
       sequence:
-      - service: light.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: light.guest_room_lights
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id: bathroom_event
       sequence:
-      - service: script.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: script.guest_room_security_ligths_bathroom_event
+        action: script.turn_on
   variables:
     first_event_on: '{{ (state_attr(''sun.sun'', ''next_setting'') | as_datetime |
       as_timestamp) + ((range(-10, 20)|random|int) * 60) }}'
