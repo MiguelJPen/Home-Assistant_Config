@@ -2,20 +2,17 @@
 # For measuring consumption in separated periods
 utility_meter:
   hourly_energy:
-    source: sensor.energy_consumption
+    source: sensor.inverter_total_energy_bought
     cycle: hourly
   daily_energy:
-    source: sensor.energy_consumption
+    source: sensor.inverter_total_energy_bought
     cycle: daily
     tariffs:
       - valle
       - llana
       - punta
-  weekly_energy:
-    source: sensor.energy_consumption
-    cycle: weekly
   monthly_energy:
-    source: sensor.energy_consumption
+    source: sensor.inverter_total_energy_bought
     cycle: monthly
     tariffs:
       - valle
@@ -38,28 +35,8 @@ utility_meter:
 
 # SENSORS
 sensor:
-  # For checking for the maximum power in the last hour
-  - platform: statistics
-    entity_id: sensor.home_energy_monitor_power
-    name: "Estadísticas de la última hora de la potencia instantánea"
-    sampling_size: 500
-    max_age: 01:00
-    precision: 0
-    state_characteristic: value_max
-
-    # For storing and calculating energy values
   - platform: template
     sensors:
-      energy_consumption:
-        friendly_name: "Energy consumption"
-        device_class: energy
-        unit_of_measurement: "kWh"
-        value_template: >
-          {% set ener = states('sensor.home_energy_monitor_energy') | float(0) %}
-
-          {{ (ener / 1000) }}
-        availability_template: "{{ states('sensor.home_energy_monitor_energy') not in ['unknown', 'unavailable', 'none'] }}"
-
       daily_energy:
         friendly_name: "Energía consumida hoy"
         device_class: energy
@@ -71,7 +48,7 @@ sensor:
 
           {{ valle + llana + punta }}
 
-      coste_energia_ahora:
+      energy_cost_now:
         friendly_name: "Coste de la energía ahora"
         unit_of_measurement: "€/kWh"
         value_template: >
@@ -107,7 +84,7 @@ sensor:
         unit_of_measurement: "€"
         value_template: >
           {% set energy = states('sensor.hourly_energy') | float(0) %}
-          {% set price = states('sensor.coste_energia_ahora') | float(0) %}
+          {% set price = states('sensor.energy_cost_now') | float(0) %}
 
           {{ (energy * price) | round(5) }}
 

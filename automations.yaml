@@ -510,26 +510,22 @@
 - id: '1626948288438'
   alias: Send energy data to a local file hourly
   description: ''
-  trigger:
-  - platform: time_pattern
-    hours: '*'
+  triggers:
+  - hours: '*'
     minutes: '59'
     seconds: '50'
-  condition: []
-  action:
-  - service: notify.send_message
-    target:
-      entity_id: notify.energy_study_file
+    trigger: time_pattern
+  conditions: []
+  actions:
+  - target:
+      entity_id:
+      - notify.collected_energy_data_file
     data:
       message: '{{ states(''sensor.date_time'') }},  {{ ''{:,.3f}''.format(float(states(''sensor.hourly_energy''),
-        0)) }}, {{ ''{:,.3f}''.format(float(states(''sensor.energy_current_hour''),
-        0)) }}, {{ ''{:,.3f}''.format(float(states(''sensor.estadisticas_de_la_ultima_hora_de_la_potencia_instantanea''),
-        0) /1000) }}, {{ ''{:,.3f}''.format(float(states(''sensor.power_production_now''),
-        0) /1000) }}, {{ states(''select.daily_energy'') }}, {{ ''{:,.3f}''.format(float(states(''sensor.daily_energy''),
-        0)) }}, {{ ''{:,.3f}''.format(float(states(''sensor.weekly_energy''), 0))
-        }}, {{ ''{:,.3f}''.format(float(states(''sensor.energy_production_today''),
-        0)) }}, {{ states(''sensor.aemet_condition'') }}, {{ ''{:,.2f}''.format(float(states(''sensor.monthly_energy_cost_imp''),
+        0)) }}, {{ states(''select.daily_energy'') }}, {{ ''{:,.3f}''.format(float(states(''sensor.daily_energy''),
+        0)) }}, {{ ''{:,.2f}''.format(float(states(''sensor.monthly_energy_cost_imp''),
         0)) }} '
+    action: notify.send_message
   mode: single
 - id: '1628698660992'
   alias: Send files from security cameras
@@ -1855,7 +1851,6 @@
     entity_id:
     - binary_sensor.interior_alarm_status
     - binary_sensor.exterior_alarm_status
-    - binary_sensor.energy_monitor_status
     - binary_sensor.heater_status
     - binary_sensor.irrigation_status
     - binary_sensor.swimming_pool_status

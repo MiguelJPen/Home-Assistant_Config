@@ -3,8 +3,8 @@ sensor.average_pressure:
 sensor.hourly_energy:
   friendly_name: Energía consumida cada hora
 sensor.daily_energy_llana:
-  friendly_name: Horas llanas
+  friendly_name: Consumo de la red en hora llana
 sensor.daily_energy_punta:
-  friendly_name: Horas punta
+  friendly_name: Consumo de la red en hora punta
 sensor.daily_energy_valle:
-  friendly_name: Horas valle
+  friendly_name: Consumo de la red en hora valle
