@@ -67,6 +67,7 @@ recorder:
       - sensor.remote_connection_to_madrid_instance
       - sensor.remote_connection_to_murcia_instance
       - sensor.riello_ups_status
+      - sensor.riello_ups_status_data
       - sensor.south_irrigation_statistics
 
   exclude:
