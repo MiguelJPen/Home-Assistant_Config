@@ -1854,6 +1854,7 @@
     - binary_sensor.heater_status
     - binary_sensor.irrigation_status
     - binary_sensor.swimming_pool_status
+    - binary_sensor.pool_sensor_status
     - binary_sensor.fence_gate_status
     - binary_sensor.murcia_murcia_heater_status
     for:
