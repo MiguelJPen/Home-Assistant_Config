@@ -102,6 +102,7 @@ switch:
     id: ${pump_id}_manual
     icon: mdi:pump
     lambda: return id(${pump_id}).state;
+    restore_mode: DISABLED
     turn_on_action:
       - switch.turn_on: ${pump_id}
       - lambda: |-
