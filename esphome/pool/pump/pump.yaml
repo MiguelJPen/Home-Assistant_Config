@@ -24,7 +24,6 @@ binary_sensor:
     id: ${pump_id}_running_sensor
     icon: mdi:pump
     device_class: running
-    trigger_on_initial_state: True
     filters:
       delayed_on_off: 50ms
 
@@ -36,7 +35,6 @@ binary_sensor:
         pulldown: True
     name: ${pump_upper_id} manual switch (debug)
     id: pump_manual_physical_switch
-    trigger_on_initial_state: True
     filters:
       delayed_on_off: 70ms
     on_state:
@@ -53,7 +51,6 @@ binary_sensor:
         pulldown: True
     name: ${pump_upper_id} automation switch (debug)
     id: pump_automation_physical_switch
-    trigger_on_initial_state: True
     filters:
       delayed_on_off: 40ms
     on_state:

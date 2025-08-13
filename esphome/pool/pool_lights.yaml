@@ -23,7 +23,6 @@ binary_sensor:
         input: true
     name: Pool lights switch (debug)
     id: pool_lights_physical_switch
-    trigger_on_initial_state: True
     filters:
       delayed_on_off: 50ms
     on_state: 
