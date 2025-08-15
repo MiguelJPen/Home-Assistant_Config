@@ -1,8 +1,8 @@
 esphome:
   on_boot:
-    priority: 800.0
+    # At this priority pretty much everything must be initialised
+    priority: -200
     then:
-      - delay: 20s
       - lambda: |-
           id(secure_pumping) = id(${pool_id}_low_level).state;
       - script.execute: ${pump_id}_update_time
@@ -24,6 +24,30 @@ packages:
 # ============================================================================ #
 script:
   - id: ${pump_id}_update_time
+    then:
+      - wait_until:
+          condition:
+            time.has_time: 
+          timeout: 60s
+      - logger.log: "Time might be valid"
+      - wait_until:
+          condition:
+            lambda: |-
+              return !isnan(id(mean_temp).state);
+          timeout: 60s
+      - logger.log: "Home assistant mean_temp sensor might be valid"
+      - if:
+          condition:
+            and:
+              - time.has_time: 
+              - lambda: |-
+                  return !isnan(id(mean_temp).state);
+          then:
+            - logger.log: "Prerequisites met for setting up the pump automation. Proceeding..."
+            - script.execute: ${pump_id}_update_time_post_check
+          else:
+            - logger.log: "Skipping setting up the pump automation: missing time and/or mean_temp"
+  - id: ${pump_id}_update_time_post_check
     then:
       - lambda: |-
           if(id(${pump_id}_mode).state == "Winter") {
@@ -51,7 +75,6 @@ script:
       - script.execute: ${pump_id}_check_if_on
   - id: ${pump_id}_check_if_on
     then:
-      - delay: 300ms
       - lambda: |-
           if(id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
             id(pump_next_on).state > id(pump_next_off).state && !id(filling_rn) && 
