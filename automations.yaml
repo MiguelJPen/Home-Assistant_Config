@@ -2258,3 +2258,54 @@
     target:
       entity_id: input_boolean.corridor_occupied
   mode: single
+- id: '1763233717632'
+  alias: Toggle the turtle's light according to the sun
+  description: ''
+  triggers:
+  - trigger: sun
+    event: sunrise
+    offset: 0
+    id: sunrise
+  - trigger: sun
+    event: sunset
+    offset: 0
+    id: sunset
+  conditions: []
+  actions:
+  - wait_template: '{{ states(''switch.madrid_smart_plug'') not in [''unavailable'',
+      ''unknown''] }}'
+    continue_on_timeout: true
+    timeout: 00:02:00
+  - if:
+    - condition: template
+      value_template: '{{ states(''switch.madrid_smart_plug'') in [''unavailable'',
+        ''unknown''] }}'
+    then:
+    - action: telegram_bot.send_message
+      metadata: {}
+      data:
+        message: The switch to control the turtles light is unreachable, toggle the
+          light manually
+    else:
+    - choose:
+      - conditions:
+        - condition: trigger
+          id:
+          - sunrise
+        sequence:
+        - action: switch.turn_on
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.madrid_smart_plug
+      - conditions:
+        - condition: trigger
+          id:
+          - sunset
+        sequence:
+        - action: switch.turn_off
+          metadata: {}
+          data: {}
+          target:
+            entity_id: switch.madrid_smart_plug
+  mode: single
