@@ -24,62 +24,50 @@ binary_sensor:
 
     binary_sensors:
       - name: "Barrera Norte"
-        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Ventana del Salón"
-        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Sur"
-        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Este"
-        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Noroeste"
-        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Oeste"
-        trigger_on_initial_state: True
         device_class: safety
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Norte Tamper"
-        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Ventana del Salón Tamper"
-        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Sur Tamper"
-        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Este Tamper"
-        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Noroeste Tamper"
-        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
       - name: "Barrera Oeste Tamper"
-        trigger_on_initial_state: True
         device_class: opening
         filters:
           delayed_on_off: 700ms
