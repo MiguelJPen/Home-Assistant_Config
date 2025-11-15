@@ -1,41 +1,41 @@
-binary_sensor:
-  - platform: gpio
-    pin:
-      number: ${low_level_sensor_pin}
-      inverted: true
-      mode:
-        input: true
-    name: "Low level pool sensor"
-    id: ${pool_id}_low_level
-    device_class: moisture
-    publish_initial_state: True
-    filters:
-      delayed_on_off: 700ms
-    on_state:
-      then:
-        - lambda: |-
-            if(!id(${pool_id}_low_level).state) {
-              id(secure_pumping) = false;
-              if(id(${pump_id}_mode).state == "Automatic")
-                id(${pump_id}).turn_off();
-            }
+# binary_sensor:
+#   - platform: gpio
+#     pin:
+#       number: ${low_level_sensor_pin}
+#       inverted: true
+#       mode:
+#         input: true
+#     name: "Low level pool sensor"
+#     id: ${pool_id}_low_level
+#     device_class: moisture
+#     trigger_on_initial_state: True
+#     filters:
+#       delayed_on_off: 700ms
+#     on_state:
+#       then:
+#         - lambda: |-
+#             if(!id(${pool_id}_low_level).state) {
+#               id(secure_pumping) = false;
+#               if(id(${pump_id}_mode).state == "Automatic")
+#                 id(${pump_id}).turn_off();
+#             }
 
-  - platform: gpio
-    pin:
-      number: ${high_level_sensor_pin}
-      inverted: true
-      mode:
-        input: true
-    name: "High level pool sensor"
-    id: ${pool_id}_high_level
-    device_class: moisture
-    publish_initial_state: True
-    filters:
-      delayed_on_off: 700ms
-    on_state:
-      then:
-        - lambda: |-
-            if (id(pool_filling_automatic_mode).state && !id(${pool_id}_high_level).state && !id(pool_filling_requested)) {
-              id(pool_filling_request_today).execute();
-            }
-            else if (id(${pool_id}_high_level).state) id(secure_pumping) = true;
+#   - platform: gpio
+#     pin:
+#       number: ${high_level_sensor_pin}
+#       inverted: true
+#       mode:
+#         input: true
+#     name: "High level pool sensor"
+#     id: ${pool_id}_high_level
+#     device_class: moisture
+#     trigger_on_initial_state: True
+#     filters:
+#       delayed_on_off: 700ms
+#     on_state:
+#       then:
+#         - lambda: |-
+#             if (id(pool_filling_automatic_mode).state && !id(${pool_id}_high_level).state && !id(pool_filling_requested)) {
+#               id(pool_filling_request_today).execute();
+#             }
+#             else if (id(${pool_id}_high_level).state) id(secure_pumping) = true;

@@ -1,15 +1,37 @@
-esphome:
-  on_boot:
-    priority: 106.0
+api:
+  on_client_connected:
     then:
-      - delay: 10s
       - script.execute: ${id}_update_time
 
 # ============================================================================ #
 script:
   - id: ${id}_update_time
     then:
-      - lambda: 
+      - wait_until:
+          condition:
+            time.has_time: 
+          timeout: 60s
+      - logger.log: "Time might be valid"
+      - wait_until:
+          condition:
+            lambda: |-
+              return !isnan(id(mean_temp).state);
+          timeout: 60s
+      - logger.log: "Home assistant mean_temp sensor might be valid"
+      - if:
+          condition:
+            and:
+              - time.has_time: 
+              - lambda: |-
+                  return !isnan(id(mean_temp).state);
+          then:
+            - logger.log: "Prerequisites met for setting up the irrigation automation. Proceeding..."
+            - script.execute: ${id}_update_time_post_check
+          else:
+            - logger.log: "Skipping setting up the irrigation automation: missing some of the required values"
+  - id: ${id}_update_time_post_check
+    then:
+      - lambda: |-
           if (id(${id}_automatic_mode).state) {
             int h_mor = atoi(((id(${id}_morning_time).state).substr(0,2)).c_str());
             int m_mor = atoi(((id(${id}_morning_time).state).substr(3,2)).c_str());

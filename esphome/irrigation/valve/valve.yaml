@@ -5,6 +5,7 @@ valve:
     icon: mdi:pipe-valve
     name: ${upper_id} valve
     device_class: water
+    optimistic: True
     lambda: |-
       if (id(${id}_valve_gpio).state) {
         return VALVE_OPEN;

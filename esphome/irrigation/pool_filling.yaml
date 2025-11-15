@@ -31,7 +31,7 @@ api:
       then:
         - lambda: |-
             id(${pool_id}_filling_requested) = true;
-            id(${pool_id}_update_time).execute();
+        - script.execute: ${pool_id}_update_time
         - homeassistant.service:
             service: esphome.pool_filling_requested
     - service: request_more_pool_water
@@ -55,7 +55,7 @@ script:
           service: esphome.pool_filling_start
   - id: ${pool_id}_update_time
     then:
-      - lambda:
+      - lambda: |-
           if (!id(${pool_id}_automatic_mode).state) {
             id(${pool_id}_filling_requested) = false; }
           if (id(${pool_id}_filling_requested) && id(${pool_id}_automatic_mode).state) {
@@ -97,10 +97,17 @@ text_sensor:
     update_interval: never
     icon: mdi:waves-arrow-up
     lambda: |-
-      if (!id(${irrigation_id}_available).state && id(${pool_id}_virtual).state)
-        return {"¡Error!"};
-      if (id(${irrigation_id}_available).state && id(${pool_id}_virtual).state)
-        return {"Llenando..."};
-      if(id(${irrigation_id}_available).state && !(id(${north_id}_virtual).state || id(${south_id}_virtual).state)) 
-        return {"Disponible"};
-      return {"No disponible"};
+      if (id(${irrigation_id}_available).state) {
+        if (id(${master_id}).position == VALVE_OPEN && (id(${north_id}).position == VALVE_OPEN || id(${south_id}).position == VALVE_OPEN) && id(${pool_id}).position == VALVE_CLOSED)
+          return {"No disponible"};
+        if(id(${master_id}).position == VALVE_CLOSED && id(${north_id}).position == VALVE_CLOSED && id(${south_id}).position == VALVE_CLOSED && id(${pool_id}).position == VALVE_CLOSED) 
+          return {"Disponible"};
+        if (id(${master_id}).position == VALVE_OPEN && id(${north_id}).position == VALVE_CLOSED && id(${south_id}).position == VALVE_CLOSED && id(${pool_id}).position == VALVE_OPEN)
+          return {"Llenando..."};
+      }
+      else {
+        if (id(${master_id}).position == VALVE_CLOSED && id(${north_id}).position == VALVE_CLOSED && id(${south_id}).position == VALVE_CLOSED && id(${pool_id}).position == VALVE_CLOSED) {
+          return {"No disponible"};
+        }
+      }
+      return {"¡Error! Comprueba las electroválvulas"};

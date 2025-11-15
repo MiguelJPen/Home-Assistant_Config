@@ -22,11 +22,14 @@ packages:
     vars:
       initial_option: ${afternoon_initial_option}
 
-esphome:
-  on_boot:
-    priority: 101.0
+api:
+  on_client_connected:
     then:
-      - delay: 14s
+      - wait_until:
+          condition:
+            time.has_time: 
+          timeout: 60s
+      - logger.log: "Time might be valid, updating time dependent entities"
       - script.execute: ${pool_id}_update_time
       - homeassistant.service:
           service: esphome.pool_filling_completed

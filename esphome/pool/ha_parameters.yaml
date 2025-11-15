@@ -16,7 +16,8 @@ binary_sensor:
     on_state:
       then:
         - lambda: |-
-            if (id(pool_filling_automatic_mode).state && !id(${pool_id}_high_level).state && !id(pool_filling_requested)) {
+            // if (id(pool_filling_automatic_mode).state && !id(${pool_id}_high_level).state && !id(pool_filling_requested)) {
+            if (id(pool_filling_automatic_mode).state && !id(pool_filling_requested)) {
               id(pool_filling_request_today).execute();
             }
             else if(!id(pool_filling_automatic_mode).state) {

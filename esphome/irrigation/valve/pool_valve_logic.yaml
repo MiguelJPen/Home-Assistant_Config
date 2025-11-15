@@ -13,18 +13,15 @@ switch:
           then:
             - switch.turn_on: ${ac_adapter_id}
             - valve.open: ${master_id}
-            - delay: 2s
       - valve.close: ${north_id}
       - valve.close: ${south_id}
       - valve.open: ${id}
-      - delay: 1s
       - component.update: ${id}_left
       - component.update: ${irrigation_id}_state
     turn_off_action:
       - script.execute: close_master_valve
-      - delay: 3s
+      - script.wait: close_master_valve
       - valve.close: ${id}
-      - delay: 1s
       - component.update: ${id}_left
       - component.update: ${irrigation_id}_state
       - homeassistant.service:

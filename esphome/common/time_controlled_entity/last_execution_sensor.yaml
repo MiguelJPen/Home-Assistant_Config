@@ -1,15 +1,11 @@
-esphome:
-  on_boot:
-    priority: 102.0
+api:
+  on_client_connected:
     then:
-      - delay: 8s
       - component.update: ${id}_last_automatic_execution_ha
       - lambda: |-
           // If this variable has been deleted for any reason, reset it
           if (id(${id}_last_automatic_execution) == 0)
             id(update_last_automatic_execution_${id}).execute();
-
-api:
   services:
     - service: reset_${id}_last_automatic_execution
       then:

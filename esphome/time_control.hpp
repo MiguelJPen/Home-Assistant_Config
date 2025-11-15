@@ -16,7 +16,6 @@ string update_next_run(string);
 string update_list(string);
 string get_time_formated(string);
 bool scheduled_run(string);
-bool water_available();
 
 string update_next_run(string time_list) {
     if (time_list.empty()) return unknown;
@@ -94,16 +93,4 @@ bool scheduled_run(string time){
     //ESP_LOGD("scheduled_run", "year:%i month:%i day:%i hour:%i minute:%i", next_year, next_month, next_day, next_hour, next_minute);
 
     return (year == next_year && month == next_month && day == next_day && hour == next_hour && minute == next_minute);
-}
-
-bool water_available() {
-    auto time_now = id(time_sntp).now();
-
-    if (time_now.month % 2 == 0 && time_now.hour >= 16){ // Water in the afternoon (16-00)
-        return true;
-    }
-    else if (time_now.month % 2 == 1 && time_now.hour >= 8 && time_now.hour < 16){ // Water in the morning (08-16)
-        return true;
-    }
-    return false;
 }

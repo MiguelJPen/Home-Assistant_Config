@@ -22,6 +22,7 @@ string add_two_minutes_from_now();
 string manual_set(int, string);
 string delete_first_timestamp(string);
 time_t add_n_days(time_t, int); // Internal
+bool water_available();
 
 pair<string, string> get_irrigation_time(time_t next_irrigation, time_t last_auto_irrigation, float mean_tmp, float mean_hum, float min_hum, string irrigation_mode, 
 int h_morn, int m_morn, int h_afte, int m_afte) {
@@ -239,4 +240,16 @@ time_t add_n_days(time_t time, int days) {
     strtime.tm_mday += days;
 
     return mktime(&strtime);
+}
+
+bool water_available() {
+    auto time_now = id(time_sntp).now();
+
+    if (time_now.month % 2 == 0 && time_now.hour >= 16){ // Water in the afternoon (16-00)
+        return true;
+    }
+    else if (time_now.month % 2 == 1 && time_now.hour >= 8 && time_now.hour < 16){ // Water in the morning (08-16)
+        return true;
+    }
+    return false;
 }

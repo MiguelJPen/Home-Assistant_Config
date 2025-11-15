@@ -59,8 +59,6 @@ substitutions:
   south_update_next_day: "42"
   north_update_irrigation_time: "45"
   south_update_irrigation_time: "50"
-  update_irrigation_period: "56"
-  update_irrigation_available: "57"
 
 packages:
   device_base: !include common/device_base.irrigation.yaml
