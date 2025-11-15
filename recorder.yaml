@@ -28,8 +28,6 @@ recorder:
       - binary_sensor.despacho
       - binary_sensor.despensa
       - binary_sensor.entrada
-      - binary_sensor.high_level_pool_sensor
-      - binary_sensor.low_level_pool_sensor
       - binary_sensor.pantry_flood_sensor_water_leak
       - binary_sensor.pasillo
       - binary_sensor.pool_pump_running
@@ -47,7 +45,6 @@ recorder:
       - sensor.average_pressure
       - sensor.bridge_state
       - sensor.db_size
-      - sensor.distance_to_pool_water
       - sensor.edata_68ta
       - sensor.edata_cv1p
       - sensor.freezer_plug_energy_consumption
@@ -62,6 +59,7 @@ recorder:
       - sensor.madrid_average_pressure
       - sensor.north_irrigation_statistics
       - sensor.pool_filling_statistics
+      - sensor.pool_sensor_distance_to_pool_water
       - sensor.precipitation
       - sensor.pump_running_statistics
       - sensor.remote_connection_to_madrid_instance
