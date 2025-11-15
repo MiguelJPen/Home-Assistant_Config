@@ -1,4 +1,5 @@
 # Generic ignores
+*.lock
 *.log
 *.log.1
 *.log.fault
@@ -22,6 +23,7 @@ zigbee2mqtt
 tts
 themes
 custom_components
+image
 www
 
 # Specific file ignores
