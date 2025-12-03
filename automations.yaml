@@ -1487,7 +1487,9 @@
     trigger: time
   - entity_id:
     - media_player.lg_webos_tv_um7000pla
-    to: 'off'
+    to:
+    - unavailable
+    - 'off'
     for:
       hours: 0
       minutes: 5
