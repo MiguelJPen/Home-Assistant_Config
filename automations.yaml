@@ -2053,49 +2053,49 @@
   alias: Automatic blind control
   description: ''
   triggers:
-  - platform: numeric_state
-    entity_id:
+  - entity_id:
     - sun.sun
     attribute: azimuth
     above: 249
     id: sun_start_hitting_north_facade
-  - platform: numeric_state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
     - sun.sun
     attribute: azimuth
     above: 159
     id: sun_stop_hitting_east_facade
-  - platform: numeric_state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
     - sun.sun
     attribute: elevation
     above: 20
     id: sun_over_horizon
-  - platform: state
-    entity_id:
+    trigger: numeric_state
+  - entity_id:
     - alarm_control_panel.el_nino_alarm
     to: armed_away
     id: alarm_armed_away
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_button.set_miguel_room_blind_to_semi_open
     id: button_miguel_room_semi_open
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_button.set_living_room_blind_to_semi_open
     id: button_living_room_semi_open
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_button.set_kitchen_blind_to_semi_open
     id: button_kitchen_semi_open
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_button.set_main_bathroom_blind_to_semi_open
     id: button_main_bathroom_semi_open
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - input_button.set_main_dresser_blind_to_semi_open
     id: button_main_dresser_semi_open
+    trigger: state
   conditions: []
   actions:
   - choose:
@@ -2161,6 +2161,8 @@
           - cover.main_dresser_blind
           - cover.main_room_left_blind
           - cover.main_room_right_blind
+          - cover.miguel_room_blind
+          - cover.patri_room_blind
     - conditions:
       - condition: trigger
         id:
