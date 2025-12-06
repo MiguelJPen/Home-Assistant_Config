@@ -1,50 +1,45 @@
-sensor:
-  - platform: template
-    sensors:
-      miguel_room_sensor_temperature_templated:
-        device_class: temperature
-        unit_of_measurement: "°C"
-        value_template: >
-          {{ states('sensor.miguel_room_sensor_temperature') | float(0) }}
+template:
+- sensor:
+  - name: miguel_room_sensor_temperature_templated
+    default_entity_id: sensor.miguel_room_sensor_temperature_templated
+    device_class: temperature
+    unit_of_measurement: °C
+    availability: >
+      {% set miguel_sensor = states('sensor.miguel_room_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
+      {% set miguel_present = is_state('input_boolean.miguel_room_occupied', 'on') %}
 
-        availability_template: >
-          {% set miguel_sensor = states('sensor.miguel_room_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
-          {% set miguel_present = is_state('input_boolean.miguel_room_occupied', 'on') %}
+      {{ miguel_sensor and miguel_present }}
+    state: '{{ states(''sensor.miguel_room_sensor_temperature'') | float(0) }}'
 
-          {{ miguel_sensor and miguel_present }}
+  - name: patri_room_sensor_temperature_templated
+    default_entity_id: sensor.patri_room_sensor_temperature_templated
+    device_class: temperature
+    unit_of_measurement: °C
+    availability: >
+      {% set patri_sensor = states('sensor.patri_room_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
+      {% set patri_present = is_state('input_boolean.patri_room_occupied', 'on') %}
 
-      patri_room_sensor_temperature_templated:
-        device_class: temperature
-        unit_of_measurement: "°C"
-        value_template: >
-          {{ states('sensor.patri_room_sensor_temperature') | float(0) }}
+      {{ patri_sensor and patri_present }}
+    state: '{{ states(''sensor.patri_room_sensor_temperature'') | float(0) }}'
 
-        availability_template: >
-          {% set patri_sensor = states('sensor.patri_room_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
-          {% set patri_present = is_state('input_boolean.patri_room_occupied', 'on') %}
+  - name: guest_room_sensor_temperature_templated
+    default_entity_id: sensor.guest_room_sensor_temperature_templated
+    device_class: temperature
+    unit_of_measurement: °C
+    availability: >
+      {% set guest_sensor = states('sensor.guest_room_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
+      {% set guest_present = is_state('input_boolean.guest_room_occupied', 'on') %}
 
-          {{ patri_sensor and patri_present }}
+      {{ guest_sensor and guest_present }}
+    state: '{{ states(''sensor.guest_room_sensor_temperature'') | float(0) }}'
 
-      guest_room_sensor_temperature_templated:
-        device_class: temperature
-        unit_of_measurement: "°C"
-        value_template: >
-          {{ states('sensor.guest_room_sensor_temperature') | float(0) }}
+  - name: corridor_sensor_temperature_templated
+    default_entity_id: sensor.corridor_sensor_temperature_templated
+    device_class: temperature
+    unit_of_measurement: °C
+    availability: >
+      {% set corridor_sensor = states('sensor.corridor_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
+      {% set corridor_present = is_state('input_boolean.corridor_occupied', 'on') %}
 
-        availability_template: >
-          {% set guest_sensor = states('sensor.guest_room_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
-          {% set guest_present = is_state('input_boolean.guest_room_occupied', 'on') %}
-
-          {{ guest_sensor and guest_present }}
-
-      corridor_sensor_temperature_templated:
-        device_class: temperature
-        unit_of_measurement: "°C"
-        value_template: >
-          {{ states('sensor.corridor_sensor_temperature') | float(0) }}
-
-        availability_template: >
-          {% set corridor_sensor = states('sensor.corridor_sensor_temperature') not in ['unknown', 'unavailable', 'none', '0'] %}
-          {% set corridor_present = is_state('input_boolean.corridor_occupied', 'on') %}
-
-          {{ corridor_sensor and corridor_present }}
+      {{ corridor_sensor and corridor_present }}
+    state: '{{ states(''sensor.corridor_sensor_temperature'') | float(0) }}'

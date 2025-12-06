@@ -34,76 +34,78 @@ utility_meter:
       - punta
 
 # SENSORS
-sensor:
-  - platform: template
-    sensors:
-      daily_energy:
-        friendly_name: "Energía consumida hoy"
-        device_class: energy
-        unit_of_measurement: "kWh"
-        value_template: >
-          {% set valle = states('sensor.daily_energy_valle') | float(0) %}
-          {% set llana = states('sensor.daily_energy_llana') | float(0) %}
-          {% set punta = states('sensor.daily_energy_punta') | float(0) %}
+template:
+- sensor:
+  - name: Energía consumida hoy
+    default_entity_id: sensor.daily_energy
+    device_class: energy
+    unit_of_measurement: kWh
+    state: >
+      {% set valle = states('sensor.daily_energy_valle') | float(0) %}
+      {% set llana = states('sensor.daily_energy_llana') | float(0) %}
+      {% set punta = states('sensor.daily_energy_punta') | float(0) %}
 
-          {{ valle + llana + punta }}
+      {{ valle + llana + punta }}
 
-      energy_cost_now:
-        friendly_name: "Coste de la energía ahora"
-        unit_of_measurement: "€/kWh"
-        value_template: >
-          {%- if state_attr('sensor.pvpc', 'period') == 'P3' -%}
-            {{ states('input_number.coste_energia_valle') }}
-          {%- elif state_attr('sensor.pvpc', 'period') == 'P2' -%}
-            {{ states('input_number.coste_energia_llana') }}
-          {%- elif state_attr('sensor.pvpc', 'period') == 'P1' -%}
-            {{ states('input_number.coste_energia_punta') }}
-          {%- else -%}
-            {{ states('sensor.coste_energia') }}
-          {%- endif -%}
+  - name: Coste de la energía ahora
+    default_entity_id: sensor.energy_cost_now
+    unit_of_measurement: €/kWh
+    state: >
+      {%- if state_attr('sensor.pvpc', 'period') == 'P3' -%}
+        {{ states('input_number.coste_energia_valle') }}
+      {%- elif state_attr('sensor.pvpc', 'period') == 'P2' -%}
+        {{ states('input_number.coste_energia_llana') }}
+      {%- elif state_attr('sensor.pvpc', 'period') == 'P1' -%}
+        {{ states('input_number.coste_energia_punta') }}
+      {%- else -%}
+        {{ states('sensor.coste_energia') }}
+      {%- endif -%}
 
-      # To show the value as a sensor
-      yesterday_kwh:
-        friendly_name: "Consumo de energía ayer"
-        device_class: energy
-        unit_of_measurement: "kWh"
-        value_template: "{{ states('input_number.yesterday_kwh') }}"
+  # To show the value as a sensor
+  - name: Consumo de energía ayer
+    default_entity_id: sensor.yesterday_kwh
+    device_class: energy
+    unit_of_measurement: kWh
+    state: '{{ states(''input_number.yesterday_kwh'') }}'
 
-      monthly_energy:
-        friendly_name: "Energía consumida este mes"
-        device_class: energy
-        unit_of_measurement: "kWh"
-        value_template: >
-          {% set valle = states('sensor.monthly_energy_valle') | float(0) %}
-          {% set llana = states('sensor.monthly_energy_llana') | float(0) %}
-          {% set punta = states('sensor.monthly_energy_punta') | float(0) %}
+  - name: Energía consumida este mes
+    default_entity_id: sensor.monthly_energy
+    device_class: energy
+    unit_of_measurement: kWh
+    state: >
+      {% set valle = states('sensor.monthly_energy_valle') | float(0) %}
+      {% set llana = states('sensor.monthly_energy_llana') | float(0) %}
+      {% set punta = states('sensor.monthly_energy_punta') | float(0) %}
 
-          {{ valle + llana + punta }}
+      {{ valle + llana + punta }}
 
-      hourly_energy_cost:
-        unit_of_measurement: "€"
-        value_template: >
-          {% set energy = states('sensor.hourly_energy') | float(0) %}
-          {% set price = states('sensor.energy_cost_now') | float(0) %}
+  - name: hourly_energy_cost
+    default_entity_id: sensor.hourly_energy_cost
+    unit_of_measurement: €
+    state: >
+      {% set energy = states('sensor.hourly_energy') | float(0) %}
+      {% set price = states('sensor.energy_cost_now') | float(0) %}
 
-          {{ (energy * price) | round(5) }}
+      {{ (energy * price) | round(5) }}
 
-      monthly_energy_cost:
-        unit_of_measurement: "€"
-        value_template: >
-          {% set valle = states('sensor.monthly_energy_cost_valle') | float(0) %}
-          {% set llana = states('sensor.monthly_energy_cost_llana') | float(0) %}
-          {% set punta = states('sensor.monthly_energy_cost_punta') | float(0) %}
+  - name: monthly_energy_cost
+    default_entity_id: sensor.monthly_energy_cost
+    unit_of_measurement: €
+    state: >
+      {% set valle = states('sensor.monthly_energy_cost_valle') | float(0) %}
+      {% set llana = states('sensor.monthly_energy_cost_llana') | float(0) %}
+      {% set punta = states('sensor.monthly_energy_cost_punta') | float(0) %}
 
-          {{ valle + llana + punta | round(2) }}
+      {{ valle + llana + punta | round(2) }}
 
-      monthly_energy_cost_imp:
-        unit_of_measurement: "€"
-        value_template: >
-          {% set cost_valle = states('sensor.monthly_energy_cost_valle') | float(0) %}
-          {% set cost_llana = states('sensor.monthly_energy_cost_llana') | float(0) %}
-          {% set cost_punta = states('sensor.monthly_energy_cost_punta') | float(0) %}
-          {% set imp_elec = states('input_number.impuesto_electricidad') | float(0) %}
-          {% set iva = states('input_number.impuesto_valor_annadido_energia') | float(0) %}
+  - name: monthly_energy_cost_imp
+    default_entity_id: sensor.monthly_energy_cost_imp
+    unit_of_measurement: €
+    state: >
+      {% set cost_valle = states('sensor.monthly_energy_cost_valle') | float(0) %}
+      {% set cost_llana = states('sensor.monthly_energy_cost_llana') | float(0) %}
+      {% set cost_punta = states('sensor.monthly_energy_cost_punta') | float(0) %}
+      {% set imp_elec = states('input_number.impuesto_electricidad') | float(0) %}
+      {% set iva = states('input_number.impuesto_valor_annadido_energia') | float(0) %}
 
-          {{ (((cost_valle + cost_llana + cost_punta) * (1 + (imp_elec / 100))) * (1 + (iva / 100))) | round(2) }}
+      {{ (((cost_valle + cost_llana + cost_punta) * (1 + (imp_elec / 100))) * (1 + (iva / 100))) | round(2) }}

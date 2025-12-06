@@ -1,10 +1,57 @@
 # WEATHER TEMPLATES
 # Create a custom template for getting the weather from AEMET service and include some local values
-weather:
+template:
+- sensor:
+  - name: Average pressure
+    default_entity_id: sensor.average_pressure
+    device_class: pressure
+    unit_of_measurement: hPa
+    availability: >
+      {% set exterior = states('sensor.exterior_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+      {% set living_room = states('sensor.living_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+      {% set principal_room = states('sensor.principal_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+
+      {{ exterior or living_room or principal_room }}
+    state: >
+      {% set exterior = states('sensor.exterior_sensor_pressure') | float(0) %}
+      {% set living_room = states('sensor.living_room_sensor_pressure') | float(0) %}
+      {% set principal_room = states('sensor.principal_room_sensor_pressure') | float(0) %}
+
+      {% set val = [exterior, living_room, principal_room] | reject('eq', 0) | map('float') | list %}
+      {% if (val|length) == 0 -%}
+        {% set ret = states('sensor.average_pressure') %}
+      {%- else -%}
+        {% set ret = ((val | average) | round(1)) %}
+      {%- endif %}
+
+      {{ ret }}
+
+  - name: Average pressure - Madrid
+    default_entity_id: sensor.madrid_average_pressure
+    device_class: pressure
+    unit_of_measurement: hPa
+    availability: >
+      {% set exterior = states('sensor.madrid_exterior_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+      {% set living_room = states('sensor.madrid_living_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+
+      {{ exterior or living_room }}
+    state: >
+      {% set exterior = states('sensor.madrid_exterior_sensor_pressure') | float(0) %}
+      {% set living_room = states('sensor.madrid_living_room_sensor_pressure') | float(0) %}
+
+      {% set val = [exterior, living_room] | reject('eq', 0) | map('float') | list %}
+      {% if (val|length) == 0 -%}
+        {% set ret = states('sensor.madrid_average_pressure') %}
+      {%- else -%}
+        {% set ret = ((val | average) | round(1)) %}
+      {%- endif %}
+
+      {{ ret }}
+
+- weather:
   # Template prediction in El Niño
-  - platform: template
-    name: "AEMET El Niño"
-    unique_id: "b26bebec-8345-11ee-b962-0242ac120002"
+  - name: AEMET El Niño
+    unique_id: b26bebec-8345-11ee-b962-0242ac120002
     condition_template: "{{ states('sensor.aemet_condition') }}"
     temperature_template: "{{ (states('sensor.exterior_sensor_temperature') | float(0)) | round(1) }}"
     humidity_template: "{{ (states('sensor.exterior_sensor_humidity') | float(0)) | round(1) }}"
@@ -14,13 +61,10 @@ weather:
     forecast_hourly_template: "{{ state_attr('sensor.weather_forecast_hourly_el_nino', 'forecast') }}"
     forecast_daily_template: "{{ state_attr('sensor.weather_forecast_daily_el_nino', 'forecast') }}"
 
-    # Template prediction in Madrid
-  - platform: template
-    name: "AEMET Madrid"
-    unique_id: "2d32e476-851d-4858-9212-d0029df0b30b"
+  - name: AEMET Madrid
+    unique_id: 2d32e476-851d-4858-9212-d0029df0b30b
     condition_template: "{{ states('sensor.aemet_madrid_condition') }}"
-    # temperature_template: "{{ (states('sensor.madrid_exterior_sensor_temperature') | float(0)) | round(1) }}"
-    temperature_template: "{{ state_attr('weather.aemet_madrid', 'temperature') }}"
+    temperature_template: "{{ (states('sensor.madrid_exterior_sensor_temperature') | float(0)) | round(1) }}"
     humidity_template: "{{ (states('sensor.madrid_exterior_sensor_humidity') | float(0)) | round(1) }}"
     pressure_template: "{{ states('sensor.madrid_average_pressure') | int(0) }}"
     wind_speed_template: "{{ states('sensor.aemet_madrid_wind_speed') | int(0) }}"
@@ -28,104 +72,55 @@ weather:
     forecast_hourly_template: "{{ state_attr('sensor.weather_forecast_hourly_madrid', 'forecast') }}"
     forecast_daily_template: "{{ state_attr('sensor.weather_forecast_daily_madrid', 'forecast') }}"
 
-sensor:
-  - platform: template
-    sensors:
-      average_pressure:
-        friendly_name: "Average pressure"
-        device_class: pressure
-        unit_of_measurement: "hPa"
-        value_template: >
-          {% set exterior = states('sensor.exterior_sensor_pressure') | float(0) %}
-          {% set living_room = states('sensor.living_room_sensor_pressure') | float(0) %}
-          {% set principal_room = states('sensor.principal_room_sensor_pressure') | float(0) %}
+- trigger:
+    - platform: state
+      entity_id: weather.aemet 
+    - platform: time_pattern
+      hours: /3
+  action:
+    - service: weather.get_forecasts
+      target:
+        entity_id:
+          - weather.aemet
+          - weather.aemet_madrid
+      data:
+        type: daily
+      response_variable: daily_weather
+  sensor:
+    - name: El Niño Weather Forecast Daily
+      unique_id: '7733a029-1b2f-4c63-b321-53790a52db10'
+      state: "{{ now() }}"
+      attributes:
+        forecast: "{{ daily_weather['weather.aemet'].forecast }}"
+    - name: Madrid Weather Forecast Daily
+      unique_id: '78b0d94b-47d3-4eb0-a32f-8586f1cb19e8'
+      state: "{{ now() }}"
+      attributes:
+        forecast: "{{ daily_weather['weather.aemet_madrid'].forecast }}"
 
-          {% set val = [exterior, living_room, principal_room] | reject('eq', 0) | map('float') | list %}
-          {% if (val|length) == 0 -%}
-            {% set ret = states('sensor.average_pressure') %}
-          {%- else -%}
-            {% set ret = ((val | average) | round(1)) %}
-          {%- endif %}
-
-          {{ ret }}
-        availability_template: >
-          {% set exterior = states('sensor.exterior_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
-          {% set living_room = states('sensor.living_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
-          {% set principal_room = states('sensor.principal_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
-
-          {{ exterior or living_room or principal_room }}
-
-      madrid_average_pressure:
-        friendly_name: "Average pressure - Madrid"
-        device_class: pressure
-        unit_of_measurement: "hPa"
-        value_template: >
-          {% set exterior = states('sensor.madrid_exterior_sensor_pressure') | float(0) %}
-          {% set living_room = states('sensor.madrid_living_room_sensor_pressure') | float(0) %}
-
-          {% set val = [exterior, living_room] | reject('eq', 0) | map('float') | list %}
-          {% if (val|length) == 0 -%}
-            {% set ret = states('sensor.madrid_average_pressure') %}
-          {%- else -%}
-            {% set ret = ((val | average) | round(1)) %}
-          {%- endif %}
-
-          {{ ret }}
-        availability_template: >
-          {% set exterior = states('sensor.madrid_exterior_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
-          {% set living_room = states('sensor.madrid_living_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
-
-          {{ exterior or living_room }}
-
-template:
-  - trigger:
-      - platform: state
-        entity_id: weather.aemet 
-      - platform: time_pattern
-        hours: /3
-    action:
-      - service: weather.get_forecasts
-        target:
-          entity_id:
-            - weather.aemet
-            - weather.aemet_madrid
-        data:
-          type: daily
-        response_variable: daily_weather
-    sensor:
-      - name: El Niño Weather Forecast Daily
-        unique_id: '7733a029-1b2f-4c63-b321-53790a52db10'
-        state: "{{ now() }}"
-        attributes:
-          forecast: "{{ daily_weather['weather.aemet'].forecast }}"
-      - name: Madrid Weather Forecast Daily
-        unique_id: '78b0d94b-47d3-4eb0-a32f-8586f1cb19e8'
-        state: "{{ now() }}"
-        attributes:
-          forecast: "{{ daily_weather['weather.aemet_madrid'].forecast }}"
-  - trigger:
-      - platform: state
-        entity_id: weather.aemet 
-      - platform: time_pattern
-        hours: /1
-        minutes: 0
-    action:
-      - service: weather.get_forecasts
-        target:
-          entity_id:
-            - weather.aemet
-            - weather.aemet_madrid
-        data:
-          type: hourly
-        response_variable: hourly_weather
-    sensor:
-      - name: El Niño Weather Forecast Hourly
-        unique_id: '64c34471-3037-4638-883e-507b1ccef55b'
-        state: "{{ now() }}"
-        attributes:
-          forecast: "{{ hourly_weather['weather.aemet'].forecast }}"
-      - name: Madrid Weather Forecast Hourly
-        unique_id: '2d2864a5-c5ae-497e-9979-48db501482a5'
-        state: "{{ now() }}"
-        attributes:
-          forecast: "{{ hourly_weather['weather.aemet_madrid'].forecast }}"
+- trigger:
+    - platform: state
+      entity_id: weather.aemet 
+    - platform: time_pattern
+      hours: /1
+      minutes: 0
+  action:
+    - service: weather.get_forecasts
+      target:
+        entity_id:
+          - weather.aemet
+          - weather.aemet_madrid
+      data:
+        type: hourly
+      response_variable: hourly_weather
+  sensor:
+    - name: El Niño Weather Forecast Hourly
+      unique_id: '64c34471-3037-4638-883e-507b1ccef55b'
+      state: "{{ now() }}"
+      attributes:
+        forecast: "{{ hourly_weather['weather.aemet'].forecast }}"
+    - name: Madrid Weather Forecast Hourly
+      unique_id: '2d2864a5-c5ae-497e-9979-48db501482a5'
+      state: "{{ now() }}"
+      attributes:
+        forecast: "{{ hourly_weather['weather.aemet_madrid'].forecast }}"
