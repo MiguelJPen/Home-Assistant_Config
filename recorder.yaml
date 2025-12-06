@@ -31,26 +31,23 @@ recorder:
       - binary_sensor.pantry_flood_sensor_water_leak
       - binary_sensor.pasillo
       - binary_sensor.pool_pump_running
-      - binary_sensor.rpi_power_status
       - binary_sensor.router
       - binary_sensor.router_madrid
       - binary_sensor.router_murcia
       - binary_sensor.salon
       - binary_sensor.terraza
       - binary_sensor.ventana_del_salon
+      - binary_sensor.zigbee2mqtt_bridge_connection_state
       - sensor.ac_despacho_total_energy_consumption
       - sensor.ac_despacho_tampered_energy_consumption
       - sensor.ac_salon_total_energy_consumption
       - sensor.ac_salon_tampered_energy_consumption
       - sensor.average_pressure
-      - sensor.bridge_state
       - sensor.db_size
       - sensor.edata_68ta
       - sensor.edata_cv1p
       - sensor.freezer_plug_energy_consumption
       - sensor.freezer_plug_tampered_energy_consumption
-      - sensor.fridge_plug_energy_consumption
-      - sensor.fridge_plug_tampered_energy_consumption
       - sensor.home_automation_office_plug_energy
       - sensor.home_automation_office_plug_tampered_energy
       - sensor.home_automation_toilet_plug_energy
@@ -64,8 +61,6 @@ recorder:
       - sensor.pump_running_statistics
       - sensor.remote_connection_to_madrid_instance
       - sensor.remote_connection_to_murcia_instance
-      - sensor.riello_ups_status
-      - sensor.riello_ups_status_data
       - sensor.south_irrigation_statistics
 
   exclude:
