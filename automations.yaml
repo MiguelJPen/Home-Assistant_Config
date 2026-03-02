@@ -530,13 +530,13 @@
 - id: '1628698660992'
   alias: Send files from security cameras
   description: ''
-  trigger:
-  - platform: event
-    event_type: folder_watcher
+  triggers:
+  - event_type: folder_watcher
     event_data:
       event_type: closed
-  condition: []
-  action:
+    trigger: event
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: template
@@ -548,20 +548,18 @@
           - condition: template
             value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
           sequence:
-          - service: telegram_bot.send_video
-            data:
+          - data:
               file: '{{ trigger.event.data.path }}'
               target: -472161375
-              timeout: 80
+            action: telegram_bot.send_video
         default:
-        - service: notify.group
-          data:
+        - data:
             message: ¡Se ha detectado un movimiento en la entrada! Adjuntando archivos...
-        - service: telegram_bot.send_document
-          data:
+          action: notify.group
+        - data:
             file: '{{ trigger.event.data.path }}'
             target: -472161375
-            timeout: 10
+          action: telegram_bot.send_document
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaSur'')
@@ -572,21 +570,19 @@
           - condition: template
             value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
           sequence:
-          - service: telegram_bot.send_video
-            data:
+          - data:
               file: '{{ trigger.event.data.path }}'
               target: -472161375
-              timeout: 80
+            action: telegram_bot.send_video
         default:
-        - service: notify.group
-          data:
+        - data:
             message: ¡Se ha detectado un movimiento en la fachada Sur de la casa!
               Adjuntando archivos...
-        - service: telegram_bot.send_document
-          data:
+          action: notify.group
+        - data:
             file: '{{ trigger.event.data.path }}'
             target: -472161375
-            timeout: 10
+          action: telegram_bot.send_document
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaEste'')
@@ -597,21 +593,19 @@
           - condition: template
             value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
           sequence:
-          - service: telegram_bot.send_video
-            data:
+          - data:
               file: '{{ trigger.event.data.path }}'
               target: -472161375
-              timeout: 80
+            action: telegram_bot.send_video
         default:
-        - service: notify.group
-          data:
+        - data:
             message: ¡Se ha detectado un movimiento en la fachada Este de la casa!
               Adjuntando archivos...
-        - service: telegram_bot.send_document
-          data:
+          action: notify.group
+        - data:
             file: '{{ trigger.event.data.path }}'
             target: -472161375
-            timeout: 10
+          action: telegram_bot.send_document
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaNorte'')
@@ -622,21 +616,19 @@
           - condition: template
             value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
           sequence:
-          - service: telegram_bot.send_video
-            data:
+          - data:
               file: '{{ trigger.event.data.path }}'
               target: -472161375
-              timeout: 80
+            action: telegram_bot.send_video
         default:
-        - service: notify.group
-          data:
+        - data:
             message: ¡Se ha detectado un movimiento en la fachada Norte de la casa!
               Adjuntando archivos...
-        - service: telegram_bot.send_document
-          data:
+          action: notify.group
+        - data:
             file: '{{ trigger.event.data.path }}'
             target: -472161375
-            timeout: 10
+          action: telegram_bot.send_document
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaOeste'')
@@ -647,21 +639,19 @@
           - condition: template
             value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
           sequence:
-          - service: telegram_bot.send_video
-            data:
+          - data:
               file: '{{ trigger.event.data.path }}'
               target: -472161375
-              timeout: 80
+            action: telegram_bot.send_video
         default:
-        - service: notify.group
-          data:
+        - data:
             message: ¡Se ha detectado un movimiento en la fachada Oeste de la casa!
               Adjuntando archivos...
-        - service: telegram_bot.send_document
-          data:
+          action: notify.group
+        - data:
             file: '{{ trigger.event.data.path }}'
             target: -472161375
-            timeout: 10
+          action: telegram_bot.send_document
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/Comedor'')
@@ -672,23 +662,21 @@
           - condition: template
             value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
           sequence:
-          - service: telegram_bot.send_video
-            data:
+          - data:
               file: '{{ trigger.event.data.path }}'
               target: -472161375
-              timeout: 80
+            action: telegram_bot.send_video
         - conditions:
           - condition: template
             value_template: '{{ trigger.event.data.file.endswith(''jpg'') }}'
           sequence:
-          - service: notify.group
-            data:
+          - data:
               message: ¡Se ha detectado un movimiento en el comedor! Adjuntando archivos...
-          - service: telegram_bot.send_document
-            data:
+            action: notify.group
+          - data:
               file: '{{ trigger.event.data.path }}'
               target: -472161375
-              timeout: 10
+            action: telegram_bot.send_document
         default: []
     default: []
   mode: parallel
