@@ -2301,3 +2301,116 @@
           target:
             entity_id: switch.madrid_smart_plug
   mode: single
+- id: '1764672053661'
+  alias: Radiator with solar surplus
+  description: ''
+  triggers:
+  - trigger: state
+    entity_id:
+    - input_boolean.solar_radiator
+    id: main_switch_on
+    to:
+    - 'on'
+  - trigger: state
+    entity_id:
+    - binary_sensor.solar_surplus_more_than_1kwh
+    to:
+    - 'on'
+    id: solar_surplus
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+  - trigger: numeric_state
+    entity_id:
+    - sensor.inverter_battery_power
+    for:
+      hours: 0
+      minutes: 10
+      seconds: 0
+    above: 100
+    id: battery_consumption
+  - trigger: state
+    entity_id:
+    - alarm_control_panel.el_nino_alarm
+    for:
+      hours: 40
+      minutes: 0
+      seconds: 0
+    to:
+    - armed_away
+    - armed_custom_bypass
+    - armed_home
+    - armed_night
+    - armed_vacation
+    id: alarm_armed
+  conditions:
+  - condition: state
+    entity_id: input_boolean.solar_radiator
+    state:
+    - 'on'
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - main_switch_on
+      - condition: state
+        entity_id: binary_sensor.solar_surplus_more_than_1kwh
+        state:
+        - 'on'
+        for:
+          hours: 0
+          minutes: 2
+          seconds: 0
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.main_room_heater
+          - switch.main_room_dresser_heater
+    - conditions:
+      - condition: trigger
+        id:
+        - solar_surplus
+      sequence:
+      - action: switch.turn_on
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.main_room_heater
+          - switch.main_room_dresser_heater
+    - conditions:
+      - condition: trigger
+        id:
+        - battery_consumption
+      sequence:
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.main_room_heater
+          - switch.main_room_dresser_heater
+    - conditions:
+      - condition: trigger
+        id:
+        - alarm_armed
+      sequence:
+      - action: input_boolean.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id: input_boolean.solar_radiator
+      - action: switch.turn_off
+        metadata: {}
+        data: {}
+        target:
+          entity_id:
+          - switch.main_room_heater
+          - switch.main_room_dresser_heater
+  mode: queued
+  max: 5
