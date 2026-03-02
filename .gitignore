@@ -3,6 +3,7 @@
 *.log
 *.log.1
 *.log.fault
+*.log.old
 *.db
 *.db.old
 *.db-shm
