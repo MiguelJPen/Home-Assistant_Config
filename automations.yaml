@@ -907,7 +907,6 @@
     - target:
         entity_id:
         - input_boolean.lau_burgos_144_has_paid
-        - input_boolean.lau_patricia_has_paid
         - input_boolean.lau_burgos_48_1_has_paid
         - input_boolean.lau_santiago_has_paid
       data: {}
@@ -933,9 +932,8 @@
       conditions:
       - condition: template
         value_template: '{{ (now().day < 7) and ( is_state(''input_boolean.lau_burgos_144_has_paid'',
-          ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
-          is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'') or is_state(''input_boolean.lau_santiago_has_paid'',
-          ''off'') )  }}'
+          ''off'') or is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'')
+          or is_state(''input_boolean.lau_santiago_has_paid'', ''off'') )  }}'
       - condition: template
         value_template: '{{ (now().day >= 13) and (now().day < 20) and ( is_state(''input_boolean.lau_hector_has_paid'',
           ''off'') ) }}'
@@ -952,18 +950,6 @@
         minutes: 0
         seconds: 3
         milliseconds: 0
-    - if:
-      - condition: template
-        value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_patricia_has_paid'',
-          ''off'') }}'
-      then:
-      - data:
-          message: Patricia Madrid
-          inline_keyboard:
-          - Pagado!:/patri_has_paid, Morosa!:/patri_has_not_paid
-          entity_id:
-          - notify.telegram_bot_1171156279_303515965
-        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_burgos_144_has_paid'',
@@ -1035,9 +1021,8 @@
       conditions:
       - condition: template
         value_template: '{{ not(now().day < 7) and ( is_state(''input_boolean.lau_burgos_144_has_paid'',
-          ''off'') or is_state(''input_boolean.lau_patricia_has_paid'', ''off'') or
-          is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'') or is_state(''input_boolean.lau_santiago_has_paid'',
-          ''off'') )  }}'
+          ''off'') or is_state(''input_boolean.lau_burgos_48_1_has_paid'', ''off'')
+          or is_state(''input_boolean.lau_santiago_has_paid'', ''off'') )  }}'
       - condition: template
         value_template: '{{ not((now().day >= 13) and (now().day < 20)) and ( is_state(''input_boolean.lau_hector_has_paid'',
           ''off'') ) }}'
@@ -1055,18 +1040,6 @@
         minutes: 0
         seconds: 3
         milliseconds: 0
-    - if:
-      - condition: template
-        value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_patricia_has_paid'',
-          ''off'') }}'
-      then:
-      - data:
-          message: Patricia Madrid
-          inline_keyboard:
-          - Pagado!:/patri_has_paid, Morosa!:/patri_has_not_paid
-          entity_id:
-          - notify.telegram_bot_1171156279_303515965
-        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_burgos_144_has_paid'',
@@ -1132,208 +1105,175 @@
 - id: '1643907231416'
   alias: Change variable values with telegram events
   description: ''
-  trigger:
-  - platform: event
-    event_type: telegram_callback
-    event_data:
-      command: /patri_has_paid
-    id: patri_has_paid
-  - platform: event
-    event_type: telegram_callback
-    event_data:
-      command: /patri_has_not_paid
-    id: patri_has_not_paid
-  - platform: event
-    event_type: telegram_callback
+  triggers:
+  - event_type: telegram_callback
     event_data:
       command: /burgos_144_has_paid
     id: burgos_144_has_paid
-  - platform: event
-    event_type: telegram_callback
+    trigger: event
+  - event_type: telegram_callback
     event_data:
       command: /burgos_144_has_not_paid
     id: burgos_144_has_not_paid
-  - platform: event
-    event_type: telegram_callback
+    trigger: event
+  - event_type: telegram_callback
     id: robleda_has_paid
     event_data:
       command: /robleda_has_paid
-  - platform: event
-    event_type: telegram_callback
+    trigger: event
+  - event_type: telegram_callback
     id: robleda_has_not_paid
     event_data:
       command: /robleda_has_not_paid
-  - platform: event
-    event_type: telegram_callback
+    trigger: event
+  - event_type: telegram_callback
     id: burgos_48_1_has_paid
     event_data:
       command: /burgos_48_1_has_paid
-  - platform: event
-    event_type: telegram_callback
+    trigger: event
+  - event_type: telegram_callback
     id: burgos_48_1_has_not_paid
     event_data:
       command: /burgos_48_1_has_not_paid
-  - platform: event
-    event_type: telegram_callback
+    trigger: event
+  - event_type: telegram_callback
     id: hector_has_paid
     event_data:
       command: /hector_has_paid
-  - platform: event
-    event_type: telegram_callback
+    trigger: event
+  - event_type: telegram_callback
     id: hector_has_not_paid
     event_data:
       command: /hector_has_not_paid
-  - platform: event
-    event_type: telegram_callback
+    trigger: event
+  - event_type: telegram_callback
     id: santiago_has_paid
     event_data:
       command: /santiago_has_paid
-  - platform: event
-    event_type: telegram_callback
+    trigger: event
+  - event_type: telegram_callback
     id: santiago_has_not_paid
     event_data:
       command: /santiago_has_not_paid
-  condition: []
-  action:
+    trigger: event
+  conditions: []
+  actions:
   - choose:
-    - conditions:
-      - condition: trigger
-        id: patri_has_paid
-      sequence:
-      - service: input_boolean.turn_on
-        data: {}
-        target:
-          entity_id: input_boolean.lau_patricia_has_paid
-      - service: notify.lau
-        data:
-          message: Pa' la saca!
-          title: "*¡Patricia ha pagado!* \U0001F389"
-    - conditions:
-      - condition: trigger
-        id: patri_has_not_paid
-      sequence:
-      - service: input_boolean.turn_off
-        data: {}
-        target:
-          entity_id: input_boolean.lau_patricia_has_paid
-      - service: notify.lau
-        data:
-          message: Pues no eh, resulta que Patri no ha pagado :(
     - conditions:
       - condition: trigger
         id: burgos_144_has_paid
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_burgos_144_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_on
+      - data:
           message: Al boteee!!!
           title: "*¡Santos ha pagado!* \U0001F389"
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: burgos_144_has_not_paid
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_burgos_144_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_off
+      - data:
           message: Pues na', no hay viajesito por culpa de Santitos :(
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: robleda_has_paid
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_robleda_seguros_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_on
+      - data:
           title: "*¡Robleda Seguros ha pagado!* \U0001F389"
           message: Cómo les gusta tener su coche seguro, jejejeje
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: robleda_has_not_paid
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_robleda_seguros_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_off
+      - data:
           message: Últimamente no nos aseguramos ni un buen cliente...
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: burgos_48_1_has_paid
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_burgos_48_1_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_on
+      - data:
           title: "*¡Elena Tattoo ha pagado!* \U0001F389"
           message: ¿A dónde estás preparando el viaje tuuu?
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: burgos_48_1_has_not_paid
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_burgos_48_1_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_off
+      - data:
           message: Joe, pues nada, vamos al parque Europa entonces ¿no?
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: hector_has_paid
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_hector_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_on
+      - data:
           title: "*¡Héctor ha pagado!* \U0001F389"
           message: ¡Menos mal que hay alguien fiel!
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: hector_has_not_paid
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_hector_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_off
+      - data:
           message: Son todos un poquito agarraos, ¿no?
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: santiago_has_paid
       sequence:
-      - service: input_boolean.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_santiago_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_on
+      - data:
           title: "*¡Pepelu ha pagado!* \U0001F389"
           message: ¡Vaya crack!
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: santiago_has_not_paid
       sequence:
-      - service: input_boolean.turn_off
-        data: {}
+      - data: {}
         target:
           entity_id: input_boolean.lau_santiago_has_paid
-      - service: notify.lau
-        data:
+        action: input_boolean.turn_off
+      - data:
           message: No se merece esa llave de garaje...
+        action: notify.lau
     default: []
   mode: single
 - id: '1649799780278'
