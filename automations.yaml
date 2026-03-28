@@ -1828,10 +1828,10 @@
     - binary_sensor.madrid_madrid_heater_status
     for:
       hours: 0
-      minutes: 0
-      seconds: 10
-    from:
+      minutes: 1
+      seconds: 0
     to:
+    - 'off'
     trigger: state
   - entity_id:
     - binary_sensor.murcia_zigbee2mqtt_bridge_connection_state
