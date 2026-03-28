@@ -895,39 +895,39 @@
 - id: '1643745839320'
   alias: Send payment reminders
   description: ''
-  trigger:
-  - platform: time
-    at: '12:15'
-  condition: []
-  action:
+  triggers:
+  - at: '12:15'
+    trigger: time
+  conditions: []
+  actions:
   - if:
     - condition: template
       value_template: '{{ now().day == 1 }}'
     then:
-    - service: input_boolean.turn_off
-      target:
+    - target:
         entity_id:
         - input_boolean.lau_burgos_144_has_paid
         - input_boolean.lau_patricia_has_paid
         - input_boolean.lau_burgos_48_1_has_paid
         - input_boolean.lau_santiago_has_paid
       data: {}
+      action: input_boolean.turn_off
   - if:
     - condition: template
       value_template: '{{ now().day == 13 }}'
     then:
-    - service: input_boolean.turn_off
-      data: {}
+    - data: {}
       target:
         entity_id: input_boolean.lau_hector_has_paid
+      action: input_boolean.turn_off
   - if:
     - condition: template
       value_template: '{{ (now().month % 3) == 0 and now().day == 5 }}'
     then:
-    - service: input_boolean.turn_off
-      target:
+    - target:
         entity_id: input_boolean.lau_robleda_seguros_has_paid
       data: {}
+      action: input_boolean.turn_off
   - if:
     - condition: or
       conditions:
@@ -944,9 +944,9 @@
           < 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off''))
           }}'
     then:
-    - service: notify.lau
-      data:
+    - data:
         message: 'Los que no han pagado todavía este mes son:'
+      action: notify.lau
     - delay:
         hours: 0
         minutes: 0
@@ -957,68 +957,74 @@
         value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_patricia_has_paid'',
           ''off'') }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Patricia Madrid
-          target: 303515965
           inline_keyboard:
           - Pagado!:/patri_has_paid, Morosa!:/patri_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_burgos_144_has_paid'',
           ''off'') }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Santos Herrero Burgos 144
-          target: 303515965
           inline_keyboard:
           - Pagado!:/burgos_144_has_paid, Moroso!:/burgos_144_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_burgos_48_1_has_paid'',
           ''off'') }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Elena Tattoo Burgos 48
-          target: 303515965
           inline_keyboard:
           - Pagado!:/burgos_48_1_has_paid, Morosa!:/burgos_48_1_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ (now().day < 7) and is_state(''input_boolean.lau_santiago_has_paid'',
           ''off'') }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: José Luis Iglesias Castelo Santiago
-          target: 303515965
           inline_keyboard:
           - Pagado!:/santiago_has_paid, Moroso!:/santiago_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ (now().day >= 13) and (now().day < 20) and ( is_state(''input_boolean.lau_hector_has_paid'',
           ''off'') ) }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Héctor Díaz Burgos 48
-          target: 303515965
           inline_keyboard:
           - Pagado!:/hector_has_paid, Moroso!:/hector_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ (now().month % 3 == 0) and (now().day >= 5) and (now().day
           < 15) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off'')
           ) }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Robleda Seguros Burgos 48 (2 plazas y trimestral)
-          target: 303515965
           inline_keyboard:
           - Pagado!:/robleda_has_paid, Moroso!:/robleda_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - delay:
         hours: 0
         minutes: 0
@@ -1040,10 +1046,10 @@
           < 15)) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off'')
           ) }}'
     then:
-    - service: notify.lau
-      data:
+    - data:
         message: ¡Morosos a la vista!
         title: "\U0001F6A8 ALERTA \U0001F6A8"
+      action: notify.lau
     - delay:
         hours: 0
         minutes: 0
@@ -1054,68 +1060,74 @@
         value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_patricia_has_paid'',
           ''off'') }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Patricia Madrid
-          target: 303515965
           inline_keyboard:
           - Pagado!:/patri_has_paid, Morosa!:/patri_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_burgos_144_has_paid'',
           ''off'') }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Santos Herrero Burgos 144
-          target: 303515965
           inline_keyboard:
           - Pagado!:/burgos_144_has_paid, Moroso!:/burgos_144_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_burgos_48_1_has_paid'',
           ''off'') }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Elena Tattoo Burgos 48
-          target: 303515965
           inline_keyboard:
           - Pagado!:/burgos_48_1_has_paid, Morosa!:/burgos_48_1_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ not(now().day < 7) and is_state(''input_boolean.lau_santiago_has_paid'',
           ''off'') }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: José Luis Iglesias Castelo Santiago
-          target: 303515965
           inline_keyboard:
           - Pagado!:/santiago_has_paid, Morosos!:/santiago_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ not((now().day >= 13) and (now().day < 20)) and ( is_state(''input_boolean.lau_hector_has_paid'',
           ''off'') ) }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Héctor Díaz Burgos 48
-          target: 303515965
           inline_keyboard:
           - Pagado!:/hector_has_paid, Moroso!:/hector_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
     - if:
       - condition: template
         value_template: '{{ not((now().month % 3 == 0) and (now().day >= 5) and (now().day
           < 15)) and (is_state(''input_boolean.lau_robleda_seguros_has_paid'', ''off'')
           ) }}'
       then:
-      - service: telegram_bot.send_message
-        data:
+      - data:
           message: Robleda Seguros Burgos 48 (2 plazas y trimestral)
-          target: 303515965
           inline_keyboard:
           - Pagado!:/robleda_has_paid, Moroso!:/robleda_has_not_paid
+          entity_id:
+          - notify.telegram_bot_1171156279_303515965
+        action: telegram_bot.send_message
   mode: single
 - id: '1643907231416'
   alias: Change variable values with telegram events
