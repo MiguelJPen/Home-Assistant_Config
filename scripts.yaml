@@ -4,7 +4,7 @@ security_lights_dining_room:
   - service: light.turn_on
     data: {}
     target:
-      entity_id: light.dining_room_plug_switch
+      entity_id: light.dining_room_plug
   - delay:
       minutes: '{{ range(30, 80) | random | int }}'
   - condition: state
@@ -24,7 +24,7 @@ security_lights_dining_room:
   - service: light.turn_off
     data: {}
     target:
-      entity_id: light.dining_room_plug_switch
+      entity_id: light.dining_room_plug
   mode: single
   icon: mdi:robber
 security_lights_corridor:
