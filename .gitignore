@@ -13,6 +13,7 @@
 __pycache__
 
 # Directory (contents) ignores
+.cache
 .cloud
 .storage
 .ssh
