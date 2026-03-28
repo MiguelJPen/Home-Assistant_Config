@@ -1509,7 +1509,9 @@
           entity_id: switch.exterior_plug
       - data: {}
         target:
-          entity_id: light.security_lights
+          entity_id:
+          - light.security_lights
+          - light.pantry_light
         action: light.turn_off
       - data: {}
         target:
