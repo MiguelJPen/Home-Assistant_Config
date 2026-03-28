@@ -235,46 +235,70 @@
 - id: '1600642629084'
   alias: When armed
   description: Notify by telegram that the alarm is armed and turn on security cameras.
-  trigger:
-  - platform: state
-    entity_id: alarm_control_panel.el_nino_alarm
+  triggers:
+  - entity_id: alarm_control_panel.el_nino_alarm
     to: armed_away
     id: armed_away
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - alarm_control_panel.el_nino_alarm
     to: armed_home
     id: armed_home
-  condition: []
-  action:
-  - service: esphome.alarm_alarm_beep
-    data: {}
+    trigger: state
+  conditions: []
+  actions:
+  - data: {}
+    action: esphome.alarm_alarm_beep
   - choose:
     - conditions:
       - condition: trigger
         id: armed_away
       sequence:
-      - service: switch.turn_on
-        target:
+      - target:
           entity_id:
           - switch.exterior_cameras
           - switch.comedor_motion_detection
         data: {}
+        action: switch.turn_on
       - delay:
           hours: 0
           minutes: 0
           seconds: 3
           milliseconds: 0
-      - service: switch.turn_on
-        data: {}
+      - data: {}
         target:
           entity_id: switch.comedor_video_streaming
+        action: switch.turn_on
+      - if:
+        - condition: state
+          entity_id: input_boolean.auto_close_blinds_when_armed
+          state:
+          - 'on'
+        then:
+        - action: cover.close_cover
+          metadata: {}
+          data: {}
+          target:
+            entity_id:
+            - cover.kitchen_blind
+            - cover.living_room_blind
+            - cover.main_bathroom_blind
+            - cover.main_dresser_blind
+            - cover.main_room_left_blind
+            - cover.main_room_right_blind
+            - cover.miguel_room_blind
+            - cover.patri_room_blind
+      - action: switch.turn_off
+        metadata: {}
+        target:
+          entity_id: switch.electric_vehicle_plug
+        data: {}
     default:
-    - service: switch.turn_on
-      target:
+    - target:
         entity_id:
         - switch.exterior_cameras
       data: {}
+      action: switch.turn_on
   mode: single
 - id: '1600697180091'
   alias: From triggered to armed
@@ -2014,11 +2038,6 @@
     id: sun_over_horizon
     trigger: numeric_state
   - entity_id:
-    - alarm_control_panel.el_nino_alarm
-    to: armed_away
-    id: alarm_armed_away
-    trigger: state
-  - entity_id:
     - input_button.set_miguel_room_blind_to_semi_open
     id: button_miguel_room_semi_open
     trigger: state
@@ -2087,24 +2106,6 @@
           - input_button.set_living_room_blind_to_semi_open
           - input_button.set_main_bathroom_blind_to_semi_open
         data: {}
-    - conditions:
-      - condition: trigger
-        id:
-        - alarm_armed_away
-      sequence:
-      - action: cover.close_cover
-        metadata: {}
-        data: {}
-        target:
-          entity_id:
-          - cover.kitchen_blind
-          - cover.living_room_blind
-          - cover.main_bathroom_blind
-          - cover.main_dresser_blind
-          - cover.main_room_left_blind
-          - cover.main_room_right_blind
-          - cover.miguel_room_blind
-          - cover.patri_room_blind
     - conditions:
       - condition: trigger
         id:
