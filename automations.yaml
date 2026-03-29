@@ -458,12 +458,12 @@
 - id: '1626736527137'
   alias: Change energy tariff
   description: ''
-  trigger:
-  - platform: state
-    entity_id: sensor.pvpc
+  triggers:
+  - entity_id: sensor.pvpc
     attribute: period
-  condition: []
-  action:
+    trigger: state
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: state
@@ -471,8 +471,7 @@
         state: P3
         attribute: period
       sequence:
-      - service: select.select_option
-        target:
+      - target:
           entity_id:
           - select.daily_energy_cost
           - select.monthly_energy_cost
@@ -480,14 +479,14 @@
           - select.monthly_energy
         data:
           option: valle
+        action: select.select_option
     - conditions:
       - condition: state
         entity_id: sensor.pvpc
         state: P2
         attribute: period
       sequence:
-      - service: select.select_option
-        target:
+      - target:
           entity_id:
           - select.daily_energy_cost
           - select.monthly_energy_cost
@@ -495,14 +494,14 @@
           - select.monthly_energy
         data:
           option: llana
+        action: select.select_option
     - conditions:
       - condition: state
         entity_id: sensor.pvpc
         state: P1
         attribute: period
       sequence:
-      - service: select.select_option
-        target:
+      - target:
           entity_id:
           - select.daily_energy_cost
           - select.monthly_energy_cost
@@ -510,7 +509,17 @@
           - select.monthly_energy
         data:
           option: punta
-    default: []
+        action: select.select_option
+    default:
+    - target:
+        entity_id:
+        - select.daily_energy_cost
+        - select.monthly_energy_cost
+        - select.daily_energy
+        - select.monthly_energy
+      data:
+        option: valle
+      action: select.select_option
   mode: single
 - id: '1626868061580'
   alias: Save daily energy consumption at the end of the day
