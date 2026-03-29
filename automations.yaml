@@ -1946,37 +1946,37 @@
 - id: '1720887537733'
   alias: Madrid actions when nobody is home
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - zone.casa_de_madrid
     to: '0'
     for:
       hours: 0
       minutes: 5
       seconds: 10
-  condition: []
-  action:
-  - service: alarm_control_panel.alarm_arm_away
-    metadata: {}
+    trigger: state
+  conditions: []
+  actions:
+  - metadata: {}
     data:
       code: '3133'
     target:
       entity_id: alarm_control_panel.madrid_house_alarm
-  - service: climate.turn_off
-    metadata: {}
+    action: alarm_control_panel.alarm_arm_away
+    enabled: false
+  - metadata: {}
     data: {}
     target:
       entity_id:
       - climate.madrid_aire_miguel
       - climate.madrid_aire_patri
+    action: climate.turn_off
   mode: single
 - id: '1721218951290'
   alias: Automatic light control
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - light.luz_del_garaje
     to: 'on'
     for:
@@ -1984,36 +1984,57 @@
       minutes: 30
       seconds: 0
     id: garage_light
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - alarm_control_panel.el_nino_alarm
     to: armed_away
     id: alarm_to_armed_away
-  condition: []
-  action:
+    trigger: state
+  - trigger: state
+    entity_id:
+    - binary_sensor.despensa
+    to:
+    - 'off'
+    for:
+      hours: 0
+      minutes: 15
+      seconds: 0
+    id: pantry_clear
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
         id:
         - garage_light
       sequence:
-      - service: light.turn_off
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id: light.luz_del_garaje
+        action: light.turn_off
     - conditions:
       - condition: trigger
         id:
         - alarm_to_armed_away
       sequence:
-      - service: light.turn_off
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id:
           - light.luz_del_garaje
           - light.facade_lights
+        action: light.turn_off
+    - conditions:
+      - condition: trigger
+        id:
+        - pantry_clear
+      sequence:
+      - action: light.turn_off
+        metadata: {}
+        target:
+          entity_id: light.pantry_light
+        data: {}
   mode: single
 - id: '1722272210170'
   alias: Automatic blind control
