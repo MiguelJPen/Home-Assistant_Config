@@ -2399,3 +2399,76 @@
           - switch.main_room_dresser_heater
   mode: queued
   max: 5
+- id: '1774801213215'
+  alias: Recover Zigbee switches that must always be on
+  description: ''
+  triggers:
+  - trigger: template
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 10
+    value_template: "{{ expand('switch.zigbee_always_on_switches') | selectattr('state',
+      'eq',\n  'off') | list | count > 0 }}"
+  - trigger: template
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    value_template: "{{ expand('switch.zigbee_always_on_switches') | selectattr('state',
+      'eq',\n  'off') | list | count > 0 }}"
+  - trigger: template
+    for:
+      hours: 0
+      minutes: 3
+      seconds: 0
+    value_template: '{{ expand(''switch.zigbee_always_on_switches'') | selectattr(''state'',
+      ''eq'', ''off'') | list | count > 0 }}'
+  - trigger: template
+    value_template: "{{ expand('switch.zigbee_always_on_switches') | selectattr('state',
+      'eq',\n  'unavailable') | list | count > 0 }}"
+    id: unavailable
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+  - trigger: template
+    value_template: "{{ expand('switch.zigbee_always_on_switches') | selectattr('state',
+      'eq',\n  'unknown') | list | count > 0 }}"
+    id: unknown
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id:
+        - unavailable
+        - unknown
+      sequence:
+      - action: telegram_bot.send_message
+        metadata: {}
+        data:
+          entity_id:
+          - notify.telegram_bot_1171156279_244204058
+          message: '{{ trigger.to_state.name }} está desconectado desde hace 2 minutos.
+            Sería necesaria una comprobación manual para ver que está todo bien y
+            volverlo a conectar al coordinador.'
+    default:
+    - action: switch.turn_on
+      metadata: {}
+      target:
+        entity_id: '{{ trigger.entity_id }}'
+      data: {}
+    - action: telegram_bot.send_message
+      metadata: {}
+      data:
+        entity_id:
+        - notify.telegram_bot_1171156279_244204058
+        message: '{{ trigger.to_state.name }} tuvo que ser recuperado usando una automatización.
+          Esperemos que sea algo aislado...'
+  mode: parallel
+  max: 5
