@@ -16,7 +16,7 @@ sensor:
     attribute: last_period
   - platform: homeassistant
     id: act_temp
-    entity_id: sensor.exterior_sensor_temperature
+    entity_id: sensor.exterior_temperature
     on_value_range:
       - below: 0
         then:

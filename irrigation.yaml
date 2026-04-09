@@ -1,21 +1,21 @@
 sensor:
   - platform: statistics
     name: "Exterior temperature mean over last 48 hours"
-    entity_id: sensor.exterior_sensor_temperature
+    entity_id: sensor.exterior_temperature
     state_characteristic: average_linear
     sampling_size: 500
     max_age:
       hours: 48
   - platform: statistics
     name: "Exterior humidity mean over last 48 hours"
-    entity_id: sensor.exterior_sensor_humidity
+    entity_id: sensor.exterior_humidity
     state_characteristic: average_linear
     sampling_size: 500
     max_age:
       hours: 48
   - platform: statistics
     name: "Exterior humidity minimum over last 48 hours"
-    entity_id: sensor.exterior_sensor_humidity
+    entity_id: sensor.exterior_humidity
     state_characteristic: value_min
     sampling_size: 500
     max_age:
