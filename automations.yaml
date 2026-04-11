@@ -599,7 +599,8 @@
           sequence:
           - data:
               file: '{{ trigger.event.data.path }}'
-              target: -472161375
+              entity_id:
+              - notify.telegram_bot_1171156279_472161375
             action: telegram_bot.send_video
         default:
         - data:
@@ -607,7 +608,8 @@
           action: notify.group
         - data:
             file: '{{ trigger.event.data.path }}'
-            target: -472161375
+            entity_id:
+            - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
     - conditions:
       - condition: template
@@ -621,7 +623,8 @@
           sequence:
           - data:
               file: '{{ trigger.event.data.path }}'
-              target: -472161375
+              entity_id:
+              - notify.telegram_bot_1171156279_472161375
             action: telegram_bot.send_video
         default:
         - data:
@@ -630,7 +633,8 @@
           action: notify.group
         - data:
             file: '{{ trigger.event.data.path }}'
-            target: -472161375
+            entity_id:
+            - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
     - conditions:
       - condition: template
@@ -644,7 +648,8 @@
           sequence:
           - data:
               file: '{{ trigger.event.data.path }}'
-              target: -472161375
+              entity_id:
+              - notify.telegram_bot_1171156279_472161375
             action: telegram_bot.send_video
         default:
         - data:
@@ -653,7 +658,8 @@
           action: notify.group
         - data:
             file: '{{ trigger.event.data.path }}'
-            target: -472161375
+            entity_id:
+            - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
     - conditions:
       - condition: template
@@ -667,7 +673,8 @@
           sequence:
           - data:
               file: '{{ trigger.event.data.path }}'
-              target: -472161375
+              entity_id:
+              - notify.telegram_bot_1171156279_472161375
             action: telegram_bot.send_video
         default:
         - data:
@@ -676,7 +683,8 @@
           action: notify.group
         - data:
             file: '{{ trigger.event.data.path }}'
-            target: -472161375
+            entity_id:
+            - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
     - conditions:
       - condition: template
@@ -690,7 +698,8 @@
           sequence:
           - data:
               file: '{{ trigger.event.data.path }}'
-              target: -472161375
+              entity_id:
+              - notify.telegram_bot_1171156279_472161375
             action: telegram_bot.send_video
         default:
         - data:
@@ -699,7 +708,8 @@
           action: notify.group
         - data:
             file: '{{ trigger.event.data.path }}'
-            target: -472161375
+            entity_id:
+            - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
     - conditions:
       - condition: template
@@ -713,7 +723,8 @@
           sequence:
           - data:
               file: '{{ trigger.event.data.path }}'
-              target: -472161375
+              entity_id:
+              - notify.telegram_bot_1171156279_472161375
             action: telegram_bot.send_video
         - conditions:
           - condition: template
@@ -724,7 +735,8 @@
             action: notify.group
           - data:
               file: '{{ trigger.event.data.path }}'
-              target: -472161375
+              entity_id:
+              - notify.telegram_bot_1171156279_472161375
             action: telegram_bot.send_document
         default: []
     default: []
