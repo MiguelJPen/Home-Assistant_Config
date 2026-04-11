@@ -1,0 +1,200 @@
+substitutions:
+  name: outdoor-monitor
+  upper_name: Outdoor Monitor
+
+packages:
+  device_base: !include common/device_base.outdoor-monitor.yaml
+  ethernet: !include common/olimex-esp32-poe.config.yaml
+  basic_control: !include common/basic_control.yaml
+
+i2c:
+  sda: GPIO13
+  scl: GPIO16
+
+bme68x_bsec2_i2c:
+  model: bme680
+  address: 0x77
+  operating_age: 4d
+  temperature_offset: 0
+
+sensor:
+  - platform: sen5x
+    id: sen55
+    address: 0x69
+    update_interval: 60s
+
+    store_baseline: true
+
+    auto_cleaning_interval: 3d
+
+    acceleration_mode: medium
+
+    temperature_compensation:
+      offset: 0.0
+      normalized_offset_slope: 0.0
+      time_constant: 300
+  
+    pm_1_0:
+      name: PM1
+    pm_2_5:
+      name: PM2.5
+      id: pm25_raw
+    pm_10_0:
+      name: PM10
+      id: pm10_raw
+    temperature:
+      name: Temperature
+      id: sensirion_temperature
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 1
+    humidity:
+      name: Humidity
+      id: sensirion_humidity
+      filters:
+        - sliding_window_moving_average:
+            window_size: 10
+            send_every: 1
+    voc:
+      name: VOC Index
+    nox:
+      name: NOx Index
+
+  - platform: homeassistant
+    id: pm25_24h_avg
+    internal: True
+    entity_id: sensor.outdoor_pm2_5_24h_mean
+
+  - platform: homeassistant
+    id: pm10_24h_avg
+    internal: True
+    entity_id: sensor.outdoor_pm10_24h_mean
+
+  - platform: absolute_humidity
+    name: "Absolute Humidity"
+    temperature: sensirion_temperature
+    humidity: sensirion_humidity
+
+  - platform: template
+    name: "Dew Point"
+    lambda: |-
+      return (243.5*(log(id(sensirion_humidity).state/100)+((17.67*id(sensirion_temperature).state)/
+      (243.5+id(sensirion_temperature).state)))/(17.67-log(id(sensirion_humidity).state/100)-
+      ((17.67*id(sensirion_temperature).state)/(243.5+id(sensirion_temperature).state))));
+    unit_of_measurement: °C
+    icon: 'mdi:thermometer-alert'
+
+  - platform: template
+    name: "Air Quality Index"
+    id: air_quality_index
+    icon: "mdi:chart-line"
+    update_interval: 60s
+    lambda: |-
+      if (isnan(id(pm25_24h_avg).state) || isnan(id(pm10_24h_avg).state)) {
+        return NAN;
+      }
+
+      float pm25 = id(pm25_24h_avg).state;
+      float pm10 = id(pm10_24h_avg).state;
+
+      int pm25_idx;
+      int pm10_idx;
+
+      if (pm25 <= 15.0) pm25_idx = 1;
+      else if (pm25 <= 25.0) pm25_idx = 2;
+      else if (pm25 <= 37.5) pm25_idx = 3;
+      else if (pm25 <= 50.0) pm25_idx = 4;
+      else pm25_idx = 5;
+
+      if (pm10 <= 45.0) pm10_idx = 1;
+      else if (pm10 <= 50.0) pm10_idx = 2;
+      else if (pm10 <= 75.0) pm10_idx = 3;
+      else if (pm10 <= 100.0) pm10_idx = 4;
+      else pm10_idx = 5;
+
+      return (pm25_idx > pm10_idx) ? pm25_idx : pm10_idx;
+
+  - platform: bme68x_bsec2
+    temperature:
+      name: "BME680 Temperature"
+      filters:
+        - throttle_average: 60s
+    pressure:
+      name: "BME680 Pressure"
+      filters:
+        - throttle_average: 60s
+    humidity:
+      name: "BME680 Humidity"
+      filters:
+        - throttle_average: 60s
+    iaq:
+      name: "BME680 IAQ"
+      id: iaq
+      filters:
+        - throttle_average: 60s
+    co2_equivalent:
+      name: "BME680 CO2 Equivalent"
+      filters:
+        - throttle_average: 60s
+    breath_voc_equivalent:
+      name: "BME680 Breath VOC Equivalent"
+      filters:
+        - throttle_average: 60s
+    gas_resistance:
+      name: "BME680 Gas Resistance"
+      filters:
+        - throttle_average: 60s
+
+text_sensor:
+  - platform: template
+    name: "Air Quality"
+    icon: "mdi:weather-dust"
+    update_interval: 60s
+    lambda: |-
+      if (isnan(id(air_quality_index).state)) {
+        return {"Unknown"};
+      }
+
+      int idx = (int) id(air_quality_index).state;
+
+      switch (idx) {
+        case 1: return {"Bueno (OMS AQG)"};
+        case 2: return {"Aceptable (OMS IT4)"};
+        case 3: return {"Moderado (OMS IT3)"};
+        case 4: return {"Pobre (OMS IT2)"};
+        default: return {"Muy pobre (OMS IT1+)"};
+      }
+
+  - platform: bme68x_bsec2
+    iaq_accuracy:
+      name: "BME680 IAQ Accuracy"
+
+  - platform: template
+    name: "BME680 IAQ Classification"
+    icon: "mdi:checkbox-marked-circle-outline"
+    lambda: |-
+      if ( int(id(iaq).state) <= 50) {
+        return {"Excellent"};
+      }
+      else if (int(id(iaq).state) >= 51 && int(id(iaq).state) <= 100) {
+        return {"Good"};
+      }
+      else if (int(id(iaq).state) >= 101 && int(id(iaq).state) <= 150) {
+        return {"Lightly polluted"};
+      }
+      else if (int(id(iaq).state) >= 151 && int(id(iaq).state) <= 200) {
+        return {"Moderately polluted"};
+      }
+      else if (int(id(iaq).state) >= 201 && int(id(iaq).state) <= 250) {
+        return {"Heavily polluted"};
+      }
+      else if (int(id(iaq).state) >= 251 && int(id(iaq).state) <= 350) {
+        return {"Severely polluted"};
+      }
+      else if (int(id(iaq).state) >= 351) {
+        return {"Extremely polluted"};
+      }
+      else {
+        return {"error"};
+      }

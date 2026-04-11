@@ -1,0 +1,20 @@
+esp32:
+  board: esp32-poe
+  framework:
+    type: arduino
+
+esphome:
+  name: $name
+  friendly_name: $upper_name
+
+ota:
+  platform: esphome
+  password: !secret ota_outdoor_monitor
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_outdoor_monitor
