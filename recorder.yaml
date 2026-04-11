@@ -14,14 +14,15 @@ recorder:
       - zone
     entity_globs:
       - alarm_control_panel.*
+      - binary_sensor.*_contact
+      - binary_sensor.*_status
+      - binary_sensor.*_tamper
       - sensor.*_battery
       - sensor.*_humidity
       - sensor.*_temperature
       - sensor.daily_energy_*
       - sensor.inverter_*
-      - binary_sensor.*_contact
-      - binary_sensor.*_status
-      - binary_sensor.*_tamper
+      - sensor.outdoor_monitor_*
     entities:
       - binary_sensor.cocina
       - binary_sensor.caja_de_alarma
