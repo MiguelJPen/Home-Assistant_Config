@@ -453,7 +453,7 @@
           enabled: true
           action: notify.group
         - data:
-            code: !secret alarm_control_panel_code
+            code: "{{ states('input_text.alarm_code') }}"
           enabled: true
           action: alarm_control_panel.alarm_disarm
           target:
