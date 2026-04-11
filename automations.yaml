@@ -1851,6 +1851,7 @@
     - binary_sensor.murcia_murcia_heater_status
     - sensor.inverter_status_connection
     - binary_sensor.madrid_madrid_heater_status
+    - binary_sensor.outdoor_monitor_outdoor_monitor_status
     for:
       hours: 0
       minutes: 1
