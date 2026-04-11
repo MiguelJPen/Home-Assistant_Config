@@ -52,8 +52,9 @@
       title: "\U0001F6A8 *¡AVISO DE DETECCIÓN!* \U0001F6A8"
     action: notify.group
   - data: {}
-    entity_id: automation.alarm_trigger_when_sensors_go_on_second
     action: automation.turn_on
+    target:
+      entity_id: automation.alarm_trigger_when_sensors_go_on_second
   - delay: 00:05
   - repeat:
       until:
@@ -72,36 +73,36 @@
 - id: '1600610773486'
   alias: When alarm is triggered
   description: Turns on the corresponding siren
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - alarm_control_panel.el_nino_alarm
     to: triggered
     from: armed_away
     id: from_armed_away
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - alarm_control_panel.el_nino_alarm
     to: triggered
     from: armed_home
     id: from_armed_home
-  condition: []
-  action:
-  - service: siren.turn_on
-    data: {}
+    trigger: state
+  conditions: []
+  actions:
+  - data: {}
     target:
       entity_id: siren.sirena_exterior
-  - service: light.turn_on
-    data: {}
+    action: siren.turn_on
+  - data: {}
     target:
       entity_id: light.facade_lights
+    action: light.turn_on
   - condition: trigger
     id:
     - from_armed_away
-  - service: siren.turn_on
-    data: {}
+  - data: {}
     target:
       entity_id: siren.sirena_interior
+    action: siren.turn_on
   mode: single
 - id: '1600612899257'
   alias: Check all sensors for alarm - Second catch
@@ -153,8 +154,9 @@
     state: armed_away
   actions:
   - data: {}
-    entity_id: alarm_control_panel.el_nino_alarm
     action: alarm_control_panel.alarm_trigger
+    target:
+      entity_id: alarm_control_panel.el_nino_alarm
   - data:
       message: "Se ha detectado un movimiento en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}. \U0001F693"
@@ -303,29 +305,30 @@
 - id: '1600697180091'
   alias: From triggered to armed
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - alarm_control_panel.el_nino_alarm
     from: Triggered
     to: armed_away
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - alarm_control_panel.el_nino_alarm
     from: triggered
     to: armed_home
-  condition: []
-  action:
-  - service: siren.turn_off
-    data: {}
+    trigger: state
+  conditions: []
+  actions:
+  - data: {}
     target:
       entity_id:
       - siren.sirena_exterior
       - siren.sirena_interior
-  - service: light.turn_off
-    data: {}
+    action: siren.turn_off
+  - data: {}
     target:
-      entity_id: light.facade_lights
+      entity_id:
+      - light.facade_lights
+    action: light.turn_off
   mode: single
 - id: '1623189802627'
   alias: Notify home and grid electricity status
@@ -453,7 +456,7 @@
           enabled: true
           action: notify.group
         - data:
-            code: "{{ states('input_text.alarm_code') }}"
+            code: '{{ states(''input_text.alarm_code'') }}'
           enabled: true
           action: alarm_control_panel.alarm_disarm
           target:
@@ -540,13 +543,12 @@
 - id: '1626868061580'
   alias: Save daily energy consumption at the end of the day
   description: ''
-  trigger:
-  - platform: time
-    at: 00:00:00
-  condition: []
-  action:
-  - service: input_number.set_value
-    target:
+  triggers:
+  - at: 00:00:00
+    trigger: time
+  conditions: []
+  actions:
+  - target:
       entity_id: input_number.yesterday_kwh
     data:
       value: '{% set valle = state_attr(''sensor.daily_energy_valle'', ''last_period'')
@@ -555,6 +557,7 @@
         | float %}
 
         {{ (valle + llana + punta ) }}'
+    action: input_number.set_value
   mode: single
 - id: '1626948288438'
   alias: Send energy data to a local file hourly
@@ -739,25 +742,23 @@
               - notify.telegram_bot_1171156279_472161375
             action: telegram_bot.send_document
         default: []
-    default: []
   mode: parallel
   max: 6
 - id: '1631442755979'
   alias: Check exterior sensors for alarm - First catch
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.entry_door_contact
     - binary_sensor.kitchen_fence_contact
     - binary_sensor.dining_room_fence_contact
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.despensa
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.terraza
     - binary_sensor.pir_exterior_entrada_contact
     - binary_sensor.pir_exterior_oeste_contact
@@ -768,27 +769,28 @@
     - binary_sensor.pir_exterior_sur_contact
     - binary_sensor.ventana_del_salon
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.despensa_tamper
     - binary_sensor.caja_de_alarma
     - binary_sensor.ventana_del_salon_tamper
     - binary_sensor.terraza_tamper
     to: open
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: alarm_control_panel.el_nino_alarm
     state: armed_home
-  action:
-  - service: notify.group
-    data:
+  actions:
+  - data:
       message: La alarma ha detectado algo en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}.
       title: "\U0001F6A8 *¡AVISO DE DETECCIÓN!* \U0001F6A8"
-  - service: automation.turn_on
-    target:
+    action: notify.group
+  - target:
       entity_id: automation.alarm_trigger_when_sensors_go_on_second_home
     data: {}
+    action: automation.turn_on
   - delay:
       hours: 0
       minutes: 10
@@ -802,28 +804,27 @@
           entity_id: alarm_control_panel.el_nino_alarm
           state: triggered
       sequence:
-      - service: automation.turn_off
-        data:
+      - data:
           stop_actions: true
         target:
           entity_id: automation.alarm_trigger_when_sensors_go_on_second_home
+        action: automation.turn_off
   mode: single
 - id: '1631444535103'
   alias: Check exterior sensors for alarm - Second catch
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - binary_sensor.entry_door_contact
     - binary_sensor.kitchen_fence_contact
     - binary_sensor.dining_room_fence_contact
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.despensa
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.terraza
     - binary_sensor.pir_exterior_entrada_contact
     - binary_sensor.pir_exterior_oeste_contact
@@ -834,47 +835,49 @@
     - binary_sensor.pir_exterior_sur_contact
     - binary_sensor.ventana_del_salon
     to: 'on'
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - binary_sensor.despensa_tamper
     - binary_sensor.caja_de_alarma
     - binary_sensor.ventana_del_salon_tamper
     - binary_sensor.terraza_tamper
     to: open
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: alarm_control_panel.el_nino_alarm
-    state: armed_home
-  action:
-  - service: alarm_control_panel.alarm_trigger
-    target:
+    state:
+    - armed_home
+  actions:
+  - target:
       entity_id: alarm_control_panel.el_nino_alarm
     data: {}
-  - service: notify.group
-    data:
+    action: alarm_control_panel.alarm_trigger
+  - data:
       message: "Se ha detectado un movimiento en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}. \U0001F693"
       title: "\U0001F6A8\U0001F6A8\U0001F6A8 *¡SE HA DISPARADO LA ALARMA!* \U0001F6A8\U0001F6A8\U0001F6A8"
+    action: notify.group
   mode: single
 - id: '1632435586236'
   alias: Reboot Home Assistant if router reboots
   description: Reboots Home Assistant due to some DHCP problems.
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.irrigation_status
+  triggers:
+  - entity_id: binary_sensor.irrigation_status
     to: 'off'
     for:
       hours: 0
       minutes: 10
       seconds: 0
-  - platform: state
-    entity_id: binary_sensor.swimming_pool_status
+    trigger: state
+  - entity_id: binary_sensor.swimming_pool_status
     for:
       hours: 0
       minutes: 10
       seconds: 0
     to: 'off'
-  condition:
+    trigger: state
+  conditions:
   - condition: or
     conditions:
     - condition: state
@@ -888,34 +891,35 @@
       - condition: state
         entity_id: binary_sensor.irrigation_status
         state: 'off'
-  action:
-  - service: hassio.host_reboot
+  actions:
+  - action: hassio.host_reboot
+    metadata: {}
     data: {}
   mode: single
 - id: '1639942219645'
   alias: Reset Wireguard connection when no outside router is reachable
   description: If the connection with any wireguard server is lost (for example, due
     to an IP change), restart the wireguard addon to establish the connection again.
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.router_madrid
+  triggers:
+  - entity_id: binary_sensor.router_madrid
     to: 'off'
     for:
       hours: 0
       minutes: 5
       seconds: 0
-  - platform: state
-    entity_id: binary_sensor.router_murcia
+    trigger: state
+  - entity_id: binary_sensor.router_murcia
     to: 'off'
     for:
       hours: 0
       minutes: 5
       seconds: 0
-  condition:
+    trigger: state
+  conditions:
   - condition: state
     entity_id: binary_sensor.router
     state: 'on'
-  action:
+  actions:
   - repeat:
       while:
       - condition: and
@@ -944,7 +948,8 @@
               minutes: 0
               seconds: 30
       sequence:
-      - service: hassio.addon_restart
+      - action: hassio.addon_restart
+        metadata: {}
         data:
           addon: fd24a922_wireguard_client
       - delay:
@@ -1340,17 +1345,17 @@
 - id: '1649799780278'
   alias: Notify flood sensor state
   description: ''
-  trigger:
-  - platform: state
-    entity_id: binary_sensor.pantry_flood_sensor_water_leak
+  triggers:
+  - entity_id: binary_sensor.pantry_flood_sensor_water_leak
     to: 'on'
-  condition: []
-  action:
-  - service: notify.group
-    data:
+    trigger: state
+  conditions: []
+  actions:
+  - data:
       message: El sensor de la despensa ha detectado agua a las {{ states('sensor.time')
         }}.
       title: '*¡AVISO IMPORTANTE!*'
+    action: notify.group
   mode: single
 - id: '1650113623089'
   alias: Randomise guest room lights behaviour
@@ -1714,38 +1719,38 @@
 - id: '1662239356385'
   alias: Money control
   description: ''
-  trigger:
-  - platform: event
-    event_type: telegram_command
+  triggers:
+  - event_type: telegram_command
     event_data:
       command: /saldo
       chat_id: 303515965
     id: saldo
-  - platform: event
-    event_type: telegram_command
+    trigger: event
+  - event_type: telegram_command
     event_data:
       command: /add
       chat_id: 303515965
     id: add
-  - platform: event
-    event_type: telegram_command
+    trigger: event
+  - event_type: telegram_command
     event_data:
       command: /substract
       chat_id: 303515965
     id: substract
-  condition: []
-  action:
+    trigger: event
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
         id: saldo
       sequence:
-      - service: notify.lau
-        data:
+      - data:
           message: '¡Holii! Tu saldo es {{ states("input_number.lau_saldo") }} €.
 
             Puedes escribir /add (cantidades de dinero a añadir) o /substract (cantidades
             de dinero a retirar) para modificar la cantidad.'
+        action: notify.lau
     - conditions:
       - condition: trigger
         id: add
@@ -1754,44 +1759,45 @@
         - condition: template
           value_template: '{{ (trigger.event.data[''args''] | count) >= 1 }}'
         then:
-        - service: input_number.set_value
-          data:
+        - data:
             value: "{% set aux = namespace(s=(0|float)) %} \n{% for i in range((trigger.event.data['args']|count))
               %}\n  {% set aux.s = aux.s + (trigger.event.data['args'][i].replace(\"'\",'.').replace(',','.')
               | float) %}\n{% endfor %} \n\n{{ (states('input_number.lau_saldo') |
               float) + (aux.s | float) }}"
           target:
             entity_id: input_number.lau_saldo
-        - service: notify.lau
-          data:
+          action: input_number.set_value
+        - data:
             message: Tu saldo ahora es {{ states("input_number.lau_saldo") }} €.
+          action: notify.lau
         else:
-        - service: notify.lau
-          data:
+        - data:
             message: Error en los argumentos, ¡vuelve a intentarlo!
+          action: notify.lau
     - conditions:
       - condition: trigger
-        id: substract
+        id:
+        - substract
       sequence:
       - if:
         - condition: template
           value_template: '{{ (trigger.event.data[''args''] | count) >= 1 }}'
         then:
-        - service: input_number.set_value
-          data:
+        - data:
             value: "{% set aux = namespace(s=(0|float)) %} \n{% for i in range((trigger.event.data['args']|count))
               %}\n  {% set aux.s = aux.s + (trigger.event.data['args'][i].replace(\"'\",'.').replace(',','.')
               | float) %}\n{% endfor %} \n\n{{ (states('input_number.lau_saldo') |
               float) - (aux.s | float) }}"
           target:
             entity_id: input_number.lau_saldo
-        - service: notify.lau
-          data:
+          action: input_number.set_value
+        - data:
             message: Tu saldo ahora es {{ states("input_number.lau_saldo") }} €.
+          action: notify.lau
         else:
-        - service: notify.lau
-          data:
+        - data:
             message: Error en los argumentos, ¡vuelve a intentarlo!
+          action: notify.lau
     default: []
   mode: single
 - id: '1663501480893'
@@ -1911,75 +1917,75 @@
 - id: '1714671696522'
   alias: Control Zigbee joining time
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - switch.zigbee2mqtt_bridge_permit_join
     to: 'on'
     id: allow_joining
-  - platform: state
-    entity_id:
+    trigger: state
+  - entity_id:
     - switch.zigbee2mqtt_bridge_permit_join
     to: 'off'
     id: not_allow_joining
-  - platform: event
-    event_type: timer.finished
+    trigger: state
+  - event_type: timer.finished
     event_data:
       entity_id: timer.zigbee_permit_join
     id: timer_finished
-  condition: []
-  action:
+    trigger: event
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
         id:
         - allow_joining
       sequence:
-      - service: timer.start
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id: timer.zigbee_permit_join
+        action: timer.start
     - conditions:
       - condition: trigger
         id:
         - not_allow_joining
       sequence:
-      - service: timer.cancel
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id: timer.zigbee_permit_join
+        action: timer.cancel
     - conditions:
       - condition: trigger
         id:
         - timer_finished
       sequence:
-      - service: switch.turn_off
-        metadata: {}
+      - metadata: {}
         data: {}
         target:
           entity_id: switch.zigbee2mqtt_bridge_permit_join
+        action: switch.turn_off
   mode: single
 - id: '1716763355559'
   alias: Notify if the pool has been filling for too long
   description: ''
-  trigger:
-  - platform: state
-    entity_id:
+  triggers:
+  - entity_id:
     - switch.pool_filling_manual
     to: 'on'
     for:
       hours: 0
       minutes: 40
       seconds: 0
-  condition: []
-  action:
-  - service: notify.miguel
-    metadata: {}
+    trigger: state
+  conditions: []
+  actions:
+  - metadata: {}
     data:
       message: The pool has been filling for more than 30 minutes, please check for
         errors or leaks!
+    action: notify.miguel
   mode: single
 - id: '1720887537733'
   alias: Madrid actions when nobody is home
@@ -2504,92 +2510,94 @@
 - id: '1672357197244'
   alias: iOS actions
   description: ''
-  trigger:
-  - platform: event
-    event_type: ios.action_fired
+  triggers:
+  - event_type: ios.action_fired
     event_data:
       actionID: open_wicket_door
     id: open_wicket_door
-  - platform: event
-    event_type: ios.action_fired
+    trigger: event
+  - event_type: ios.action_fired
     event_data:
       actionID: open_main_gate
     id: open_main_gate
-  - platform: event
-    event_type: ios.action_fired
+    trigger: event
+  - event_type: ios.action_fired
     event_data:
       actionID: toggle_garage_light
     id: toggle_garage_light
-  - platform: event
-    event_type: ios.action_fired
+    trigger: event
+  - event_type: ios.action_fired
     event_data:
       actionID: open_path_gate
     id: open_path_gate
-  - platform: event
-    event_type: ios.action_fired
+    trigger: event
+  - event_type: ios.action_fired
     event_data:
       actionID: toggle_porch_light
     id: toggle_porch_light
-  - platform: event
-    event_type: ios.action_fired
+    trigger: event
+  - event_type: ios.action_fired
     event_data:
       actionID: arrive_home
     id: arrive_home
     context: {}
-  condition:
-    - condition: or
-      conditions:
-      - condition: template
-        value_template: '{{ trigger.event.data.sourceDevicePermanentID == states(''input_text.dad_device_id'') }}'
-      - condition: template
-        value_template: '{{ trigger.event.data.sourceDevicePermanentID == states(''input_text.mum_device_id'') }}'
-  action:
+    trigger: event
+  conditions:
+  - condition: or
+    conditions:
+    - condition: template
+      value_template: '{{ trigger.event.data.sourceDevicePermanentID == states(''input_text.dad_device_id'')
+        }}'
+    - condition: template
+      value_template: '{{ trigger.event.data.sourceDevicePermanentID == states(''input_text.mum_device_id'')
+        }}'
+  actions:
   - choose:
     - conditions:
       - condition: trigger
         id: open_wicket_door
       sequence:
-      - service: button.press
-        data: {}
+      - data: {}
         target:
           entity_id: button.wicket_door
+        action: button.press
     - conditions:
       - condition: trigger
         id: open_main_gate
       sequence:
-      - service: cover.toggle
-        data: {}
+      - data: {}
         target:
           entity_id: cover.main_gate
+        action: cover.toggle
     - conditions:
       - condition: trigger
         id: open_path_gate
       sequence:
-      - service: button.press
-        data: {}
+      - data: {}
         target:
           entity_id: button.path_gate
+        action: button.press
     - conditions:
       - condition: trigger
         id: toggle_garage_light
       sequence:
-      - service: light.toggle
-        data: {}
+      - data: {}
         target:
           entity_id: light.luz_del_garaje
+        action: light.toggle
     - conditions:
       - condition: trigger
         id: toggle_porch_light
       sequence:
-      - service: light.toggle
-        data: {}
+      - data: {}
         target:
           entity_id: light.front_porch
+        action: light.toggle
     - conditions:
       - condition: trigger
         id:
         - arrive_home
       sequence:
-      - service: script.arrive_home
-        data: {}
+      - data: {}
+        action: script.arrive_home
   mode: single
