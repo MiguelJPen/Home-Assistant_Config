@@ -328,133 +328,149 @@
       entity_id: light.facade_lights
   mode: single
 - id: '1623189802627'
-  alias: Notify the status of the UPS
-  description: Notifies the UPS change of state and turns off the system if the battery
-    is low.
-  trigger:
-  - platform: event
-    event_type: nut.ups_event
-    event_data:
-      notify_type: ONBATT
-    id: on_battery
-  - platform: event
-    event_type: nut.ups_event
-    event_data:
-      notify_type: ONLINE
-    id: online
-  - platform: event
-    event_type: nut.ups_event
-    event_data:
-      notify_type: LOWBATT
-    id: low_battery
-  - platform: event
-    event_type: nut.ups_event
-    event_data:
-      notify_type: REPLBATT
-    id: replace_battery
-  - platform: event
-    event_type: nut.ups_event
-    event_data:
-      notify_type: COMMBAD
-    id: bad_comm
-  - platform: event
-    event_type: nut.ups_event
-    event_data:
-      notify_type: NOCOMM
-    id: no_comm
-  condition: []
-  action:
+  alias: Notify home and grid electricity status
+  description: ''
+  triggers:
+  - trigger: numeric_state
+    entity_id:
+    - sensor.inverter_grid_voltage_l1
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
+    below: 100
+    id: grid_down
+  - trigger: template
+    value_template: '{{ states(''switch.fridge_plug'') in [''unavailable'', ''unknown'']
+      and states(''switch.home_automation_office_plug'') in [''unavailable'', ''unknown'']
+      and states(''binary_sensor.irrigation_status'') in [''unavailable'', ''unknown'']
+      }}'
+    for:
+      hours: 0
+      minutes: 2
+      seconds: 0
+    id: house_electricy_down
+  conditions: []
+  actions:
   - choose:
     - conditions:
       - condition: trigger
         id:
-        - on_battery
+        - grid_down
       sequence:
-      - service: notify.group
-        data:
-          message: Parece que ha habido un corte de luz a las {{ states('sensor.time')
-            }}. Por favor, revísalo antes de que las baterías no puedan aguantar la
-            carga del sistema. El sistema se apagará automáticamente si la batería
-            está muy baja.
-          title: '*AVISO*'
-        enabled: true
+      - data:
+          message: No hay energía en la red eléctrica. El sistema solar y las baterías
+            aguantarán el sistema.
+          title: Caída de la red eléctrica
+        action: notify.group
       - repeat:
-          count: '30'
+          until:
+          - condition: numeric_state
+            entity_id: sensor.inverter_grid_voltage_l1
+            above: 190
           sequence:
-          - service: notify.miguel
+          - action: notify.group
+            metadata: {}
             data:
-              message: 'Carga: {{ states(''sensor.riello_ups_load'') }} %.
-
-                Voltaje de la batería: {{ states(''sensor.riello_ups_battery_voltage'')
-                }} V.
-
-                Voltaje de salida: {{ states(''sensor.riello_ups_output_voltage'')
-                }} V.'
-              title: '*Información de la batería*'
+              message: 'Estado actual de la batería: {{ states(''sensor.inverter_battery_soc'')
+                }}%'
+          - if:
+            - condition: state
+              entity_id: switch.electric_vehicle_plug
+              state:
+              - 'on'
+            - condition: numeric_state
+              entity_id: sensor.inverter_battery_power
+              above: 100
+            then:
+            - action: switch.turn_off
+              metadata: {}
+              target:
+                entity_id: switch.electric_vehicle_plug
+              data: {}
+            - action: notify.group
+              metadata: {}
+              data:
+                message: Se ha desconectado el cargador del coche para ahorrar energía.
+                  Recuerda activarlo de nuevo.
           - delay:
               hours: 0
-              minutes: 20
+              minutes: 30
               seconds: 0
               milliseconds: 0
+      - action: notify.group
+        metadata: {}
+        data:
+          message: Se ha solventado el corte de energía en la red.
     - conditions:
       - condition: trigger
         id:
-        - online
+        - house_electricy_down
       sequence:
-      - service: notify.group
-        data:
-          message: Se ha solventado el corte de energía. Intentando poner todo en
-            orden...
-    - conditions:
-      - condition: trigger
-        id:
-        - low_battery
-      sequence:
-      - service: notify.group
-        data:
-          message: El sistema se apagará para proteger los datos y garantizar la integridad
-            de la información.  En caso de que vuelva la luz, será necesario pulsar
-            el botón situado en el frontal del Home Assistant si no se inicia automáticamente
-            pasados diez minutos. Desarmando la alarma para evitar sorpresas...
-          title: '*AVISO IMPORTANTE*'
+      - data:
+          message: Parece que no hay electricidad en casa desde las {{ states('sensor.time')
+            }}. Por favor, revísalo antes de que el SAI no pueda aguantar la carga
+            del sistema.
+          title: '*AVISO*'
         enabled: true
-      - service: alarm_control_panel.alarm_disarm
-        data: {}
-        enabled: true
-      - delay:
-          hours: 0
+        action: notify.group
+      - if:
+        - condition: numeric_state
+          entity_id: sensor.inverter_load_voltage
+          below: 100
+        then:
+        - action: notify.group
+          metadata: {}
+          data:
+            message: Parece que hay un problema con el inversor y no está generando
+              electricidad... Revísalo para solucionar el problema.
+      - wait_template: '{{ states(''switch.fridge_plug'') not in [''unavailable'',
+          ''unknown''] or states(''switch.home_automation_office_plug'') not in [''unavailable'',
+          ''unknown''] or states(''binary_sensor.irrigation_status'') not in [''unavailable'',
+          ''unknown''] }}'
+        continue_on_timeout: true
+        timeout:
+          hours: 1
           minutes: 0
-          seconds: 30
+          seconds: 0
           milliseconds: 0
-      - service: notify.group
-        data:
-          message: Apagando el sistema...
-        enabled: true
-      - service: hassio.host_shutdown
-        data: {}
-        enabled: true
-    - conditions:
-      - condition: trigger
-        id:
-        - replace_battery
-      sequence:
-      - service: notify.miguel
-        data:
-          message: 'La batería del SAI no está en buen estado y debería ser reemplazada
-            pronto. Sus características son: {{ states(''sensor.riello_ups_nominal_battery_voltage'')
-            }} V y {{ states(''sensor.riello_ups_battery_capacity'') }} Ah.'
-          title: '*AVISO IMPORTANTE*'
-    - conditions:
-      - condition: trigger
-        id:
-        - bad_comm
-        - no_comm
-      sequence:
-      - service: notify.miguel
-        data:
-          title: '*Atención*'
-          message: Se ha perdido la comunicación con el SAI.
-  mode: restart
+      - if:
+        - condition: template
+          value_template: '{{ wait.completed }}'
+        then:
+        - action: notify.group
+          metadata: {}
+          data:
+            message: Se ha solventado el problema interno de energía en casa.
+        else:
+        - data:
+            message: El sistema se apagará para proteger los datos y garantizar la
+              integridad de la información.  En caso de que vuelva la luz, será necesario
+              pulsar el botón situado en el frontal del Home Assistant si no se inicia
+              automáticamente pasados diez minutos. Desarmando la alarma para evitar
+              sorpresas...
+            title: '*AVISO IMPORTANTE*'
+          enabled: true
+          action: notify.group
+        - data:
+            code: !secret alarm_control_panel_code
+          enabled: true
+          action: alarm_control_panel.alarm_disarm
+          target:
+            entity_id: alarm_control_panel.el_nino_alarm
+        - delay:
+            hours: 0
+            minutes: 0
+            seconds: 30
+            milliseconds: 0
+        - data:
+            message: Apagando el sistema...
+          enabled: true
+          action: notify.group
+        - data: {}
+          enabled: true
+          action: hassio.host_shutdown
+  mode: single
 - id: '1626736527137'
   alias: Change energy tariff
   description: ''
