@@ -59,10 +59,10 @@ script:
           if (!id(${pool_id}_automatic_mode).state) {
             id(${pool_id}_filling_requested) = false; }
           if (id(${pool_id}_filling_requested) && id(${pool_id}_automatic_mode).state) {
-            int hour_morning = atoi(((id(${pool_id}_morning_time).state).substr(0,2)).c_str());
-            int minute_morning = atoi(((id(${pool_id}_morning_time).state).substr(3,2)).c_str());
-            int hour_afternoon = atoi(((id(${pool_id}_afternoon_time).state).substr(0,2)).c_str());
-            int minute_afternoon = atoi(((id(${pool_id}_afternoon_time).state).substr(3,2)).c_str());
+            int hour_morning = atoi(id(${pool_id}_morning_time).current_option().substr(0,2).c_str());
+            int minute_morning = atoi(id(${pool_id}_morning_time).current_option().substr(3,2).c_str());
+            int hour_afternoon = atoi(id(${pool_id}_afternoon_time).current_option().substr(0,2).c_str());
+            int minute_afternoon = atoi(id(${pool_id}_afternoon_time).current_option().substr(3,2).c_str());
 
             time_t aux = get_next_time_at(hour_morning, minute_morning, hour_afternoon, minute_afternoon);
             id(${pool_id}_timestamps_on).publish_state(to_string(aux));

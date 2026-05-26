@@ -49,19 +49,19 @@ script:
   - id: ${pump_id}_update_time_post_check
     then:
       - lambda: |-
-          if(id(${pump_id}_mode).state == "Winter") {
+          if(id(${pump_id}_mode).current_option() == "Winter") {
             pair<string,string> winter_time = get_winter_pumping_time(30);
 
             id(${pump_id}_timestamps_on).publish_state(winter_time.first);
             id(${pump_id}_timestamps_off).publish_state(winter_time.second); 
           }
-          else if (id(${pump_id}_mode).state == "Automatic") {
+          else if (id(${pump_id}_mode).current_option() == "Automatic") {
             pair<string,string> automatic_time = get_automatic_pumping_time(id(mean_temp).state);
 
             id(${pump_id}_timestamps_on).publish_state(automatic_time.first);
             id(${pump_id}_timestamps_off).publish_state(automatic_time.second); 
           }
-          else if (id(${pump_id}_mode).state == "Full-time") {
+          else if (id(${pump_id}_mode).current_option() == "Full-time") {
             pair<string,string> automatic_full_time = get_automatic_full_pumping_time();
 
             id(${pump_id}_timestamps_on).publish_state(automatic_full_time.first);
@@ -75,10 +75,10 @@ script:
   - id: ${pump_id}_check_if_on
     then:
       - lambda: |-
-          if (id(${pump_id}_mode).state != "Manual") {
+          if (id(${pump_id}_mode).current_option() != "Manual") {
             if (id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
               id(pump_next_on).state > id(pump_next_off).state && !id(filling_rn) && 
-              ((id(secure_pumping) && (id(${pump_id}_mode).state == "Automatic" || id(${pump_id}_mode).state == "Full-time")) || id(${pump_id}_mode).state == "Winter"))
+              ((id(secure_pumping) && (id(${pump_id}_mode).current_option() == "Automatic" || id(${pump_id}_mode).current_option() == "Full-time")) || id(${pump_id}_mode).current_option() == "Winter"))
                 id(${pump_id}).turn_on();
             else id(${pump_id}).turn_off();
           }
@@ -94,7 +94,7 @@ sensor:
     unit_of_measurement: min
     icon: mdi:timer-outline
     lambda: |-
-      if (id(${pump_id}).state && (id(${pump_id}_mode).state != "Manual")) {
+      if (id(${pump_id}).state && (id(${pump_id}_mode).current_option() != "Manual")) {
         return ((atoi((id(pump_next_off).state).c_str()) - id(time_pump).now().timestamp) / 60) + 1;
       }
       return 0;
@@ -160,11 +160,11 @@ time:
         minutes: /1
         then:
           - lambda: |-
-              if ((id(${pump_id}_mode).state == "Winter" || (id(secure_pumping) && (id(${pump_id}_mode).state == "Automatic" || id(${pump_id}_mode).state == "Full-time"))) && 
+              if ((id(${pump_id}_mode).current_option() == "Winter" || (id(secure_pumping) && (id(${pump_id}_mode).current_option() == "Automatic" || id(${pump_id}_mode).current_option() == "Full-time"))) && 
                 !id(filling_rn) && 
                 scheduled_run(id(${pump_id}_next_on).state.c_str())) {
                   id(${pump_id}).turn_on();
                 }
-              if (id(${pump_id}_mode).state != "Manual" && scheduled_run(id(${pump_id}_next_off).state.c_str())) {
+              if (id(${pump_id}_mode).current_option() != "Manual" && scheduled_run(id(${pump_id}_next_off).state.c_str())) {
                 id(${pump_id}).turn_off();
               }
