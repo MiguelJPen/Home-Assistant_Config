@@ -2134,6 +2134,9 @@
         state: disarmed
       - condition: template
         value_template: '{{ now().month >= 5 and now().month <= 8 }}'
+      - condition: numeric_state
+        entity_id: sensor.exterior_temperature
+        above: 30
       sequence:
       - metadata: {}
         data: {}
