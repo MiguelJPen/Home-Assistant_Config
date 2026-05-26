@@ -8,6 +8,8 @@
 #include "esphome.h"
 
 #define DAY_SECS 86400
+#define MORNING_START_HOUR 8
+#define AFTERNOON_START_HOUR 16
 #define CADUCA "Hoja caduca"
 #define PERENNE "Hoja perenne"
 #define FRUTALES "Frutales"
@@ -24,6 +26,7 @@ string delete_first_timestamp(string);
 time_t add_n_days(time_t, int); // Internal
 bool water_available();
 bool uses_morning_slot(uint8_t); // Internal
+bool water_available_at(uint8_t, uint8_t); // Internal
 bool is_before_time(uint8_t, uint8_t, int, int); // Internal
 
 pair<string, string> get_irrigation_time(time_t next_irrigation, time_t last_auto_irrigation, float mean_tmp, float mean_hum, float min_hum, string irrigation_mode, 
@@ -252,17 +255,18 @@ time_t add_n_days(time_t time, int days) {
 bool water_available() {
     auto time_now = id(time_sntp).now();
 
-    if (time_now.month % 2 == 0 && time_now.hour >= 16){ // Water in the afternoon (16-00)
-        return true;
-    }
-    else if (time_now.month % 2 == 1 && time_now.hour >= 8 && time_now.hour < 16){ // Water in the morning (08-16)
-        return true;
-    }
-    return false;
+    return water_available_at(time_now.month, time_now.hour);
 }
 
 bool uses_morning_slot(uint8_t month) {
     return month % 2 == 1;
+}
+
+bool water_available_at(uint8_t month, uint8_t hour) {
+    if (uses_morning_slot(month))
+        return hour >= MORNING_START_HOUR && hour < AFTERNOON_START_HOUR;
+
+    return hour >= AFTERNOON_START_HOUR;
 }
 
 bool is_before_time(uint8_t hour, uint8_t minute, int target_hour, int target_minute) {

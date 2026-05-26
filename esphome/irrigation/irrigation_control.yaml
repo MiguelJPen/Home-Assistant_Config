@@ -100,7 +100,7 @@ text_sensor:
     icon: mdi:water-check
     lambda: |-
       auto time_now = id(time_irrigation).now();
-      if (time_now.month % 2 == 1) {
+      if (uses_morning_slot(time_now.month)) {
         return {"Mañana"};
       }
       return {"Tarde"};
@@ -146,4 +146,3 @@ time:
           - binary_sensor.template.publish:
               id: ${irrigation_id}_available
               state: !lambda return water_available();
-
