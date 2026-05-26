@@ -6,8 +6,8 @@ packages:
       id: ${master_id}
       upper_id: ${master_upper_id}
       relay_pin: ${master_valve_pin}
-  close_master_valve: !include 
-    file: valve/irrigation_close_master.yaml
+  master_valve: !include 
+    file: valve/irrigation_master_valve.yaml
 
   #### North valve
   ${north_id}_valve: !include

@@ -1,24 +1,27 @@
-switch:
-  - platform: template
-    name: Pool filling
-    id: ${id}_virtual
-    internal: True
-    lambda: return (id(${id}).position == VALVE_OPEN && id(${master_id}).position == VALVE_OPEN);
-    turn_on_action:
+script:
+  - id: ${id}_start_transition
+    then:
       - if:
           condition:
-            - or:
-              - switch.is_off: ${ac_adapter_id}
-              - lambda: return (id(${master_id}).position == VALVE_CLOSED);
+            switch.is_on: ${north_id}_virtual
           then:
-            - switch.turn_on: ${ac_adapter_id}
-            - valve.open: ${master_id}
-      - valve.close: ${north_id}
-      - valve.close: ${south_id}
+            - switch.turn_off: ${north_id}_virtual
+            - script.wait: ${north_id}_stop_transition
+      - if:
+          condition:
+            switch.is_on: ${south_id}_virtual
+          then:
+            - switch.turn_off: ${south_id}_virtual
+            - script.wait: ${south_id}_stop_transition
+      - script.execute: open_master_valve
+      - script.wait: open_master_valve
       - valve.open: ${id}
       - component.update: ${id}_left
       - component.update: ${irrigation_id}_state
-    turn_off_action:
+  - id: ${id}_stop_transition
+    then:
+      - lambda: |-
+          id(${id}_timestamps_off).publish_state(delete_first_timestamp(id(${id}_timestamps_off).state));
       - script.execute: close_master_valve
       - script.wait: close_master_valve
       - valve.close: ${id}
@@ -27,3 +30,14 @@ switch:
       - homeassistant.service:
           service: esphome.pool_filling_completed
       - lambda: id(${id}_filling_requested) = false;
+
+switch:
+  - platform: template
+    name: Pool filling
+    id: ${id}_virtual
+    internal: True
+    lambda: return (id(${id}).position == VALVE_OPEN && id(${master_id}).position == VALVE_OPEN);
+    turn_on_action:
+      - script.execute: ${id}_start_transition
+    turn_off_action:
+      - script.execute: ${id}_stop_transition

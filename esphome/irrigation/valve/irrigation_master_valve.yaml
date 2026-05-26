@@ -1,0 +1,26 @@
+script:
+  - id: open_master_valve
+    then:
+      - if:
+          condition:
+            or:
+              - switch.is_off: ${ac_adapter_id}
+              - lambda: return (id(${master_id}).position == VALVE_CLOSED);
+          then:
+            - switch.turn_on: ${ac_adapter_id}
+            - valve.open: ${master_id}
+  - id: close_master_valve
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: |-
+              int open_valves = 0;
+              if (id(${north_id}).position == VALVE_OPEN) open_valves++;
+              if (id(${south_id}).position == VALVE_OPEN) open_valves++;
+              if (id(${pool_id}).position == VALVE_OPEN) open_valves++;
+              return open_valves <= 1;
+          then:
+            - valve.close: ${master_id}
+            - delay: 2s
+            - switch.turn_off: ${ac_adapter_id}

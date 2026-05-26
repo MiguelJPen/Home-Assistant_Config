@@ -85,8 +85,6 @@ switch:
           service: esphome.pool_manual_filling_start
     turn_off_action:
       - switch.turn_off: ${pool_id}_virtual
-      - lambda: |-
-          id(${pool_id}_timestamps_off).publish_state(delete_first_timestamp(id(${pool_id}_timestamps_off).state));
 
 # ============================================================================ #
 text_sensor:

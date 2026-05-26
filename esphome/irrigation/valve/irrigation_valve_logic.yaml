@@ -1,3 +1,27 @@
+script:
+  - id: ${id}_start_transition
+    then:
+      - if:
+          condition:
+            switch.is_on: ${pool_id}_virtual
+          then:
+            - switch.turn_off: ${pool_id}_virtual
+            - script.wait: ${pool_id}_stop_transition
+      - script.execute: open_master_valve
+      - script.wait: open_master_valve
+      - valve.open: ${id}
+      - component.update: ${id}_left
+      - component.update: ${irrigation_id}_state
+  - id: ${id}_stop_transition
+    then:
+      - lambda: |-
+          id(${id}_timestamps_off).publish_state(delete_first_timestamp(id(${id}_timestamps_off).state));
+      - script.execute: close_master_valve
+      - script.wait: close_master_valve
+      - valve.close: ${id}
+      - component.update: ${id}_left
+      - component.update: ${irrigation_id}_state
+
 switch:
   # Virtual zone switches which toggle the relay and check others
   - platform: template
@@ -6,21 +30,6 @@ switch:
     internal: True
     lambda: return (id(${id}).position == VALVE_OPEN && id(${master_id}).position == VALVE_OPEN);
     turn_on_action:
-      - if:
-          condition:
-            - or:
-              - switch.is_off: ${ac_adapter_id}
-              - lambda: return (id(${master_id}).position == VALVE_CLOSED);
-          then:
-            - switch.turn_on: ${ac_adapter_id}
-            - valve.open: ${master_id}
-      - valve.close: ${pool_id}
-      - valve.open: ${id}
-      - component.update: ${id}_left
-      - component.update: ${irrigation_id}_state
+      - script.execute: ${id}_start_transition
     turn_off_action:
-      - script.execute: close_master_valve
-      - script.wait: close_master_valve
-      - valve.close: ${id}
-      - component.update: ${id}_left
-      - component.update: ${irrigation_id}_state
+      - script.execute: ${id}_stop_transition

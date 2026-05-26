@@ -10,6 +10,3 @@ switch:
       - switch.turn_on: ${id}_virtual
     turn_off_action:
       - switch.turn_off: ${id}_virtual
-      - lambda: |-
-          id(${id}_timestamps_off).publish_state(delete_first_timestamp(id(${id}_timestamps_off).state));
-      
