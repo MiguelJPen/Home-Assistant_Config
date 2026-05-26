@@ -23,6 +23,8 @@ string manual_set(int, string);
 string delete_first_timestamp(string);
 time_t add_n_days(time_t, int); // Internal
 bool water_available();
+bool uses_morning_slot(uint8_t); // Internal
+bool is_before_time(uint8_t, uint8_t, int, int); // Internal
 
 pair<string, string> get_irrigation_time(time_t next_irrigation, time_t last_auto_irrigation, float mean_tmp, float mean_hum, float min_hum, string irrigation_mode, 
 int h_morn, int m_morn, int h_afte, int m_afte) {
@@ -50,13 +52,13 @@ int h_morn, int m_morn, int h_afte, int m_afte) {
     if (min_hum < 25 || mean_hum < 45) mins += 25;
     else if (min_hum < 45) mins += 15;
 
-    time_t irrigation_timestamp = max(today_timestamp, max(today_timestamp + (days_to_next_irrigation * DAY_SECS), 
-                                        today_timestamp + ((irrigation_frequency - days_since_last_irrigation) * DAY_SECS)));
+    time_t irrigation_timestamp = max(today_timestamp, max(add_n_days(today_timestamp, days_to_next_irrigation),
+                                        add_n_days(today_timestamp, irrigation_frequency - days_since_last_irrigation)));
     set_time_at(irrigation_timestamp, h_morn, m_morn, h_afte, m_afte);
     turn_on.append(to_string(irrigation_timestamp));
     turn_off.append(to_string(irrigation_timestamp + (mins * 60)));
 
-    irrigation_timestamp += irrigation_frequency * DAY_SECS;
+    irrigation_timestamp = add_n_days(irrigation_timestamp, irrigation_frequency);
     set_time_at(irrigation_timestamp, h_morn, m_morn, h_afte, m_afte);
     turn_on.append(comma + to_string(irrigation_timestamp));
     turn_off.append(comma + to_string(irrigation_timestamp + (mins * 60)));
@@ -68,51 +70,55 @@ int h_morn, int m_morn, int h_afte, int m_afte) {
 }
 
 void set_time_at(time_t &day, int h_morn, int m_morn, int h_afte, int m_afte) {
-    struct tm new_time = *localtime(&day);
+    auto new_time = esphome::ESPTime::from_epoch_local(day);
 
-    if (new_time.tm_mon % 2 == 0) {
-        new_time.tm_hour = h_morn;
-        new_time.tm_min = m_morn;
+    if (uses_morning_slot(new_time.month)) {
+        new_time.hour = h_morn;
+        new_time.minute = m_morn;
     }
     else {
-        new_time.tm_hour = h_afte;
-        new_time.tm_min = m_afte;
+        new_time.hour = h_afte;
+        new_time.minute = m_afte;
     }
-    new_time.tm_sec = 0;
+    new_time.second = 0;
+    new_time.recalc_timestamp_local();
 
-    day = mktime(&new_time);
+    day = new_time.timestamp;
 }
 
 time_t get_next_irrigation_day(time_t old_next_irrigation, time_t last_auto_irrigation, float precipitation, float mean_tmp, string irrigation_mode) {
     /* This function is executed every day to check if there has been a massive rainfall to 
     adjust the irrigation days and prevent water waste and flooding the roots. */
     time_t today_timestamp = id(time_sntp).now().timestamp;
-    struct tm now_time = *localtime(&today_timestamp);
+    auto now_time = esphome::ESPTime::from_epoch_local(today_timestamp);
     int no_water_days = max(0, (int) floor(difftime(old_next_irrigation, today_timestamp) / DAY_SECS));
 
     // Set a fixed hour, we want to set the day
-    now_time.tm_hour = 12;
-    now_time.tm_min = 0;
-    now_time.tm_sec = 0;
-    today_timestamp = mktime(&now_time);
+    now_time.hour = 12;
+    now_time.minute = 0;
+    now_time.second = 0;
+    now_time.recalc_timestamp_local();
+    today_timestamp = now_time.timestamp;
 
     //ESP_LOGD("get_next_irrigation_day", "Option of my select: %s", irrigation_mode.c_str());
 
     if(irrigation_mode.compare(CADUCA) == 0) {
         // No irrigation during winter
-        if (now_time.tm_mon > 10) {
-            now_time.tm_year++;
-            now_time.tm_mon = 2;
-            now_time.tm_mday = 1;
+        if (now_time.month > 11) {
+            now_time.year++;
+            now_time.month = 3;
+            now_time.day_of_month = 1;
 
-            time_t aux = mktime(&now_time);
+            now_time.recalc_timestamp_local();
+            time_t aux = now_time.timestamp;
             return aux;
         }
-        else if (now_time.tm_mon < 2) {
-            now_time.tm_mon = 2;
-            now_time.tm_mday = 1;
+        else if (now_time.month < 3) {
+            now_time.month = 3;
+            now_time.day_of_month = 1;
 
-            time_t aux = mktime(&now_time);
+            now_time.recalc_timestamp_local();
+            time_t aux = now_time.timestamp;
             return aux;
         }
         // Rest of the year
@@ -126,7 +132,7 @@ time_t get_next_irrigation_day(time_t old_next_irrigation, time_t last_auto_irri
         }
     }
     else if(irrigation_mode.compare(PERENNE) == 0) {
-        if (now_time.tm_mon < 2 || now_time.tm_mon > 10) {
+        if (now_time.month < 3 || now_time.month > 11) {
             if (precipitation > 5) no_water_days = max(no_water_days, max(5, int(precipitation / 5)));
         }
         else {
@@ -151,49 +157,46 @@ time_t get_next_irrigation_day(time_t old_next_irrigation, time_t last_auto_irri
 
 time_t get_next_time_at(int h_morn, int m_morn, int h_afte, int m_afte) {
     time_t now_timestamp = id(time_sntp).now().timestamp;
-    struct tm new_time = *localtime(&now_timestamp);
+    auto new_time = esphome::ESPTime::from_epoch_local(now_timestamp);
 
     //ESP_LOGD("get_next_time_at", "HM: %i, MM: %i, HA %i, MA %i", h_morn, m_morn, h_afte, m_afte);
 
-    if (new_time.tm_mon % 2 == 0 && new_time.tm_hour < h_morn) {
-        new_time.tm_hour = h_morn;
-        new_time.tm_min = m_morn;
+    if (uses_morning_slot(new_time.month) && is_before_time(new_time.hour, new_time.minute, h_morn, m_morn)) {
+        new_time.hour = h_morn;
+        new_time.minute = m_morn;
     }
-    else if (new_time.tm_mon % 2 == 0) {
-        new_time.tm_mday++;
-        time_t aux = mktime(&new_time);
-        new_time = *localtime(&aux);
+    else if (uses_morning_slot(new_time.month)) {
+        new_time.increment_day();
 
-        if (new_time.tm_mon % 2 == 0) {
-            new_time.tm_hour = h_morn;
-            new_time.tm_min = m_morn;
+        if (uses_morning_slot(new_time.month)) {
+            new_time.hour = h_morn;
+            new_time.minute = m_morn;
         }
         else {
-            new_time.tm_hour = h_afte;
-            new_time.tm_min = m_afte;
+            new_time.hour = h_afte;
+            new_time.minute = m_afte;
         }
     }
-    else if (new_time.tm_hour < h_afte) {
-        new_time.tm_hour = h_afte;
-        new_time.tm_min = m_afte;
+    else if (is_before_time(new_time.hour, new_time.minute, h_afte, m_afte)) {
+        new_time.hour = h_afte;
+        new_time.minute = m_afte;
     }
     else {
-        new_time.tm_mday++;
-        time_t aux = mktime(&new_time);
-        new_time = *localtime(&aux);
+        new_time.increment_day();
 
-        if (new_time.tm_mon % 2 != 0) {
-            new_time.tm_hour = h_afte;
-            new_time.tm_min = m_afte;
+        if (!uses_morning_slot(new_time.month)) {
+            new_time.hour = h_afte;
+            new_time.minute = m_afte;
         }
         else {
-            new_time.tm_hour = h_morn;
-            new_time.tm_min = m_morn;
+            new_time.hour = h_morn;
+            new_time.minute = m_morn;
         }
     }
-    new_time.tm_sec = 0;
+    new_time.second = 0;
+    new_time.recalc_timestamp_local();
 
-    time_t aux = mktime(&new_time);
+    time_t aux = new_time.timestamp;
 
     //ESP_LOGD("get_next_time_at", "Time aux: %ld", aux);
 
@@ -202,20 +205,22 @@ time_t get_next_time_at(int h_morn, int m_morn, int h_afte, int m_afte) {
 
 string add_two_minutes_from_now() {
     time_t now_timestamp = id(time_sntp).now().timestamp;
-    struct tm new_time = *localtime(&now_timestamp);
+    auto new_time = esphome::ESPTime::from_epoch_local(now_timestamp);
 
-    new_time.tm_sec = 0;
-    time_t aux = mktime(&new_time);
+    new_time.second = 0;
+    new_time.recalc_timestamp_local();
+    time_t aux = new_time.timestamp;
     return to_string(aux + 2 * 60);
 }
 
 string manual_set(int duration, string time_list) {
     time_t now_timestamp = id(time_sntp).now().timestamp;
-    struct tm now_time = *localtime(&now_timestamp);
+    auto now_time = esphome::ESPTime::from_epoch_local(now_timestamp);
     string comma = (time_list.empty() ? "" : ",");
 
-    now_time.tm_sec = 0;
-    time_t aux = mktime(&now_time);
+    now_time.second = 0;
+    now_time.recalc_timestamp_local();
+    time_t aux = now_time.timestamp;
 
     time_list.insert(0, to_string((long int)(aux + ((duration - 1) * 60))) + comma);
 
@@ -236,10 +241,12 @@ string delete_first_timestamp(string time_list) {
 }
 
 time_t add_n_days(time_t time, int days) {
-    struct tm strtime = *localtime(&time);
-    strtime.tm_mday += days;
+    auto local_time = esphome::ESPTime::from_epoch_local(time);
+    for (int i = 0; i < days; i++)
+        local_time.increment_day();
 
-    return mktime(&strtime);
+    local_time.recalc_timestamp_local();
+    return local_time.timestamp;
 }
 
 bool water_available() {
@@ -252,4 +259,12 @@ bool water_available() {
         return true;
     }
     return false;
+}
+
+bool uses_morning_slot(uint8_t month) {
+    return month % 2 == 1;
+}
+
+bool is_before_time(uint8_t hour, uint8_t minute, int target_hour, int target_minute) {
+    return hour < target_hour || (hour == target_hour && minute < target_minute);
 }

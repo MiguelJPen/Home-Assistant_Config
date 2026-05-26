@@ -5,6 +5,7 @@
 #include <clocale>
 #include <cmath>
 #include <algorithm>
+#include <cstdlib>
 
 #include "esphome.h"
 
@@ -39,18 +40,11 @@ string update_list(string time_list){
     }
 
     // Retrieve the current time.
-    auto time_now = id(time_sntp).now();
-    int year = time_now.year, month = time_now.month, day = time_now.day_of_month;
-    int hour = time_now.hour, minute = time_now.minute;
+    time_t now_timestamp = id(time_sntp).now().timestamp;
 
     for (string timestamp : times) {
-        time_t next_run_aux = atoi(timestamp.c_str());
-        struct tm next_run = *localtime(&next_run_aux);
-
-        int next_year = next_run.tm_year + 1900, next_month = next_run.tm_mon + 1, next_day = next_run.tm_mday;
-        int next_hour = next_run.tm_hour, next_minute = next_run.tm_min;
-
-        if (year < next_year || (year == next_year && (month < next_month || (month == next_month && (day < next_day || (day == next_day && (hour < next_hour || (hour == next_hour && (minute < next_minute))))))))) {
+        time_t next_run_timestamp = (time_t) atol(timestamp.c_str());
+        if (next_run_timestamp > now_timestamp) {
             ret.append(comma + timestamp);
             comma = ",";
         }
@@ -64,10 +58,11 @@ string get_time_formated(string time) {
         return time;
     
     char date[100];
-    time_t t = atoi(time.c_str());
+    time_t t = (time_t) atol(time.c_str());
+    auto local_time = esphome::ESPTime::from_epoch_local(t);
 
     setlocale(LC_TIME, "es_ES-UTF_8");
-    strftime(date, 100, "%a %b %d %R", localtime(&t));
+    local_time.strftime(date, 100, "%a %b %d %R");
 
     return string(date);
 }
@@ -76,21 +71,8 @@ bool scheduled_run(string time){
     if (!time.compare(unknown))
         return false;
 
-    auto time_now = id(time_sntp).now();
-    int year = time_now.year;
-    int month = time_now.month;
-    int day = time_now.day_of_month;
-    int hour = time_now.hour;
-    int minute = time_now.minute;
+    time_t now_timestamp = id(time_sntp).now().timestamp;
+    time_t next_run_timestamp = (time_t) atol(time.c_str());
 
-    time_t next_run_aux = atoi(time.c_str());
-    struct tm next_run = *localtime(&next_run_aux);
-
-    int next_year = next_run.tm_year + 1900, next_month = next_run.tm_mon + 1, next_day = next_run.tm_mday;
-    int next_hour = next_run.tm_hour, next_minute = next_run.tm_min;
-
-    //ESP_LOGD("scheduled_run", "TODAY: year:%i month:%i day:%i hour:%i minute:%i", year, month, day, hour, minute);
-    //ESP_LOGD("scheduled_run", "year:%i month:%i day:%i hour:%i minute:%i", next_year, next_month, next_day, next_hour, next_minute);
-
-    return (year == next_year && month == next_month && day == next_day && hour == next_hour && minute == next_minute);
+    return now_timestamp >= next_run_timestamp && now_timestamp < next_run_timestamp + 60;
 }
