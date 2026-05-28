@@ -8,8 +8,10 @@ text_sensor:
     lambda: |-
       if (id(${id}_next_on).state == "Sin programaciones" || id(${id}_next_off).state == "Sin programaciones") 
         return {"0 min"};
-      if (atoi((id(${id}_next_off).state).c_str()) > atoi((id(${id}_next_on).state).c_str())) {
-        int mins = ((atoi((id(${id}_next_off).state).c_str()) - atoi((id(${id}_next_on).state).c_str())) / 60);
+      time_t next_on = timestamp_from_string(id(${id}_next_on).state);
+      time_t next_off = timestamp_from_string(id(${id}_next_off).state);
+      if (next_off > next_on) {
+        int mins = ((next_off - next_on) / 60);
         int hours = mins/60;
         mins %= 60;
         string ret = to_string(mins) + " min";

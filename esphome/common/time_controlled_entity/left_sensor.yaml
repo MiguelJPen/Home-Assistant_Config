@@ -8,7 +8,7 @@ sensor:
     icon: mdi:timer-outline
     lambda: |-
       if (id(${sensor_id}).state) {
-        return ((atoi((id(${id}_next_off).state).c_str()) - id(time_${id}).now().timestamp) / 60) + 1;
+        return minutes_until(id(${id}_next_off).state, id(time_${id}).now().timestamp);
       }
       return 0;
 

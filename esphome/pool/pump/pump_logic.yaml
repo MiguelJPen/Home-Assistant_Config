@@ -77,7 +77,7 @@ script:
       - lambda: |-
           if (id(${pump_id}_mode).current_option() != "Manual") {
             if (id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-              id(pump_next_on).state > id(pump_next_off).state && !id(filling_rn) && 
+              timestamp_after(id(pump_next_on).state, id(pump_next_off).state) && !id(filling_rn) && 
               ((id(secure_pumping) && (id(${pump_id}_mode).current_option() == "Automatic" || id(${pump_id}_mode).current_option() == "Full-time")) || id(${pump_id}_mode).current_option() == "Winter"))
                 id(${pump_id}).turn_on();
             else id(${pump_id}).turn_off();
@@ -95,7 +95,7 @@ sensor:
     icon: mdi:timer-outline
     lambda: |-
       if (id(${pump_id}).state && (id(${pump_id}_mode).current_option() != "Manual")) {
-        return ((atoi((id(pump_next_off).state).c_str()) - id(time_pump).now().timestamp) / 60) + 1;
+        return minutes_until(id(pump_next_off).state, id(time_pump).now().timestamp);
       }
       return 0;
 

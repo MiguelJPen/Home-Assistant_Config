@@ -26,7 +26,7 @@ api:
             id(filling_rn) = false;
             id(pool_filling_requested) = false;
             if (id(pump_next_on).state != "Sin programaciones" && id(pump_next_off).state != "Sin programaciones" &&
-            id(pump_next_on).state > id(pump_next_off).state && id(secure_pumping))
+            timestamp_after(id(pump_next_on).state, id(pump_next_off).state) && id(secure_pumping))
               id(${pump_id}).turn_on();
     - service: filling_requested
       then:
