@@ -16,8 +16,6 @@ script:
       - script.execute: open_master_valve
       - script.wait: open_master_valve
       - valve.open: ${id}
-      - component.update: ${id}_left
-      - component.update: ${irrigation_id}_state
   - id: ${id}_stop_transition
     then:
       - lambda: |-
@@ -25,8 +23,6 @@ script:
       - script.execute: close_master_valve
       - script.wait: close_master_valve
       - valve.close: ${id}
-      - component.update: ${id}_left
-      - component.update: ${irrigation_id}_state
       - homeassistant.service:
           service: esphome.pool_filling_completed
       - lambda: id(${id}_filling_requested) = false;
@@ -41,3 +37,6 @@ switch:
       - script.execute: ${id}_start_transition
     turn_off_action:
       - script.execute: ${id}_stop_transition
+    on_state:
+      - component.update: ${id}_left
+      - component.update: ${irrigation_id}_state
