@@ -15,15 +15,19 @@ script:
       - wait_until:
           condition:
             lambda: |-
-              return !isnan(id(mean_temp).state);
+              return !isnan(id(mean_temp).state) &&
+                !isnan(id(mean_humid).state) &&
+                !isnan(id(min_humid).state);
           timeout: 60s
-      - logger.log: "Home assistant mean_temp sensor might be valid"
+      - logger.log: "Home Assistant weather sensors might be valid"
       - if:
           condition:
             and:
               - time.has_time: 
               - lambda: |-
-                  return !isnan(id(mean_temp).state);
+                  return !isnan(id(mean_temp).state) &&
+                    !isnan(id(mean_humid).state) &&
+                    !isnan(id(min_humid).state);
           then:
             - logger.log: "Prerequisites met for setting up the irrigation automation. Proceeding..."
             - script.execute: ${id}_update_time_post_check
