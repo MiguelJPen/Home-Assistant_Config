@@ -1,0 +1,59 @@
+interval:
+  - interval: 125ms
+    then:
+      - lambda: |-
+          static bool barrier = false;
+          static bool tamper = false;
+          static bool published_initial_state = false;
+
+          auto read_stable = []() {
+            delay(50);
+            return analogRead(${pin});
+          };
+          auto set_barrier = [&](bool state) {
+            barrier = state;
+            id(${id}).publish_state(barrier);
+          };
+          auto set_tamper = [&](bool state) {
+            tamper = state;
+            id(${id}_tamper).publish_state(tamper);
+          };
+          auto clear_tamper = [&]() {
+            if (tamper) {
+              set_tamper(false);
+            }
+          };
+
+          int value = analogRead(${pin});
+          if (value <= 200 && !tamper) {
+            if (read_stable() <= 1024)
+              set_tamper(true);
+          } else if (value > 200 && value <= 2100 && !barrier) {
+            clear_tamper();
+            value = read_stable();
+            if (value > 1024 && value <= 2000)
+              set_barrier(true);
+          } else if (value > 2100 && barrier) {
+            clear_tamper();
+            set_barrier(false);
+          }
+
+          if (!published_initial_state) {
+            id(${id}).publish_state(barrier);
+            id(${id}_tamper).publish_state(tamper);
+            published_initial_state = true;
+          }
+
+binary_sensor:
+  - platform: template
+    id: ${id}
+    name: "${name}"
+    device_class: safety
+    filters:
+      delayed_on_off: 700ms
+  - platform: template
+    id: ${id}_tamper
+    name: "${name} Tamper"
+    device_class: opening
+    filters:
+      delayed_on_off: 700ms

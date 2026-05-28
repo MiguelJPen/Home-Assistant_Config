@@ -8,66 +8,43 @@ packages:
   device_base: !include common/device_base.exterior-alarm.yaml
   basic_control: !include common/basic_control.yaml
   wifi: !include common/wifi.yaml
+  alarm_adc: !include alarm/adc_setup.yaml
+  barrier_north: !include
+    file: alarm/sensor_pair.yaml
+    vars:
+      id: barrier_north
+      name: Barrera Norte
+      pin: 32
+  living_room_window: !include
+    file: alarm/sensor_pair.yaml
+    vars:
+      id: living_room_window
+      name: Ventana del Salón
+      pin: 33
+  barrier_south: !include
+    file: alarm/sensor_pair.yaml
+    vars:
+      id: barrier_south
+      name: Barrera Sur
+      pin: 34
+  barrier_east: !include
+    file: alarm/sensor_pair.yaml
+    vars:
+      id: barrier_east
+      name: Barrera Este
+      pin: 35
+  barrier_northwest: !include
+    file: alarm/sensor_pair.yaml
+    vars:
+      id: barrier_northwest
+      name: Barrera Noroeste
+      pin: 36
+  barrier_west: !include
+    file: alarm/sensor_pair.yaml
+    vars:
+      id: barrier_west
+      name: Barrera Oeste
+      pin: 39
 
 esphome:
   name: exterior-alarm
-  includes:
-  - BarrierSensor.h
-
-# ============================================================================ #
-binary_sensor:
-  - platform: custom
-    lambda: |-
-      auto myBarr = new BarrierSensor();
-      App.register_component(myBarr);
-      return {myBarr->Barriers[0], myBarr->Barriers[1], myBarr->Barriers[2], myBarr->Barriers[3], myBarr->Barriers[4], myBarr->Barriers[5], myBarr->Tampers[0], myBarr->Tampers[1], myBarr->Tampers[2], myBarr->Tampers[3], myBarr->Tampers[4], myBarr->Tampers[5]};
-
-    binary_sensors:
-      - name: "Barrera Norte"
-        device_class: safety
-        filters:
-          delayed_on_off: 700ms
-      - name: "Ventana del Salón"
-        device_class: safety
-        filters:
-          delayed_on_off: 700ms
-      - name: "Barrera Sur"
-        device_class: safety
-        filters:
-          delayed_on_off: 700ms
-      - name: "Barrera Este"
-        device_class: safety
-        filters:
-          delayed_on_off: 700ms
-      - name: "Barrera Noroeste"
-        device_class: safety
-        filters:
-          delayed_on_off: 700ms
-      - name: "Barrera Oeste"
-        device_class: safety
-        filters:
-          delayed_on_off: 700ms
-      - name: "Barrera Norte Tamper"
-        device_class: opening
-        filters:
-          delayed_on_off: 700ms
-      - name: "Ventana del Salón Tamper"
-        device_class: opening
-        filters:
-          delayed_on_off: 700ms
-      - name: "Barrera Sur Tamper"
-        device_class: opening
-        filters:
-          delayed_on_off: 700ms
-      - name: "Barrera Este Tamper"
-        device_class: opening
-        filters:
-          delayed_on_off: 700ms
-      - name: "Barrera Noroeste Tamper"
-        device_class: opening
-        filters:
-          delayed_on_off: 700ms
-      - name: "Barrera Oeste Tamper"
-        device_class: opening
-        filters:
-          delayed_on_off: 700ms

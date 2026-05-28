@@ -1,0 +1,6 @@
+esphome:
+  on_boot:
+    priority: 800
+    then:
+      - lambda: |-
+          analogSetAttenuation(ADC_11db);
