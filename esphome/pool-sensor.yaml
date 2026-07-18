@@ -36,12 +36,12 @@ sensor:
   - platform: "a02yyuw"
     name: "Distance to pool water"
     filters:
-    - quantile:
-        window_size: 50
-        send_every: 15
-        send_first_at: 15
-        quantile: .8
-    - median:
-        window_size: 50
-        send_every: 15
-        send_first_at: 15
+      - filter_out: nan
+      - median:
+          window_size: 15
+          send_every: 5
+          send_first_at: 5
+      - sliding_window_moving_average:
+          window_size: 6
+          send_every: 1
+      - delta: 0.002
