@@ -10,14 +10,14 @@ homeassistant:
     - "/media/securityCameras"
 
   packages:
-    irrigation: !include irrigation.yaml
-    pool: !include pool.yaml
     climate: !include climate.yaml
     energy: !include energy.yaml
-    recorder: !include recorder.yaml
     external_access: !include external_access.yaml
-    security: !include security.yaml
     ios: !include ios.yaml
+    irrigation: !include irrigation.yaml
+    pool: !include pool.yaml
+    recorder: !include recorder.yaml
+    security: !include security.yaml
     thermostat: !include thermostat.yaml
 
 logger:
