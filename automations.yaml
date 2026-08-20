@@ -2151,26 +2151,6 @@
     above: 20
     id: sun_over_horizon
     trigger: numeric_state
-  - entity_id:
-    - input_button.set_miguel_room_blind_to_semi_open
-    id: button_miguel_room_semi_open
-    trigger: state
-  - entity_id:
-    - input_button.set_living_room_blind_to_semi_open
-    id: button_living_room_semi_open
-    trigger: state
-  - entity_id:
-    - input_button.set_kitchen_blind_to_semi_open
-    id: button_kitchen_semi_open
-    trigger: state
-  - entity_id:
-    - input_button.set_main_bathroom_blind_to_semi_open
-    id: button_main_bathroom_semi_open
-    trigger: state
-  - entity_id:
-    - input_button.set_main_dresser_blind_to_semi_open
-    id: button_main_dresser_semi_open
-    trigger: state
   conditions: []
   actions:
   - choose:
@@ -2217,82 +2197,18 @@
         entity_id: alarm_control_panel.el_nino_alarm
         state: disarmed
       sequence:
-      - action: input_button.press
-        target:
-          entity_id:
-          - input_button.set_living_room_blind_to_semi_open
-          - input_button.set_main_bathroom_blind_to_semi_open
-        data: {}
-    - conditions:
-      - condition: trigger
-        id:
-        - button_miguel_room_semi_open
-      - condition: state
-        entity_id: alarm_control_panel.el_nino_alarm
-        state: disarmed
-      sequence:
       - action: cover.set_cover_position
         metadata: {}
-        data:
-          position: 13
-        target:
-          entity_id: cover.miguel_room_blind
-    - conditions:
-      - condition: trigger
-        id:
-        - button_living_room_semi_open
-      - condition: state
-        entity_id: alarm_control_panel.el_nino_alarm
-        state: disarmed
-      sequence:
-      - action: cover.set_cover_position
-        metadata: {}
-        data:
-          position: 27
-        target:
-          entity_id: cover.living_room_blind
-    - conditions:
-      - condition: trigger
-        id:
-        - button_kitchen_semi_open
-      - condition: state
-        entity_id: alarm_control_panel.el_nino_alarm
-        state: disarmed
-      sequence:
-      - action: cover.set_cover_position
-        metadata: {}
-        data:
-          position: 25
-        target:
-          entity_id: cover.kitchen_blind
-    - conditions:
-      - condition: trigger
-        id:
-        - button_main_bathroom_semi_open
-      - condition: state
-        entity_id: alarm_control_panel.el_nino_alarm
-        state: disarmed
-      sequence:
-      - action: cover.set_cover_position
-        metadata: {}
-        data:
-          position: 20
         target:
           entity_id: cover.main_bathroom_blind
-    - conditions:
-      - condition: trigger
-        id:
-        - button_main_dresser_semi_open
-      - condition: state
-        entity_id: alarm_control_panel.el_nino_alarm
-        state: disarmed
-      sequence:
+        data:
+          position: 20
       - action: cover.set_cover_position
         metadata: {}
-        data:
-          position: 8
         target:
-          entity_id: cover.main_dresser_blind
+          entity_id: cover.living_room_blind
+        data:
+          position: 27
   mode: single
 - id: '1739008125474'
   alias: Reset room occupation switches
