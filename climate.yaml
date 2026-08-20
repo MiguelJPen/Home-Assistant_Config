@@ -9,13 +9,15 @@ template:
     availability: >
       {% set living_room = states('sensor.living_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
       {% set principal_room = states('sensor.principal_room_sensor_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
+      {% set weather_station = states('sensor.weather_station_pressure') not in ['unknown', 'unavailable', 'none', '0'] %}
 
-      {{ living_room or principal_room }}
+      {{ living_room or principal_room or weather_station }}
     state: >
       {% set living_room = states('sensor.living_room_sensor_pressure') | float(0) %}
       {% set principal_room = states('sensor.principal_room_sensor_pressure') | float(0) %}
+      {% set weather_station = states('sensor.weather_station_pressure') | float(0) %}
 
-      {% set val = [living_room, principal_room] | reject('eq', 0) | map('float') | list %}
+      {% set val = [living_room, principal_room, weather_station] | reject('eq', 0) | map('float') | list %}
       {% if (val|length) == 0 -%}
         {% set ret = states('sensor.average_pressure') %}
       {%- else -%}
