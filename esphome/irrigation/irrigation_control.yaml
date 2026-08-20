@@ -62,6 +62,12 @@ api:
 
 # ============================================================================ #
 script:
+  - id: update_state_text
+    mode: restart
+    then:
+      - logger.log: "Updating state sensors"
+      - component.update: ${irrigation_id}_state
+      - component.update: ${pool_id}_state
   - id: shutdown_irrigation_valves
     mode: restart
     then:
@@ -89,7 +95,6 @@ script:
       - valve.close: ${pool_id}
       - script.execute: close_master_valve
       - script.wait: close_master_valve
-      - component.update: ${irrigation_id}_state
   - id: avoid_freezing_pipes
     then:
       - while:
@@ -121,7 +126,8 @@ binary_sensor:
               binary_sensor.is_off: ${irrigation_id}_available
             then:
               - script.execute: shutdown_irrigation_valves
-        - component.update: ${irrigation_id}_state
+              - script.wait: shutdown_irrigation_valves
+        - script.execute: update_state_text
 
 # ============================================================================ #
 text_sensor:
@@ -157,8 +163,6 @@ text_sensor:
         }
       }
       return {"¡Error! Comprueba las electroválvulas"};
-    on_value:
-      - component.update: ${pool_id}_state
 
 # ============================================================================ #
 time:

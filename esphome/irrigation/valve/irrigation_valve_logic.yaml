@@ -27,8 +27,11 @@ switch:
     lambda: return (id(${id}).position == VALVE_OPEN && id(${master_id}).position == VALVE_OPEN);
     turn_on_action:
       - script.execute: ${id}_start_transition
+      - script.wait: ${id}_start_transition
+      - script.execute: update_state_text
     turn_off_action:
       - script.execute: ${id}_stop_transition
+      - script.wait: ${id}_stop_transition
+      - script.execute: update_state_text
     on_state:
       - component.update: ${id}_left
-      - component.update: ${irrigation_id}_state
