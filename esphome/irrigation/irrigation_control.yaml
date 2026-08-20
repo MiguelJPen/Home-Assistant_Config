@@ -62,6 +62,34 @@ api:
 
 # ============================================================================ #
 script:
+  - id: shutdown_irrigation_valves
+    mode: restart
+    then:
+      - logger.log: "Irrigation timeframe ended, closing all valves"
+      - if:
+          condition:
+            switch.is_on: ${north_id}_virtual
+          then:
+            - switch.turn_off: ${north_id}_virtual
+            - script.wait: ${north_id}_stop_transition
+      - if:
+          condition:
+            switch.is_on: ${south_id}_virtual
+          then:
+            - switch.turn_off: ${south_id}_virtual
+            - script.wait: ${south_id}_stop_transition
+      - if:
+          condition:
+            switch.is_on: ${pool_id}_virtual
+          then:
+            - switch.turn_off: ${pool_id}_virtual
+            - script.wait: ${pool_id}_stop_transition
+      - valve.close: ${north_id}
+      - valve.close: ${south_id}
+      - valve.close: ${pool_id}
+      - script.execute: close_master_valve
+      - script.wait: close_master_valve
+      - component.update: ${irrigation_id}_state
   - id: avoid_freezing_pipes
     then:
       - while:
@@ -88,6 +116,11 @@ binary_sensor:
     internal: True
     on_state:
       then:
+        - if:
+            condition:
+              binary_sensor.is_off: ${irrigation_id}_available
+            then:
+              - script.execute: shutdown_irrigation_valves
         - component.update: ${irrigation_id}_state
 
 # ============================================================================ #
