@@ -17,12 +17,14 @@ recorder:
       - binary_sensor.*_contact
       - binary_sensor.*_status
       - binary_sensor.*_tamper
+      - binary_sensor.weather_station_*
       - sensor.*_battery
       - sensor.*_humidity
       - sensor.*_temperature
       - sensor.daily_energy_*
       - sensor.inverter_*
       - sensor.outdoor_monitor_*
+      - sensor.weather_station_*
     entities:
       - binary_sensor.cocina
       - binary_sensor.caja_de_alarma
