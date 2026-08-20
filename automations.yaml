@@ -179,6 +179,7 @@
       entity_id:
       - siren.sirena_exterior
       - siren.sirena_interior
+      - siren.caseta_siren
     action: siren.turn_off
   - if:
     - condition: state
@@ -232,6 +233,8 @@
       - switch.fachada_este_ftp_upload
       - switch.fachada_norte_ftp_upload
       - switch.fachada_oeste_ftp_upload
+      - switch.caseta_ftp_upload
+      - switch.caseta_siren_on_event
     enabled: true
   mode: single
 - id: '1600642629084'
@@ -614,6 +617,7 @@
             entity_id:
             - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
+      alias: Entrada
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaSur'')
@@ -639,6 +643,7 @@
             entity_id:
             - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
+      alias: Fachada sur
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaEste'')
@@ -664,6 +669,7 @@
             entity_id:
             - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
+      alias: Fachada Este
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaNorte'')
@@ -689,6 +695,7 @@
             entity_id:
             - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
+      alias: Fachada Norte
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/fachadaOeste'')
@@ -714,6 +721,32 @@
             entity_id:
             - notify.telegram_bot_1171156279_472161375
           action: telegram_bot.send_document
+      alias: Fachada Oeste
+    - conditions:
+      - condition: template
+        value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/caseta'')
+          }}'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: template
+            value_template: '{{ trigger.event.data.file.endswith(''mp4'') }}'
+          sequence:
+          - data:
+              file: '{{ trigger.event.data.path }}'
+              entity_id:
+              - notify.telegram_bot_1171156279_472161375
+            action: telegram_bot.send_video
+        default:
+        - data:
+            message: ¡Se ha detectado un movimiento en la caseta! Adjuntando archivos...
+          action: notify.group
+        - data:
+            file: '{{ trigger.event.data.path }}'
+            entity_id:
+            - notify.telegram_bot_1171156279_472161375
+          action: telegram_bot.send_document
+      alias: Caseta
     - conditions:
       - condition: template
         value_template: '{{ trigger.event.data.folder.startswith(''/media/securityCameras/Comedor'')
@@ -742,6 +775,7 @@
               - notify.telegram_bot_1171156279_472161375
             action: telegram_bot.send_document
         default: []
+      alias: Comedor
   mode: parallel
   max: 6
 - id: '1631442755979'
