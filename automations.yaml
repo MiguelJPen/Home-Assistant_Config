@@ -1931,6 +1931,21 @@
       minutes: 0
       seconds: 10
     trigger: state
+  - trigger: state
+    entity_id:
+    - camera.entrada_main
+    - camera.fachada_este_main
+    - camera.fachada_norte_main
+    - camera.fachada_oeste_clear
+    - camera.fachada_sur_main
+    - camera.caseta_clear
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 30
+    to:
+    - unavailable
+    - unknown
   conditions:
   - condition: template
     value_template: "{{ trigger.to_state is not none\n     and trigger.to_state.state
