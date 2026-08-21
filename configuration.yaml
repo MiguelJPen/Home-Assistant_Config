@@ -12,7 +12,6 @@ homeassistant:
   packages:
     climate: !include climate.yaml
     energy: !include energy.yaml
-    external_access: !include external_access.yaml
     ios: !include ios.yaml
     irrigation: !include irrigation.yaml
     pool: !include pool.yaml
