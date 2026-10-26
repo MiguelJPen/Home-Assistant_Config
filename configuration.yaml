@@ -61,17 +61,6 @@ sensor:
 #      - Media
 #      - BajoMedia
 
-notify:
-  - name: miguel
-    platform: telegram
-    chat_id: !secret miguel_chat_id
-  - name: lau
-    platform: telegram
-    chat_id: !secret lau_chat_id
-  - name: group
-    platform: telegram
-    chat_id: !secret group_chat_id
-
 # DEVICE TRACKER
 device_tracker:
   - platform: google_maps

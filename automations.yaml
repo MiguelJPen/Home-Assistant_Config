@@ -50,7 +50,9 @@
       message: La alarma ha detectado algo en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}.
       title: "\U0001F6A8 *¡AVISO DE DETECCIÓN!* \U0001F6A8"
-    action: notify.group
+    action: notify.send_message
+    target:
+      entity_id: notify.telegram_bot_1171156279_472161375
   - data: {}
     action: automation.turn_on
     target:
@@ -161,7 +163,9 @@
       message: "Se ha detectado un movimiento en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}. \U0001F693"
       title: "\U0001F6A8\U0001F6A8\U0001F6A8 *¡SE HA DISPARADO LA ALARMA!* \U0001F6A8\U0001F6A8\U0001F6A8"
-    action: notify.group
+    action: notify.send_message
+    target:
+      entity_id: notify.telegram_bot_1171156279_472161375
   mode: single
 - id: '1600622835627'
   alias: When disarmed
@@ -368,14 +372,18 @@
           message: No hay energía en la red eléctrica. El sistema solar y las baterías
             aguantarán el sistema.
           title: Caída de la red eléctrica
-        action: notify.group
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_472161375
       - repeat:
           until:
           - condition: numeric_state
             entity_id: sensor.inverter_grid_voltage_l1
             above: 190
           sequence:
-          - action: notify.group
+          - action: notify.send_message
+            target:
+              entity_id: notify.telegram_bot_1171156279_472161375
             metadata: {}
             data:
               message: 'Estado actual de la batería: {{ states(''sensor.inverter_battery_soc'')
@@ -394,7 +402,9 @@
               target:
                 entity_id: switch.electric_vehicle_plug
               data: {}
-            - action: notify.group
+            - action: notify.send_message
+              target:
+                entity_id: notify.telegram_bot_1171156279_472161375
               metadata: {}
               data:
                 message: Se ha desconectado el cargador del coche para ahorrar energía.
@@ -404,7 +414,9 @@
               minutes: 30
               seconds: 0
               milliseconds: 0
-      - action: notify.group
+      - action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_472161375
         metadata: {}
         data:
           message: Se ha solventado el corte de energía en la red.
@@ -419,13 +431,17 @@
             del sistema.
           title: '*AVISO*'
         enabled: true
-        action: notify.group
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_472161375
       - if:
         - condition: numeric_state
           entity_id: sensor.inverter_load_voltage
           below: 100
         then:
-        - action: notify.group
+        - action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
           metadata: {}
           data:
             message: Parece que hay un problema con el inversor y no está generando
@@ -444,7 +460,9 @@
         - condition: template
           value_template: '{{ wait.completed }}'
         then:
-        - action: notify.group
+        - action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
           metadata: {}
           data:
             message: Se ha solventado el problema interno de energía en casa.
@@ -457,7 +475,9 @@
               sorpresas...
             title: '*AVISO IMPORTANTE*'
           enabled: true
-          action: notify.group
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
         - data:
             code: '{{ states(''input_text.alarm_code'') }}'
           enabled: true
@@ -472,7 +492,9 @@
         - data:
             message: Apagando el sistema...
           enabled: true
-          action: notify.group
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
         - data: {}
           enabled: true
           action: hassio.host_shutdown
@@ -611,7 +633,9 @@
         default:
         - data:
             message: ¡Se ha detectado un movimiento en la entrada! Adjuntando archivos...
-          action: notify.group
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
         - data:
             file: '{{ trigger.event.data.path }}'
             entity_id:
@@ -637,7 +661,9 @@
         - data:
             message: ¡Se ha detectado un movimiento en la fachada Sur de la casa!
               Adjuntando archivos...
-          action: notify.group
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
         - data:
             file: '{{ trigger.event.data.path }}'
             entity_id:
@@ -663,7 +689,9 @@
         - data:
             message: ¡Se ha detectado un movimiento en la fachada Este de la casa!
               Adjuntando archivos...
-          action: notify.group
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
         - data:
             file: '{{ trigger.event.data.path }}'
             entity_id:
@@ -689,7 +717,9 @@
         - data:
             message: ¡Se ha detectado un movimiento en la fachada Norte de la casa!
               Adjuntando archivos...
-          action: notify.group
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
         - data:
             file: '{{ trigger.event.data.path }}'
             entity_id:
@@ -715,7 +745,9 @@
         - data:
             message: ¡Se ha detectado un movimiento en la fachada Oeste de la casa!
               Adjuntando archivos...
-          action: notify.group
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
         - data:
             file: '{{ trigger.event.data.path }}'
             entity_id:
@@ -740,7 +772,9 @@
         default:
         - data:
             message: ¡Se ha detectado un movimiento en la caseta! Adjuntando archivos...
-          action: notify.group
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_472161375
         - data:
             file: '{{ trigger.event.data.path }}'
             entity_id:
@@ -768,7 +802,9 @@
           sequence:
           - data:
               message: ¡Se ha detectado un movimiento en el comedor! Adjuntando archivos...
-            action: notify.group
+            action: notify.send_message
+            target:
+              entity_id: notify.telegram_bot_1171156279_472161375
           - data:
               file: '{{ trigger.event.data.path }}'
               entity_id:
@@ -820,7 +856,9 @@
       message: La alarma ha detectado algo en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}.
       title: "\U0001F6A8 *¡AVISO DE DETECCIÓN!* \U0001F6A8"
-    action: notify.group
+    action: notify.send_message
+    target:
+      entity_id: notify.telegram_bot_1171156279_472161375
   - target:
       entity_id: automation.alarm_trigger_when_sensors_go_on_second_home
     data: {}
@@ -891,7 +929,9 @@
       message: "Se ha detectado un movimiento en el sensor {{trigger.to_state.attributes.friendly_name
         }} a las {{states('sensor.time')}}. \U0001F693"
       title: "\U0001F6A8\U0001F6A8\U0001F6A8 *¡SE HA DISPARADO LA ALARMA!* \U0001F6A8\U0001F6A8\U0001F6A8"
-    action: notify.group
+    action: notify.send_message
+    target:
+      entity_id: notify.telegram_bot_1171156279_472161375
   mode: single
 - id: '1632435586236'
   alias: Reboot Home Assistant if router reboots
@@ -1044,7 +1084,9 @@
     then:
     - data:
         message: 'Los que no han pagado todavía este mes son:'
-      action: notify.lau
+      action: notify.send_message
+      target:
+        entity_id: notify.telegram_bot_1171156279_303515965
     - delay:
         hours: 0
         minutes: 0
@@ -1134,7 +1176,9 @@
     - data:
         message: ¡Morosos a la vista!
         title: "\U0001F6A8 ALERTA \U0001F6A8"
-      action: notify.lau
+      action: notify.send_message
+      target:
+        entity_id: notify.telegram_bot_1171156279_303515965
     - delay:
         hours: 0
         minutes: 0
@@ -1270,7 +1314,9 @@
       - data:
           message: Al boteee!!!
           title: "*¡Santos ha pagado!* \U0001F389"
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: burgos_144_has_not_paid
@@ -1281,7 +1327,9 @@
         action: input_boolean.turn_off
       - data:
           message: Pues na', no hay viajesito por culpa de Santitos :(
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: robleda_has_paid
@@ -1293,7 +1341,9 @@
       - data:
           title: "*¡Robleda Seguros ha pagado!* \U0001F389"
           message: Cómo les gusta tener su coche seguro, jejejeje
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: robleda_has_not_paid
@@ -1304,7 +1354,9 @@
         action: input_boolean.turn_off
       - data:
           message: Últimamente no nos aseguramos ni un buen cliente...
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: burgos_48_1_has_paid
@@ -1316,7 +1368,9 @@
       - data:
           title: "*¡Elena Tattoo ha pagado!* \U0001F389"
           message: ¿A dónde estás preparando el viaje tuuu?
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: burgos_48_1_has_not_paid
@@ -1327,7 +1381,9 @@
         action: input_boolean.turn_off
       - data:
           message: Joe, pues nada, vamos al parque Europa entonces ¿no?
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: hector_has_paid
@@ -1339,7 +1395,9 @@
       - data:
           title: "*¡Héctor ha pagado!* \U0001F389"
           message: ¡Menos mal que hay alguien fiel!
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: hector_has_not_paid
@@ -1350,7 +1408,9 @@
         action: input_boolean.turn_off
       - data:
           message: Son todos un poquito agarraos, ¿no?
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: santiago_has_paid
@@ -1362,7 +1422,9 @@
       - data:
           title: "*¡Pepelu ha pagado!* \U0001F389"
           message: ¡Vaya crack!
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: santiago_has_not_paid
@@ -1373,7 +1435,9 @@
         action: input_boolean.turn_off
       - data:
           message: No se merece esa llave de garaje...
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     default: []
   mode: single
 - id: '1649799780278'
@@ -1389,7 +1453,9 @@
       message: El sensor de la despensa ha detectado agua a las {{ states('sensor.time')
         }}.
       title: '*¡AVISO IMPORTANTE!*'
-    action: notify.group
+    action: notify.send_message
+    target:
+      entity_id: notify.telegram_bot_1171156279_472161375
   mode: single
 - id: '1650113623089'
   alias: Randomise guest room lights behaviour
@@ -1784,7 +1850,9 @@
 
             Puedes escribir /add (cantidades de dinero a añadir) o /substract (cantidades
             de dinero a retirar) para modificar la cantidad.'
-        action: notify.lau
+        action: notify.send_message
+        target:
+          entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id: add
@@ -1803,11 +1871,15 @@
           action: input_number.set_value
         - data:
             message: Tu saldo ahora es {{ states("input_number.lau_saldo") }} €.
-          action: notify.lau
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_303515965
         else:
         - data:
             message: Error en los argumentos, ¡vuelve a intentarlo!
-          action: notify.lau
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_303515965
     - conditions:
       - condition: trigger
         id:
@@ -1827,11 +1899,15 @@
           action: input_number.set_value
         - data:
             message: Tu saldo ahora es {{ states("input_number.lau_saldo") }} €.
-          action: notify.lau
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_303515965
         else:
         - data:
             message: Error en los argumentos, ¡vuelve a intentarlo!
-          action: notify.lau
+          action: notify.send_message
+          target:
+            entity_id: notify.telegram_bot_1171156279_303515965
     default: []
   mode: single
 - id: '1663501480893'
@@ -2034,7 +2110,9 @@
     data:
       message: The pool has been filling for more than 30 minutes, please check for
         errors or leaks!
-    action: notify.miguel
+    action: notify.send_message
+    target:
+      entity_id: notify.telegram_bot_1171156279_244204058
   mode: single
 - id: '1720887537733'
   alias: Madrid actions when nobody is home
