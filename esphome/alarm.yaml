@@ -42,11 +42,11 @@ script:
       
 # Enable Home Assistant API
 api:
-  services:
-    - service: alarm_beep
+  actions:
+    - action: alarm_beep
       then:
         - script.execute: alarm_siren_beep
-    - service: alarm_beep_beep
+    - action: alarm_beep_beep
       then:
         - script.execute: alarm_siren_beep
         - delay: 150ms
