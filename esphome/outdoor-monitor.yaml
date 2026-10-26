@@ -52,9 +52,9 @@ sensor:
         - sliding_window_moving_average:
             window_size: 30
             send_every: 6
-    voc:
+    voc_index:
       name: VOC Index
-    nox:
+    nox_index:
       name: NOx Index
     co2:
       name: Carbon Dioxide
