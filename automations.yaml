@@ -2144,7 +2144,7 @@
     action: climate.turn_off
   mode: single
 - id: '1721218951290'
-  alias: Automatic light control
+  alias: Light control
   description: ''
   triggers:
   - entity_id:
@@ -2208,7 +2208,7 @@
         data: {}
   mode: single
 - id: '1722272210170'
-  alias: Automatic blind control
+  alias: Blind control
   description: ''
   triggers:
   - entity_id:
