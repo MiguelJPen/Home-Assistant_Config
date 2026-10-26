@@ -196,3 +196,41 @@ arrive_home:
         - light.front_porch
   mode: single
   icon: mdi:human-greeting-variant
+open_yard_awning:
+  sequence:
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.yard_awning_l2
+    data: {}
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.yard_awning_l1
+    data: {}
+  alias: open_yard_awning
+  description: ''
+  icon: mdi:awning-outline
+close_yard_awning:
+  sequence:
+  - action: switch.turn_off
+    metadata: {}
+    target:
+      entity_id: switch.yard_awning_l2
+    data: {}
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.yard_awning_l1
+    data: {}
+  alias: Close yard awning
+  description: ''
+stop_yard_awning:
+  sequence:
+  - action: switch.turn_on
+    metadata: {}
+    target:
+      entity_id: switch.yard_awning_l1
+    data: {}
+  alias: Stop yard awning
+  description: ''
